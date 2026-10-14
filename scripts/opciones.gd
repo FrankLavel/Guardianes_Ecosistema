@@ -1,5 +1,7 @@
 extends Control
 
+const ESCENA_MENU := "res://scenes/menu/menu_principal.tscn"
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -26,4 +28,4 @@ func _on_slider_volumen_value_changed(value: float) -> void:
 
 
 func _on_btn_volver_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/menu/menu_principal.tscn")
+	get_tree().change_scene_to_file(ESCENA_MENU)
