@@ -1,0 +1,30 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Builds exportados (los genera el pipeline o el editor)
+/builds/
+
+# Credenciales de exportación (contraseñas de firma, keystores)
+export_credentials.cfg
+*.keystore
+*.jks
+
+# Artefactos de pruebas GUT
+/test-results/
+
+# Archivos temporales de Godot
+*.tmp
+*.translation
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
