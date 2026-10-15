@@ -23,7 +23,7 @@ shape = SubResource("RectangleShape2D_cuerpo")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(0, -60)
-zoom = Vector2(1.5, 1.5)
+zoom = Vector2(2.25, 2.25)
 position_smoothing_enabled = true
 position_smoothing_speed = 6.0
 drag_horizontal_enabled = true
