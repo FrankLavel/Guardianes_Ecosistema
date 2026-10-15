@@ -33,7 +33,10 @@ var punto_reaparicion: Vector2
 var _tiempo_coyote_restante := 0.0
 var _tiempo_buffer_restante := 0.0
 
-@onready var _sprite: Sprite2D = $Sprite2D
+## A partir de esta fracción de la velocidad máxima se usa "correr" en vez de "caminar".
+const UMBRAL_CORRER := 0.6
+
+@onready var sprite: AnimatedSprite2D = $Sprite
 @onready var camara: Camera2D = $Camera2D
 
 
@@ -53,10 +56,28 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 	entrada_salto_presionado = false
-	if entrada_direccion != 0.0:
-		_sprite.flip_h = entrada_direccion < 0.0
+	_actualizar_animacion()
 	if global_position.y > limite_caida:
 		reaparecer()
+
+
+## Nombre de la animación que corresponde al estado actual del movimiento.
+func animacion_segun_estado() -> StringName:
+	if not is_on_floor():
+		return &"saltar" if velocity.y < 0.0 else &"caer"
+	var rapidez := absf(velocity.x)
+	if rapidez < 5.0:
+		return &"idle"
+	return &"correr" if rapidez >= velocidad_maxima * UMBRAL_CORRER else &"caminar"
+
+
+func _actualizar_animacion() -> void:
+	# El arte mira a la derecha; se voltea al ir a la izquierda.
+	if entrada_direccion != 0.0:
+		sprite.flip_h = entrada_direccion < 0.0
+	var animacion := animacion_segun_estado()
+	if sprite.animation != animacion:
+		sprite.play(animacion)
 
 
 func reaparecer() -> void:

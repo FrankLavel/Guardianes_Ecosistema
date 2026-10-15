@@ -39,7 +39,7 @@ func test_camina_a_la_derecha() -> void:
 	guardian.entrada_direccion = 1.0
 	await wait_physics_frames(20)
 	assert_gt(guardian.global_position.x, x_inicial + 20.0)
-	assert_false(guardian.get_node("Sprite2D").flip_h, "Mira a la derecha")
+	assert_false(guardian.sprite.flip_h, "Mira a la derecha")
 
 
 func test_camina_a_la_izquierda_y_voltea_el_sprite() -> void:
@@ -48,7 +48,7 @@ func test_camina_a_la_izquierda_y_voltea_el_sprite() -> void:
 	guardian.entrada_direccion = -1.0
 	await wait_physics_frames(20)
 	assert_lt(guardian.global_position.x, x_inicial - 20.0)
-	assert_true(guardian.get_node("Sprite2D").flip_h, "Mira a la izquierda")
+	assert_true(guardian.sprite.flip_h, "Mira a la izquierda")
 
 
 func test_se_detiene_al_soltar_la_direccion() -> void:
@@ -86,3 +86,33 @@ func test_reaparece_si_cae_fuera_del_nivel() -> void:
 	await wait_for_signal(guardian.reaparecio, 3.0)
 	assert_signal_emitted(guardian, "reaparecio")
 	assert_almost_eq(guardian.global_position.x, 0.0, 1.0)
+
+
+func test_animacion_idle_al_estar_quieto() -> void:
+	await _aterrizar()
+	await wait_physics_frames(2)
+	assert_eq(guardian.sprite.animation, &"idle")
+
+
+func test_animacion_correr_al_moverse_rapido() -> void:
+	await _aterrizar()
+	guardian.entrada_direccion = 1.0
+	await wait_physics_frames(20)
+	assert_eq(guardian.sprite.animation, &"correr")
+	assert_true(guardian.sprite.is_playing())
+
+
+func test_animacion_saltar_y_luego_caer() -> void:
+	await _aterrizar()
+	guardian.entrada_salto_presionado = true
+	guardian.entrada_salto_mantenido = true
+	await wait_physics_frames(3)
+	assert_eq(guardian.sprite.animation, &"saltar")
+	await wait_until(func(): return guardian.velocity.y > 0.0, 2.0)
+	await wait_physics_frames(1)
+	assert_eq(guardian.sprite.animation, &"caer")
+
+
+func test_todas_las_animaciones_existen() -> void:
+	for nombre in [&"idle", &"caminar", &"correr", &"saltar", &"caer", &"agachar", &"interactuar"]:
+		assert_true(guardian.sprite.sprite_frames.has_animation(nombre), "Falta animación: %s" % nombre)
