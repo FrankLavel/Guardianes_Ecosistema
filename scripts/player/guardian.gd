@@ -1,8 +1,9 @@
 class_name Guardian
 extends CharacterBody2D
-## Personaje controlable: caminar, saltar y reaparecer si cae fuera del nivel.
+## Personaje controlable: caminar, saltar, interactuar y reaparecer si cae fuera del nivel.
 
 signal reaparecio
+signal interactuo(objetivo: Node)
 
 @export_group("Movimiento")
 @export var velocidad_maxima := 240.0
@@ -22,16 +23,24 @@ signal reaparecio
 ## Si el personaje baja de esta altura (coordenada Y global), reaparece.
 @export var limite_caida := 2000.0
 
+@export_group("Interacción")
+## Segundos que dura la pose de interactuar (el guardián no se mueve mientras tanto).
+@export var duracion_interaccion := 0.35
+
 ## Si es false, la entrada se asigna desde fuera (pruebas, cinemáticas).
 var leer_entrada_del_jugador := true
 var entrada_direccion := 0.0
 var entrada_salto_presionado := false
 var entrada_salto_mantenido := false
+var entrada_interactuar := false
 
 var punto_reaparicion: Vector2
 
 var _tiempo_coyote_restante := 0.0
 var _tiempo_buffer_restante := 0.0
+var _tiempo_interaccion_restante := 0.0
+## Objetos cercanos con un método interactuar(guardian).
+var _interactuables: Array[Node2D] = []
 
 ## A partir de esta fracción de la velocidad máxima se usa "correr" en vez de "caminar".
 const UMBRAL_CORRER := 0.6
@@ -49,13 +58,17 @@ func _physics_process(delta: float) -> void:
 		entrada_direccion = Input.get_axis("mover_izquierda", "mover_derecha")
 		entrada_salto_presionado = Input.is_action_just_pressed("saltar")
 		entrada_salto_mantenido = Input.is_action_pressed("saltar")
+		entrada_interactuar = Input.is_action_just_pressed("interactuar")
 
+	_aplicar_interaccion(delta)
 	_aplicar_gravedad(delta)
-	_aplicar_salto(delta)
+	if not esta_interactuando():
+		_aplicar_salto(delta)
 	_aplicar_movimiento_horizontal(delta)
 	move_and_slide()
 
 	entrada_salto_presionado = false
+	entrada_interactuar = false
 	_actualizar_animacion()
 	if global_position.y > limite_caida:
 		reaparecer()
@@ -63,6 +76,8 @@ func _physics_process(delta: float) -> void:
 
 ## Nombre de la animación que corresponde al estado actual del movimiento.
 func animacion_segun_estado() -> StringName:
+	if esta_interactuando():
+		return &"interactuar"
 	if not is_on_floor():
 		return &"saltar" if velocity.y < 0.0 else &"caer"
 	var rapidez := absf(velocity.x)
@@ -73,7 +88,7 @@ func animacion_segun_estado() -> StringName:
 
 func _actualizar_animacion() -> void:
 	# El arte mira a la derecha; se voltea al ir a la izquierda.
-	if entrada_direccion != 0.0:
+	if entrada_direccion != 0.0 and not esta_interactuando():
 		sprite.flip_h = entrada_direccion < 0.0
 	var animacion := animacion_segun_estado()
 	if sprite.animation != animacion:
@@ -85,15 +100,53 @@ func _actualizar_animacion() -> void:
 		sprite.speed_scale = 1.0
 
 
+func esta_interactuando() -> bool:
+	return _tiempo_interaccion_restante > 0.0
+
+
+func registrar_interactuable(objeto: Node2D) -> void:
+	if objeto not in _interactuables:
+		_interactuables.append(objeto)
+
+
+func quitar_interactuable(objeto: Node2D) -> void:
+	_interactuables.erase(objeto)
+
+
+func interactuable_mas_cercano() -> Node2D:
+	var mejor: Node2D = null
+	for objeto in _interactuables:
+		if is_instance_valid(objeto) and (mejor == null
+				or global_position.distance_squared_to(objeto.global_position)
+				< global_position.distance_squared_to(mejor.global_position)):
+			mejor = objeto
+	return mejor
+
+
 func reaparecer() -> void:
 	global_position = punto_reaparicion
 	velocity = Vector2.ZERO
 	_tiempo_coyote_restante = 0.0
 	_tiempo_buffer_restante = 0.0
+	_tiempo_interaccion_restante = 0.0
 	# Con interpolación de física activa, evita que se dibuje "deslizándose" hasta el punto de reaparición.
 	reset_physics_interpolation()
 	camara.reset_smoothing()
 	reaparecio.emit()
+
+
+func _aplicar_interaccion(delta: float) -> void:
+	_tiempo_interaccion_restante = maxf(_tiempo_interaccion_restante - delta, 0.0)
+	if not entrada_interactuar or esta_interactuando() or not is_on_floor():
+		return
+	var objetivo := interactuable_mas_cercano()
+	if objetivo == null:
+		return
+	_tiempo_interaccion_restante = duracion_interaccion
+	# Mirar hacia el objeto.
+	sprite.flip_h = objetivo.global_position.x < global_position.x
+	objetivo.interactuar(self)
+	interactuo.emit(objetivo)
 
 
 func _aplicar_gravedad(delta: float) -> void:
@@ -121,7 +174,7 @@ func _aplicar_salto(delta: float) -> void:
 
 
 func _aplicar_movimiento_horizontal(delta: float) -> void:
-	if entrada_direccion != 0.0:
+	if entrada_direccion != 0.0 and not esta_interactuando():
 		velocity.x = move_toward(velocity.x, entrada_direccion * velocidad_maxima, aceleracion * delta)
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, friccion * delta)

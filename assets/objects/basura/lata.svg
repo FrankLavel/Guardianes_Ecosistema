@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <!-- Placeholder: lata aplastada -->
+  <rect x="9" y="12" width="14" height="16" fill="#c62828"/>
+  <rect x="9" y="12" width="14" height="2" fill="#bdbdbd"/>
+  <rect x="9" y="26" width="14" height="2" fill="#9e9e9e"/>
+  <rect x="11" y="16" width="4" height="8" fill="#ef9a9a"/>
+  <rect x="17" y="18" width="4" height="3" fill="#ffffff"/>
+</svg>

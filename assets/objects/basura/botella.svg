@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
+  <!-- Placeholder: botella de plástico tirada -->
+  <rect x="4" y="14" width="20" height="10" fill="#9fd3e6"/>
+  <rect x="4" y="14" width="20" height="2" fill="#d8f1fa"/>
+  <rect x="10" y="17" width="10" height="5" fill="#e53935"/>
+  <rect x="24" y="16" width="3" height="6" fill="#9fd3e6"/>
+  <rect x="27" y="16" width="3" height="6" fill="#1e88e5"/>
+  <rect x="4" y="24" width="20" height="2" fill="#5f8fa0"/>
+</svg>

@@ -4,6 +4,12 @@
 [ext_resource type="TileSet" path="res://assets/tilesets/terreno.tres" id="2_uqx68"]
 [ext_resource type="PackedScene" path="res://scenes/player/Guardian.tscn" id="3_74ikt"]
 
+[ext_resource type="PackedScene" path="res://scenes/world/Basura.tscn" id="4_basura"]
+[ext_resource type="PackedScene" path="res://scenes/world/Rio.tscn" id="5_rio"]
+[ext_resource type="PackedScene" path="res://scenes/world/PuntoControl.tscn" id="6_control"]
+[ext_resource type="PackedScene" path="res://scenes/world/Meta.tscn" id="7_meta"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="8_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/NivelCompletado.tscn" id="9_final"]
 [node name="Nivel1" type="Node2D" unique_id=1497878329]
 script = ExtResource("1_4rwkb")
 
@@ -23,3 +29,60 @@ tile_set = ExtResource("2_uqx68")
 
 [node name="Guardian" parent="." unique_id=930884087 instance=ExtResource("3_74ikt")]
 position = Vector2(112, 576)
+
+[node name="Rios" type="Node2D" parent="."]
+
+[node name="Rio1" parent="Rios" instance=ExtResource("5_rio")]
+position = Vector2(960, 600)
+
+[node name="Rio2" parent="Rios" instance=ExtResource("5_rio")]
+position = Vector2(2272, 600)
+
+[node name="PuntosControl" type="Node2D" parent="."]
+
+[node name="PuntoControl1" parent="PuntosControl" instance=ExtResource("6_control")]
+position = Vector2(848, 576)
+
+[node name="PuntoControl2" parent="PuntosControl" instance=ExtResource("6_control")]
+position = Vector2(2160, 512)
+
+[node name="BasuraNivel" type="Node2D" parent="."]
+
+[node name="Basura1" parent="BasuraNivel" instance=ExtResource("4_basura")]
+position = Vector2(400, 576)
+tipo = "botella"
+
+[node name="Basura2" parent="BasuraNivel" instance=ExtResource("4_basura")]
+position = Vector2(784, 576)
+tipo = "lata"
+
+[node name="Basura3" parent="BasuraNivel" instance=ExtResource("4_basura")]
+position = Vector2(1168, 576)
+tipo = "bolsa"
+
+[node name="Basura4" parent="BasuraNivel" instance=ExtResource("4_basura")]
+position = Vector2(1456, 384)
+tipo = "pila"
+
+[node name="Basura5" parent="BasuraNivel" instance=ExtResource("4_basura")]
+position = Vector2(1936, 512)
+tipo = "unicel"
+
+[node name="Basura6" parent="BasuraNivel" instance=ExtResource("4_basura")]
+position = Vector2(2128, 512)
+tipo = "botella"
+
+[node name="Basura7" parent="BasuraNivel" instance=ExtResource("4_basura")]
+position = Vector2(2704, 384)
+tipo = "lata"
+
+[node name="Basura8" parent="BasuraNivel" instance=ExtResource("4_basura")]
+position = Vector2(3216, 576)
+tipo = "bolsa"
+
+[node name="Meta" parent="." instance=ExtResource("7_meta")]
+position = Vector2(3664, 576)
+
+[node name="HUD" parent="." instance=ExtResource("8_hud")]
+
+[node name="NivelCompletado" parent="." instance=ExtResource("9_final")]
