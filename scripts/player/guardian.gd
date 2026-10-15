@@ -78,6 +78,11 @@ func _actualizar_animacion() -> void:
 	var animacion := animacion_segun_estado()
 	if sprite.animation != animacion:
 		sprite.play(animacion)
+	# Las piernas avanzan al ritmo real del movimiento (evita que "patine" al acelerar).
+	if animacion == &"caminar" or animacion == &"correr":
+		sprite.speed_scale = clampf(absf(velocity.x) / velocidad_maxima, 0.6, 1.2)
+	else:
+		sprite.speed_scale = 1.0
 
 
 func reaparecer() -> void:
@@ -85,6 +90,9 @@ func reaparecer() -> void:
 	velocity = Vector2.ZERO
 	_tiempo_coyote_restante = 0.0
 	_tiempo_buffer_restante = 0.0
+	# Con interpolación de física activa, evita que se dibuje "deslizándose" hasta el punto de reaparición.
+	reset_physics_interpolation()
+	camara.reset_smoothing()
 	reaparecio.emit()
 
 

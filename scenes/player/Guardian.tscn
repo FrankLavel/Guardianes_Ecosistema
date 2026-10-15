@@ -17,7 +17,7 @@ texture_filter = 2
 scale = Vector2(0.34, 0.34)
 sprite_frames = ExtResource("2_frames")
 animation = &"idle"
-offset = Vector2(0, -80)
+offset = Vector2(0, -88)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -22)

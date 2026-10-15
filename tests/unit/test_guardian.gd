@@ -116,3 +116,27 @@ func test_animacion_saltar_y_luego_caer() -> void:
 func test_todas_las_animaciones_existen() -> void:
 	for nombre in [&"idle", &"caminar", &"correr", &"saltar", &"caer", &"agachar", &"interactuar"]:
 		assert_true(guardian.sprite.sprite_frames.has_animation(nombre), "Falta animación: %s" % nombre)
+
+
+func test_ningun_cuadro_de_animacion_esta_recortado() -> void:
+	# Si el dibujo toca el borde de su celda del atlas, se ve cortado en el juego.
+	var frames := guardian.sprite.sprite_frames
+	for anim in frames.get_animation_names():
+		for i in frames.get_frame_count(anim):
+			var img := frames.get_frame_texture(anim, i).get_image()
+			var w := img.get_width()
+			var h := img.get_height()
+			assert_gt(w * h, 0, "Cuadro vacío")
+			var tocado := false
+			for x in w:
+				if img.get_pixel(x, 0).a > 0.0:
+					tocado = true
+			for y in h:
+				if img.get_pixel(0, y).a > 0.0 or img.get_pixel(w - 1, y).a > 0.0:
+					tocado = true
+			assert_false(tocado, "Cuadro %d de '%s' toca el borde de su celda" % [i, anim])
+
+
+func test_interpolacion_de_fisica_activa() -> void:
+	# Sin esto el movimiento se ve a saltos en monitores de más de 60 Hz.
+	assert_true(ProjectSettings.get_setting("physics/common/physics_interpolation"))
