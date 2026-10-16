@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
-  <!-- Placeholder: pila (batería) -->
-  <rect x="6" y="18" width="20" height="10" fill="#212121"/>
-  <rect x="6" y="18" width="8" height="10" fill="#fbc02d"/>
-  <rect x="26" y="21" width="3" height="4" fill="#9e9e9e"/>
-  <rect x="6" y="18" width="20" height="2" fill="#424242"/>
-</svg>

@@ -126,3 +126,11 @@ water drop icon, trash bag icon, open book icon (journal), pause icon, close ico
 - [ ] ¿Nada está cortado en los bordes?
 - [ ] ¿Los cuadros de animación son del mismo tamaño y miran a la derecha?
 - [ ] ¿Nombre de archivo correcto?
+
+---
+
+## 6. Cómo se integra el arte (programación)
+
+1. Las imágenes originales viven en `assets/fuente_ia/` (Godot las ignora).
+2. `python tools/arte/procesar.py` quita el fondo magenta, separa cada objeto, arma las animaciones y deja los PNG en `assets/` (personajes, mapas, objetos, interfaz).
+3. Si se regenera una imagen, se reemplaza con **el mismo nombre** y se vuelve a ejecutar el script. Si cambia la cantidad u orden de objetos en una hoja, el script avisa y hay que ajustar la lista de nombres en `procesar.py`.
