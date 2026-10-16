@@ -5,9 +5,8 @@ extends Area2D
 
 signal guardian_cayo(guardian: Guardian)
 
-const COLOR_CONTAMINADO := Color("5e5b2f")
-const COLOR_LIMPIO := Color("3fa7e0")
-const TEXTURA_PEZ := preload("res://assets/objects/pez.svg")
+const MARGEN_ORILLA := 18.0
+const FRAMES_ANIMALES := preload("res://assets/characters/animales/zona1_animales_frames.tres")
 
 ## Ancho y profundidad del agua; el origen es la esquina superior izquierda de la superficie.
 @export var tamano := Vector2(96, 104)
@@ -16,9 +15,13 @@ var limpieza := 0.0:
 	set(valor):
 		limpieza = clampf(valor, 0.0, 1.0)
 		if is_node_ready():
-			_agua.color = COLOR_CONTAMINADO.lerp(COLOR_LIMPIO, limpieza)
+			(_agua.material as ShaderMaterial).set_shader_parameter("limpieza", limpieza)
 
-var _peces: Array[Sprite2D] = []
+## Para animar el cambio de color en vez de cambiarlo de golpe.
+func animar_limpieza(objetivo: float, segundos := 1.0) -> void:
+	create_tween().tween_property(self, "limpieza", objetivo, segundos)
+
+var _peces: Array[AnimatedSprite2D] = []
 
 @onready var _agua: ColorRect = $Agua
 @onready var _forma: CollisionShape2D = $CollisionShape2D
@@ -26,7 +29,10 @@ var _peces: Array[Sprite2D] = []
 
 func _ready() -> void:
 	add_to_group(&"rio")
-	_agua.size = tamano
+	# El agua se mete un poco bajo las orillas para que no queden huecos entre el suelo y el río.
+	_agua.position = Vector2(-MARGEN_ORILLA, 0)
+	_agua.size = tamano + Vector2(MARGEN_ORILLA * 2.0, 0)
+	(_agua.material as ShaderMaterial).set_shader_parameter("alto_px", tamano.y)
 	var rect := RectangleShape2D.new()
 	# La zona que hace reaparecer empieza un poco bajo la superficie: se ve que "toca" el agua.
 	rect.size = Vector2(tamano.x, tamano.y - 16.0)
@@ -45,9 +51,12 @@ func mostrar_peces(cantidad := 2) -> void:
 	if hay_peces():
 		return
 	for i in cantidad:
-		var pez := Sprite2D.new()
-		pez.texture = TEXTURA_PEZ
-		pez.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var pez := AnimatedSprite2D.new()
+		pez.sprite_frames = FRAMES_ANIMALES
+		pez.animation = &"pez"
+		pez.play()
+		pez.scale = Vector2(0.11, 0.11)
+		pez.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 		var x := tamano.x * (i + 1) / (cantidad + 1)
 		pez.position = Vector2(x, 24.0)
 		pez.flip_h = i % 2 == 1

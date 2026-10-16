@@ -28,4 +28,4 @@ func _on_slider_volumen_value_changed(value: float) -> void:
 
 
 func _on_btn_volver_pressed() -> void:
-	get_tree().change_scene_to_file(ESCENA_MENU)
+	Transicion.ir_a(ESCENA_MENU)

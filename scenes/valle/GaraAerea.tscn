@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/valle/gara_aerea.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/gara/aerea/gara_aerea_frames.tres" id="2_frames"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pies"]
+size = Vector2(36, 18)
+
+[node name="GaraAerea" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 1
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="Sombra" type="Polygon2D" parent="."]
+color = Color(0, 0, 0, 0.28)
+polygon = PackedVector2Array(-26, 0, -22, -6, -12, -9, 0, -10, 12, -9, 22, -6, 26, 0, 22, 6, 12, 9, 0, 10, -12, 9, -22, 6)
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 2
+scale = Vector2(0.5, 0.5)
+sprite_frames = ExtResource("2_frames")
+animation = &"idle_abajo"
+offset = Vector2(0, -102)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_pies")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+process_callback = 0
+position = Vector2(0, -50)
+zoom = Vector2(1.25, 1.25)
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0

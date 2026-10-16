@@ -15,6 +15,8 @@ var nivel_terminado := false
 @onready var hud: HUD = $HUD
 @onready var pantalla_final: NivelCompletado = $NivelCompletado
 @onready var meta: Meta = $Meta
+@onready var fondo: FondoZona = $FondoZona1
+@onready var garza: AnimatedSprite2D = $Garza
 
 
 func _ready() -> void:
@@ -84,9 +86,13 @@ func _al_recoger(basura: Basura) -> void:
 	var salud := salud_del_rio()
 	for rio in rios():
 		rio.limpieza = salud
+	fondo.animar_limpieza(salud)
 	if rio_limpio():
 		for rio in rios():
 			rio.mostrar_peces()
+		# Vuelven los animales: señal visible de que el ecosistema se recupera.
+		garza.visible = true
+		garza.play()
 		hud.mostrar_mensaje("¡El río está limpio!",
 			"Los peces regresaron. Camina hasta el árbol al final del camino.", 6.0)
 	else:

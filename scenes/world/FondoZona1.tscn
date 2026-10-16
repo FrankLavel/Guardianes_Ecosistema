@@ -1,0 +1,46 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/fondo_zona.gd" id="1_fondo"]
+[ext_resource type="Script" path="res://scripts/world/capa_fondo.gd" id="2_capa"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/cielo.png" id="3_cielo"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/cielo_contaminado.png" id="4_cielo_c"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/montanas.png" id="5_montanas"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/montanas_contaminado.png" id="6_montanas_c"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/arboles.png" id="7_arboles"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/arboles_contaminado.png" id="8_arboles_c"]
+
+[node name="FondoZona1" type="CanvasLayer"]
+layer = -10
+script = ExtResource("1_fondo")
+
+[node name="Cielo" type="Control" parent="."]
+texture_filter = 2
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("2_capa")
+factor = 0.03
+alto_en_pantalla = 1080.0
+textura_limpia = ExtResource("3_cielo")
+textura_contaminada = ExtResource("4_cielo_c")
+
+[node name="Montanas" type="Control" parent="."]
+texture_filter = 2
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("2_capa")
+factor = 0.12
+alto_en_pantalla = 560.0
+separacion_abajo = 300.0
+textura_limpia = ExtResource("5_montanas")
+textura_contaminada = ExtResource("6_montanas_c")
+
+[node name="Arboles" type="Control" parent="."]
+texture_filter = 2
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("2_capa")
+factor = 0.3
+alto_en_pantalla = 520.0
+separacion_abajo = 120.0
+textura_limpia = ExtResource("7_arboles")
+textura_contaminada = ExtResource("8_arboles_c")

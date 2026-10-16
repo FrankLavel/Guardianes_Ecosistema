@@ -1,0 +1,90 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogo.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/tema.tres" id="2_tema"]
+
+[sub_resource type="StyleBoxFlat" id="Marco_retrato"]
+bg_color = Color(0.93, 0.85, 0.66, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.36, 0.22, 0.1, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="Dialogo" type="CanvasLayer"]
+process_mode = 3
+layer = 50
+script = ExtResource("1_script")
+
+[node name="Caja" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -820.0
+offset_top = -340.0
+offset_right = 820.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = ExtResource("2_tema")
+
+[node name="HBox" type="HBoxContainer" parent="Caja"]
+layout_mode = 2
+theme_override_constants/separation = 36
+
+[node name="MarcoRetrato" type="Panel" parent="Caja/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 190)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("Marco_retrato")
+
+[node name="Retrato" type="TextureRect" parent="Caja/HBox/MarcoRetrato"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="Caja/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Nombre" type="Label" parent="Caja/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 38
+text = "Nombre"
+
+[node name="Texto" type="Label" parent="Caja/HBox/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Texto del diálogo"
+autowrap_mode = 3
+
+[node name="Continuar" type="Label" parent="Caja/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 0.7, 1)
+theme_override_font_sizes/font_size = 26
+text = "E  ▶"
+horizontal_alignment = 2

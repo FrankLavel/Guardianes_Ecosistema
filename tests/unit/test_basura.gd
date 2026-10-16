@@ -37,7 +37,7 @@ func test_cada_tipo_tiene_nombre_y_dato_educativo() -> void:
 		var datos := DatosBasura.obtener(tipo)
 		assert_ne(str(datos.get("nombre", "")), "", "Falta nombre: %s" % tipo)
 		assert_gt(str(datos.get("dato", "")).length(), 20, "Falta dato educativo: %s" % tipo)
-		assert_true(ResourceLoader.exists("res://assets/objects/basura/%s.svg" % tipo), "Falta imagen: %s" % tipo)
+		assert_true(ResourceLoader.exists("res://assets/objects/basura/%s.png" % tipo), "Falta imagen: %s" % tipo)
 
 
 func test_muestra_aviso_cuando_el_guardian_esta_cerca() -> void:

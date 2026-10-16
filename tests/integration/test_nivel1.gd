@@ -6,13 +6,19 @@ const ESCENA_NIVEL1 := preload("res://scenes/world/Nivel1.tscn")
 var nivel: Node2D
 
 
+const RANURA_PRUEBAS := 99
+
+
 func before_each() -> void:
+	# Partida de pruebas: no toca la partida real del jugador.
+	Juego.nueva_partida(RANURA_PRUEBAS)
 	nivel = add_child_autofree(ESCENA_NIVEL1.instantiate())
 
 
 func after_each() -> void:
 	# La pantalla final pausa el juego.
 	get_tree().paused = false
+	Juego.borrar_partida(RANURA_PRUEBAS)
 
 
 func _recoger_todo() -> void:
@@ -21,7 +27,7 @@ func _recoger_todo() -> void:
 
 
 func test_controles_definidos_en_el_proyecto() -> void:
-	for accion in ["mover_izquierda", "mover_derecha", "saltar", "interactuar"]:
+	for accion in ["mover_izquierda", "mover_derecha", "mover_arriba", "mover_abajo", "saltar", "interactuar", "pausa"]:
 		assert_true(InputMap.has_action(accion), "Falta la acción: %s" % accion)
 		assert_gt(InputMap.action_get_events(accion).size(), 0, "Sin teclas: %s" % accion)
 
@@ -85,6 +91,8 @@ func test_meta_con_el_rio_limpio_completa_el_nivel() -> void:
 	assert_true(nivel.nivel_terminado)
 	assert_true(nivel.pantalla_final.visible)
 	assert_true(pausado, "La pantalla final debe pausar el juego")
+	assert_true(Juego.zona_esta_completa("rio"), "Completar el nivel restaura la zona del río")
+	assert_true(Juego.zona_desbloqueada("bosque"), "Y desbloquea el bosque")
 
 
 func test_la_meta_detecta_al_guardian() -> void:
@@ -110,3 +118,19 @@ func test_los_datos_educativos_se_incluyen_en_la_exportacion() -> void:
 	assert_eq(presets.load("res://export_presets.cfg"), OK)
 	for seccion in ["preset.0", "preset.1"]:
 		assert_string_contains(presets.get_value(seccion, "include_filter"), "data/*.json")
+
+
+func test_el_terreno_se_dibuja_con_arte_y_los_tiles_son_invisibles() -> void:
+	var decorador: DecoradorTerreno = nivel.get_node("TerrenoVisual")
+	await wait_frames(1)
+	assert_gt(decorador.get_child_count(), 5, "Debería haber tiras de suelo y plataformas")
+	assert_eq(nivel.terreno.self_modulate.a, 0.0, "Los tiles de colisión no se ven")
+	assert_eq(decorador.tramos(DecoradorTerreno.TILE_PLATAFORMA).size(), 4)
+
+
+func test_el_fondo_se_limpia_con_el_rio() -> void:
+	_recoger_todo()
+	await wait_seconds(1.5)
+	for capa in nivel.fondo.capas():
+		assert_almost_eq(capa.limpieza, 1.0, 0.01)
+	assert_true(nivel.garza.visible, "La garza regresa al río limpio")

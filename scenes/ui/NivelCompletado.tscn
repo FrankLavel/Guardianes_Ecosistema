@@ -106,4 +106,4 @@ theme_override_font_sizes/font_size = 36
 theme_override_styles/normal = SubResource("StyleBoxFlat_boton")
 theme_override_styles/hover = SubResource("StyleBoxFlat_boton_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_boton_hover")
-text = "VOLVER AL MENÚ"
+text = "VOLVER AL VALLE"
