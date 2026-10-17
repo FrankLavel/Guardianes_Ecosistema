@@ -95,6 +95,7 @@ func _mostrar_linea() -> void:
 	_escribiendo = create_tween()
 	_escribiendo.tween_property(_texto, "visible_ratio", 1.0, _texto.text.length() / VELOCIDAD_TEXTO)
 	_escribiendo.tween_callback(func(): _continuar.visible = true)
+	Sonido.efecto("dialogo")
 	linea_mostrada.emit(_indice)
 
 

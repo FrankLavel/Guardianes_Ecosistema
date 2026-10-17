@@ -140,3 +140,27 @@ func test_la_nina_camina_con_su_propio_arte() -> void:
 	Juego.nueva_partida(RANURA, "nina", "")
 	var otro: Node2D = add_child_autofree(ESCENA_VALLE.instantiate())
 	assert_eq(otro.gara.sprite.sprite_frames.resource_path, Juego.PERSONAJES["nina"]["aereo"])
+
+
+func test_tras_el_nivel_don_chucho_pide_ayuda_con_el_filtro() -> void:
+	var chucho: PersonajeValle = valle.get_node("Objetos/DonChucho")
+	Juego.marcar_dialogo_visto("don_chucho_inicio")
+	Juego.marcar("rio_nivel")
+	assert_eq(chucho.dialogo_actual(), "don_chucho_filtro")
+	assert_eq(valle.objetivo_actual(), "Habla con Don Chucho: quiere enseñarte algo.")
+
+
+func test_al_terminar_ese_dialogo_se_abre_el_filtro() -> void:
+	Juego.marcar("rio_nivel")
+	valle._al_terminar_dialogo("don_chucho_filtro")
+	get_tree().paused = false
+	assert_true(valle.puzzle_filtro.visible)
+	valle.puzzle_filtro.cerrar()
+
+
+func test_resolver_el_filtro_restaura_el_rio_y_da_nadar() -> void:
+	Juego.marcar("rio_nivel")
+	valle._al_resolver_filtro()
+	assert_true(Juego.zona_esta_completa("rio"))
+	assert_true(Juego.tiene_habilidad("nadar"))
+	assert_true(Juego.zona_desbloqueada("bosque"))

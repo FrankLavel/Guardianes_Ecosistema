@@ -15,8 +15,9 @@ func _ready() -> void:
 	_mensaje.visible = false
 
 
-func actualizar(recogidas: int, total: int) -> void:
-	var salud := 1.0 if total == 0 else float(recogidas) / total
+func actualizar(recogidas: int, total: int, salud := -1.0) -> void:
+	if salud < 0.0:
+		salud = 1.0 if total == 0 else float(recogidas) / total
 	var animacion := create_tween()
 	animacion.tween_property(barra_salud, "value", salud * 100.0, 0.4)
 	etiqueta_basura.text = "Basura recogida: %d / %d" % [recogidas, total]

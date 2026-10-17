@@ -26,6 +26,12 @@ func _recoger_todo() -> void:
 		basura.interactuar(nivel.guardian)
 
 
+## Recoger toda la basura y arreglar las compuertas: el río queda limpio.
+func _limpiar_rio() -> void:
+	_recoger_todo()
+	nivel.valvulas.puzzle.resuelto.emit()
+
+
 func test_controles_definidos_en_el_proyecto() -> void:
 	for accion in ["mover_izquierda", "mover_derecha", "mover_arriba", "mover_abajo", "saltar", "interactuar", "pausa"]:
 		assert_true(InputMap.has_action(accion), "Falta la acción: %s" % accion)
@@ -60,14 +66,23 @@ func test_empieza_con_el_rio_contaminado() -> void:
 func test_recoger_basura_sube_la_salud_y_muestra_el_dato() -> void:
 	var basura: Basura = nivel.basuras()[0]
 	basura.interactuar(nivel.guardian)
-	assert_almost_eq(nivel.salud_del_rio(), 1.0 / 8.0, 0.001)
-	assert_almost_eq(nivel.rios()[0].limpieza, 1.0 / 8.0, 0.001)
+	var esperado: float = 1.0 / (8 + nivel.PESO_COMPUERTAS)
+	assert_almost_eq(nivel.salud_del_rio(), esperado, 0.001)
+	assert_almost_eq(nivel.rios()[0].limpieza, esperado, 0.001)
 	assert_eq(nivel.hud.mensaje_visible(), basura.datos()["nombre"])
 	assert_eq(nivel.hud.etiqueta_basura.text, "Basura recogida: 1 / 8")
 
 
-func test_recoger_todo_limpia_el_rio_y_aparecen_peces() -> void:
+func test_solo_recoger_basura_no_basta_falta_la_tuberia() -> void:
 	_recoger_todo()
+	assert_false(nivel.rio_limpio())
+	nivel._al_llegar_a_meta(nivel.guardian)
+	assert_false(nivel.nivel_terminado)
+	assert_eq(nivel.hud.mensaje_visible(), "Aún sale agua sucia al río")
+
+
+func test_recoger_todo_y_arreglar_las_compuertas_limpia_el_rio() -> void:
+	_limpiar_rio()
 	assert_true(nivel.rio_limpio())
 	for rio in nivel.rios():
 		assert_eq(rio.limpieza, 1.0)
@@ -83,7 +98,7 @@ func test_meta_sin_limpiar_el_rio_no_termina_el_nivel() -> void:
 
 
 func test_meta_con_el_rio_limpio_completa_el_nivel() -> void:
-	_recoger_todo()
+	_limpiar_rio()
 	nivel._al_llegar_a_meta(nivel.guardian)
 	var pausado := get_tree().paused
 	# Quitar la pausa antes de cualquier await: con el árbol pausado GUT también se detiene.
@@ -91,8 +106,8 @@ func test_meta_con_el_rio_limpio_completa_el_nivel() -> void:
 	assert_true(nivel.nivel_terminado)
 	assert_true(nivel.pantalla_final.visible)
 	assert_true(pausado, "La pantalla final debe pausar el juego")
-	assert_true(Juego.zona_esta_completa("rio"), "Completar el nivel restaura la zona del río")
-	assert_true(Juego.zona_desbloqueada("bosque"), "Y desbloquea el bosque")
+	assert_true(Juego.tiene_marca("rio_nivel"), "Terminar el nivel cumple la meta del río")
+	assert_false(Juego.zona_esta_completa("rio"), "La zona se restaura después, con el filtro")
 
 
 func test_la_meta_detecta_al_guardian() -> void:
@@ -129,7 +144,7 @@ func test_el_terreno_se_dibuja_con_arte_y_los_tiles_son_invisibles() -> void:
 
 
 func test_el_fondo_se_limpia_con_el_rio() -> void:
-	_recoger_todo()
+	_limpiar_rio()
 	await wait_seconds(1.5)
 	for capa in nivel.fondo.capas():
 		assert_almost_eq(capa.limpieza, 1.0, 0.01)

@@ -239,15 +239,14 @@ def zona1() -> None:
     for capa in ["montanas", "arboles"]:
         for sufijo in ["", "_contaminado"]:
             rgba = arte.quitar_cielo_magenta(cargar(f"zona1_fondo_{capa}{sufijo}.jpg"))
-            if capa == "arboles":
-                # Hay árboles "fantasma" mezclados con el magenta del fondo.
-                rgba = arte.quitar_tinte_magenta(rgba, rojo=12, azul=12)
+            # Hay restos del magenta del fondo mezclados con el dibujo (árboles "fantasma",
+            # manchas rosas en las cimas).
+            rgba = arte.quitar_tinte_magenta(rgba, rojo=12, azul=12)
             img = Image.fromarray(rgba)
             img = img.crop(img.getbbox())
             img = hacer_repetible_h(img, 120)
-            if capa == "arboles":
-                # Segunda pasada: la mezcla de los bordes puede revivir restos morados.
-                img = Image.fromarray(arte.quitar_tinte_magenta(np.asarray(img), rojo=8, azul=8))
+            # Segunda pasada: la mezcla de los bordes puede revivir restos morados.
+            img = Image.fromarray(arte.quitar_tinte_magenta(np.asarray(img), rojo=8, azul=8))
             guardar(img, destino / f"{capa}{sufijo}.png")
     for sufijo, caja in [("", (82, 154, 1182, 709)), ("_contaminado", None)]:
         img = Image.fromarray(cargar(f"zona1_fondo_cielo{sufijo}.jpg").astype(np.uint8))
@@ -256,6 +255,50 @@ def zona1() -> None:
             x0, y0, x1, y1 = separar_objetos(rgba)[0]["caja"]
             caja = (x0 + 8, y0 + 8, x1 - 8, y1 - 8)
         guardar(hacer_repetible_h(img.crop(caja).convert("RGBA"), 120), destino / f"cielo{sufijo}.png")
+
+
+# ---------------------------------------------------------------- Puzzle del filtro
+def puzzle_filtro() -> None:
+    destino = "ui/puzzle_filtro"
+    piezas = {}
+    for fuente, nombre in [("puzzle_filtro_vacio.jpg", "botella"), ("puzzle_filtro_grava.jpg", "carta_grava"),
+                           ("puzzle_filtro_arena.jpg", "carta_arena"), ("puzzle_filtro_carbon.jpg", "carta_carbon")]:
+        piezas.update(objetos(fuente, [nombre], destino))
+    piezas.update(objetos("puzzle_filtro_extras.jpg", ["carta_algodon", "gota_sucia", "gota_limpia"], destino))
+    # Texturas de cada material para pintar las capas dentro del filtro. Se dibujan a baja
+    # resolución y se amplían sin suavizar, para que sean pixel art como el resto.
+    for material in ["grava", "arena", "carbon", "algodon"]:
+        guardar(textura_material(material), ASSETS / destino / f"textura_{material}.png")
+
+
+def textura_material(material: str, lado: int = 48, zoom: int = 4) -> Image.Image:
+    from PIL import ImageDraw
+    rng = np.random.default_rng({"grava": 1, "arena": 2, "carbon": 3, "algodon": 4}[material])
+    paletas = {
+        "grava": ((92, 72, 52), [(150, 140, 125), (120, 110, 98), (170, 150, 120), (105, 95, 90)], (55, 45, 38)),
+        "arena": ((214, 170, 98), [(232, 192, 120), (196, 150, 80), (240, 210, 150)], None),
+        "carbon": ((22, 22, 24), [(48, 48, 52), (62, 62, 68), (36, 36, 40)], (10, 10, 12)),
+        "algodon": ((226, 232, 238), [(250, 252, 255), (205, 214, 224)], (180, 190, 204)),
+    }
+    fondo, colores, contorno = paletas[material]
+    img = Image.new("RGB", (lado, lado), fondo)
+    d = ImageDraw.Draw(img)
+    if material == "arena":
+        for _ in range(lado * lado // 3):
+            x, y = rng.integers(0, lado, 2)
+            img.putpixel((int(x), int(y)), tuple(int(c) for c in colores[rng.integers(0, len(colores))]))
+    else:
+        cantidad, tam = {"grava": (34, (3, 7)), "carbon": (40, (2, 6)), "algodon": (26, (4, 9))}[material]
+        for _ in range(cantidad):
+            cx, cy = rng.integers(0, lado, 2)
+            rx, ry = rng.integers(tam[0], tam[1], 2)
+            color = tuple(int(c) for c in colores[rng.integers(0, len(colores))])
+            # Se dibuja también desplazado un "lado" para que la textura se repita sin cortes.
+            for ox in (-lado, 0, lado):
+                for oy in (-lado, 0, lado):
+                    caja = [cx - rx + ox, cy - ry + oy, cx + rx + ox, cy + ry + oy]
+                    d.ellipse(caja, fill=color, outline=contorno)
+    return img.resize((lado * zoom, lado * zoom), Image.Resampling.NEAREST).convert("RGBA")
 
 
 # ---------------------------------------------------------------- Personajes
@@ -298,7 +341,7 @@ def ui() -> None:
     guardar(recortar(rgba, logo), ASSETS / "ui" / "logo.png")
 
 
-GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui}
+GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

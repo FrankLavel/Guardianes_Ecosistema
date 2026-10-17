@@ -4,8 +4,9 @@ extends CanvasLayer
 
 const ESCENA_VALLE := "res://scenes/valle/Valle.tscn"
 
-## Zona que se marca como restaurada al mostrar esta pantalla.
-@export_enum("rio", "bosque", "lago") var zona := "rio"
+## Meta que se cumple al terminar el nivel. La zona se restaura después, en el valle
+## (por ejemplo, el río necesita además el filtro de Don Chucho).
+@export var marca := "rio_nivel"
 
 @onready var _boton_menu: Button = %BtnMenu
 
@@ -16,10 +17,12 @@ func _ready() -> void:
 
 
 func mostrar() -> void:
-	Juego.completar_zona(zona)
+	Juego.marcar(marca)
+	Juego.guardar()
 	for etiqueta in [%Titulo, %Aprendizaje]:
 		etiqueta.text = Juego.reemplazar(etiqueta.text)
 	visible = true
+	Sonido.efecto("zona_restaurada")
 	get_tree().paused = true
 	_boton_menu.grab_focus()
 

@@ -11,6 +11,7 @@ const ESCENA_SELECCION := "res://scenes/menu/SeleccionPersonaje.tscn"
 
 
 func _ready() -> void:
+	Sonido.musica("valle")
 	_boton_continuar.visible = Juego.existe_partida()
 	(_boton_continuar if _boton_continuar.visible else _boton_nueva).grab_focus()
 	# El logo "respira" un poco para que el menú no se sienta estático.

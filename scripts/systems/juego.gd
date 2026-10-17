@@ -9,7 +9,9 @@ signal partida_cargada
 
 ## Orden de las zonas: cada una se desbloquea al completar la anterior.
 const ZONAS := ["rio", "bosque", "lago"]
-const VERSION_GUARDADO := 2
+const VERSION_GUARDADO := 3
+## Habilidad que se gana al restaurar cada zona.
+const HABILIDAD_POR_ZONA := {"rio": "nadar", "bosque": "enredaderas"}
 
 ## Personajes que se pueden elegir. "plataformas" vacío = todavía no hay arte lateral propio
 ## y se usa el del niño mientras tanto.
@@ -46,6 +48,9 @@ var nombre := ""
 var zonas_completadas: Array[String] = []
 var especies_descubiertas: Array[String] = []
 var dialogos_vistos: Array[String] = []
+## Metas dentro de una zona ("rio_nivel", "rio_compuertas"...).
+var marcas: Array[String] = []
+var habilidades: Array[String] = []
 ## Posición de Gara en el valle para volver al mismo lugar al salir de una zona.
 var posicion_valle := Vector2.ZERO
 var tiene_posicion_valle := false
@@ -61,6 +66,8 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	zonas_completadas.clear()
 	especies_descubiertas.clear()
 	dialogos_vistos.clear()
+	marcas.clear()
+	habilidades.clear()
 	tiene_posicion_valle = false
 	posicion_valle = Vector2.ZERO
 
@@ -99,6 +106,8 @@ func completar_zona(zona: String) -> void:
 	if zona in zonas_completadas:
 		return
 	zonas_completadas.append(zona)
+	if HABILIDAD_POR_ZONA.has(zona):
+		dar_habilidad(HABILIDAD_POR_ZONA[zona])
 	zona_completada.emit(zona)
 	guardar()
 
@@ -106,6 +115,24 @@ func completar_zona(zona: String) -> void:
 ## De 0 a 1: qué tanto del valle está restaurado.
 func progreso() -> float:
 	return float(zonas_completadas.size()) / ZONAS.size()
+
+
+func marcar(id: String) -> void:
+	if id not in marcas:
+		marcas.append(id)
+
+
+func tiene_marca(id: String) -> bool:
+	return id in marcas
+
+
+func dar_habilidad(id: String) -> void:
+	if id not in habilidades:
+		habilidades.append(id)
+
+
+func tiene_habilidad(id: String) -> bool:
+	return id in habilidades
 
 
 func marcar_dialogo_visto(id: String) -> void:
@@ -136,6 +163,8 @@ func a_diccionario() -> Dictionary:
 		"zonas_completadas": zonas_completadas,
 		"especies_descubiertas": especies_descubiertas,
 		"dialogos_vistos": dialogos_vistos,
+		"marcas": marcas,
+		"habilidades": habilidades,
 		"posicion_valle": [posicion_valle.x, posicion_valle.y] if tiene_posicion_valle else null,
 	}
 
@@ -148,6 +177,8 @@ func desde_diccionario(datos: Dictionary) -> void:
 	zonas_completadas.assign(datos.get("zonas_completadas", []))
 	especies_descubiertas.assign(datos.get("especies_descubiertas", []))
 	dialogos_vistos.assign(datos.get("dialogos_vistos", []))
+	marcas.assign(datos.get("marcas", []))
+	habilidades.assign(datos.get("habilidades", []))
 	var pos = datos.get("posicion_valle")
 	tiene_posicion_valle = pos is Array and pos.size() == 2
 	posicion_valle = Vector2(pos[0], pos[1]) if tiene_posicion_valle else Vector2.ZERO

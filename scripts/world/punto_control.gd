@@ -13,5 +13,6 @@ func _ready() -> void:
 
 
 func _al_entrar(cuerpo: Node2D) -> void:
-	if cuerpo is Guardian:
+	if cuerpo is Guardian and cuerpo.punto_reaparicion != global_position:
 		cuerpo.punto_reaparicion = global_position
+		Sonido.efecto("punto_control")

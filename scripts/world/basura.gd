@@ -48,6 +48,7 @@ func interactuar(guardian: Guardian) -> void:
 	_aviso.visible = false
 	set_deferred("monitoring", false)
 	recogida.emit(self)
+	Sonido.efecto("recoger", 0.08)
 	var animacion := create_tween().set_parallel()
 	animacion.tween_property(_sprite, "position:y", _sprite.position.y - 24.0, 0.3)
 	animacion.tween_property(_sprite, "modulate:a", 0.0, 0.3)

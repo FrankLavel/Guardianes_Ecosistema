@@ -1,0 +1,52 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/estacion_valvulas.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona1/tuberia_sucia.png" id="2_tuberia"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona1/charco_toxico.png" id="3_charco"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona1/valvula_cerrada.png" id="4_valvula"]
+[ext_resource type="PackedScene" path="res://scenes/puzzles/PuzzleCompuertas.tscn" id="5_puzzle"]
+
+[sub_resource type="RectangleShape2D" id="Zona"]
+size = Vector2(130, 90)
+
+[node name="EstacionValvulas" type="Area2D"]
+z_index = -1
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_script")
+
+[node name="Charco" type="Sprite2D" parent="."]
+texture_filter = 2
+position = Vector2(46, -4)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("3_charco")
+
+[node name="Tuberia" type="Sprite2D" parent="."]
+texture_filter = 2
+position = Vector2(20, 0)
+scale = Vector2(0.24, 0.24)
+texture = ExtResource("2_tuberia")
+offset = Vector2(0, -231)
+
+[node name="Valvula" type="Sprite2D" parent="."]
+texture_filter = 2
+position = Vector2(-34, -6)
+scale = Vector2(0.09, 0.09)
+texture = ExtResource("4_valvula")
+offset = Vector2(0, -266)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -45)
+shape = SubResource("Zona")
+
+[node name="Aviso" type="Label" parent="."]
+offset_left = -120.0
+offset_top = -150.0
+offset_right = 120.0
+offset_bottom = -120.0
+theme_override_font_sizes/font_size = 18
+text = "E  Revisar las válvulas"
+horizontal_alignment = 1
+
+[node name="PuzzleCompuertas" parent="." instance=ExtResource("5_puzzle")]

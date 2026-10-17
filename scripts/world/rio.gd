@@ -1,7 +1,8 @@
 class_name Rio
 extends Area2D
 ## Tramo de río. Su color pasa de contaminado a limpio según `limpieza` (0 a 1).
-## Si el guardián cae al agua, avisa al nivel para que lo haga reaparecer.
+## Si el guardián cae al agua sucia (o aún no sabe nadar), avisa al nivel para que reaparezca;
+## si el agua está limpia y tiene la habilidad "nadar", puede nadar en él.
 
 signal guardian_cayo(guardian: Guardian)
 
@@ -10,6 +11,8 @@ const FRAMES_ANIMALES := preload("res://assets/characters/animales/zona1_animale
 
 ## Ancho y profundidad del agua; el origen es la esquina superior izquierda de la superficie.
 @export var tamano := Vector2(96, 104)
+## Si es false, nunca se puede nadar aquí (por ejemplo, un río que sigue contaminado).
+@export var nadable_si_limpio := true
 
 var limpieza := 0.0:
 	set(valor):
@@ -39,7 +42,30 @@ func _ready() -> void:
 	_forma.shape = rect
 	_forma.position = Vector2(tamano.x / 2.0, 16.0 + rect.size.y / 2.0)
 	limpieza = limpieza
+	_crear_fondo()
 	body_entered.connect(_al_entrar)
+	body_exited.connect(_al_salir)
+
+
+func es_nadable() -> bool:
+	return nadable_si_limpio and limpieza >= 0.99 and Juego.tiene_habilidad("nadar")
+
+
+func superficie_y() -> float:
+	return global_position.y
+
+
+## Lecho del río: para poder nadar hace falta un fondo donde apoyarse.
+func _crear_fondo() -> void:
+	var fondo := StaticBody2D.new()
+	fondo.name = "Fondo"
+	var forma := CollisionShape2D.new()
+	var segmento := SegmentShape2D.new()
+	segmento.a = Vector2(-MARGEN_ORILLA, tamano.y)
+	segmento.b = Vector2(tamano.x + MARGEN_ORILLA, tamano.y)
+	forma.shape = segmento
+	fondo.add_child(forma)
+	add_child(fondo)
 
 
 func hay_peces() -> bool:
@@ -69,5 +95,15 @@ func mostrar_peces(cantidad := 2) -> void:
 
 
 func _al_entrar(cuerpo: Node2D) -> void:
-	if cuerpo is Guardian:
+	if not cuerpo is Guardian:
+		return
+	Sonido.efecto("chapoteo", 0.1)
+	if es_nadable():
+		cuerpo.entrar_agua(self)
+	else:
 		guardian_cayo.emit(cuerpo)
+
+
+func _al_salir(cuerpo: Node2D) -> void:
+	if cuerpo is Guardian:
+		cuerpo.salir_agua(self)

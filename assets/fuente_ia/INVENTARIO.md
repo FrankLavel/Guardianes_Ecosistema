@@ -53,6 +53,8 @@ Revisado el 16 de octubre de 2026. ✅ listo para integrar · ⚠️ usable con 
 
 ## Falta
 
+- 🟡 **Animación de nadar** para el niño y la niña (vista lateral, 4–6 cuadros, mirando a la derecha). Mientras no exista, al nadar se usa la de caminar con un tono azulado.
+
 Del sprint 1 ya no falta nada imprescindible. Solo, si se quiere uniformidad:
 - 🟡 Don Chucho de pie (de lado) con el diseño nuevo.
 

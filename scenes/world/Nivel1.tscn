@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" path="res://assets/maps/zona1/plataformas/troncos_doble.png" id="13_troncos"]
 [ext_resource type="PackedScene" path="res://scenes/ui/MenuPausa.tscn" id="14_pausa"]
 [ext_resource type="SpriteFrames" path="res://assets/characters/animales/zona1_animales_frames.tres" id="15_animales"]
+[ext_resource type="PackedScene" path="res://scenes/world/EstacionValvulas.tscn" id="16_valvulas"]
 [node name="Nivel1" type="Node2D" unique_id=1497878329]
 script = ExtResource("1_4rwkb")
 
@@ -92,6 +93,9 @@ tipo = "lata"
 [node name="Basura8" parent="BasuraNivel" instance=ExtResource("4_basura")]
 position = Vector2(3216, 576)
 tipo = "bolsa"
+
+[node name="EstacionValvulas" parent="." instance=ExtResource("16_valvulas")]
+position = Vector2(3440, 576)
 
 [node name="Meta" parent="." instance=ExtResource("7_meta")]
 position = Vector2(3664, 576)

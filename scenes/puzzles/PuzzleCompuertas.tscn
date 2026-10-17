@@ -1,0 +1,265 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzles/puzzle_compuertas.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona1/valvula_abierta.png" id="2_abierta"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona1/valvula_cerrada.png" id="3_cerrada"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona1/tuberia_sucia.png" id="4_tuberia"]
+[ext_resource type="Theme" path="res://assets/ui/tema.tres" id="5_tema"]
+
+[sub_resource type="StyleBoxFlat" id="Planta"]
+bg_color = Color(0.82, 0.78, 0.7, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.3, 0.25, 0.2, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="Fondo_diagrama"]
+bg_color = Color(0.36, 0.5, 0.3, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="PuzzleCompuertas" type="CanvasLayer"]
+script = ExtResource("1_script")
+
+[node name="Oscurecer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="PanelContainer" parent="."]
+texture_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -860.0
+offset_top = -520.0
+offset_right = 860.0
+offset_bottom = 520.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_tema")
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Titulo" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 46
+text = "Las compuertas del río"
+horizontal_alignment = 1
+
+[node name="Diagrama" type="Panel" parent="Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1300, 560)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("Fondo_diagrama")
+
+[node name="Fabrica" type="TextureRect" parent="Panel/VBox/Diagrama"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 50.0
+offset_right = 200.0
+offset_bottom = 290.0
+texture = ExtResource("4_tuberia")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LblFabrica" type="Label" parent="Panel/VBox/Diagrama"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 290.0
+offset_right = 260.0
+offset_bottom = 330.0
+theme_override_font_sizes/font_size = 28
+text = "Fábrica vieja"
+horizontal_alignment = 1
+
+[node name="Planta" type="Panel" parent="Panel/VBox/Diagrama"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 610.0
+offset_top = 360.0
+offset_right = 830.0
+offset_bottom = 500.0
+theme_override_styles/panel = SubResource("Planta")
+
+[node name="Lbl" type="Label" parent="Panel/VBox/Diagrama/Planta"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 26
+text = "Planta de
+tratamiento"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RioDiagrama" type="ColorRect" parent="Panel/VBox/Diagrama"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 1130.0
+offset_top = 40.0
+offset_right = 1270.0
+offset_bottom = 530.0
+color = Color(0.36, 0.42, 0.32, 1)
+
+[node name="Lbl" type="Label" parent="Panel/VBox/Diagrama/RioDiagrama"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 34
+text = "RÍO"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ValvulaA" type="TextureButton" parent="Panel/VBox/Diagrama"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 725.0
+offset_top = 95.0
+offset_right = 855.0
+offset_bottom = 225.0
+pivot_offset = Vector2(65, 75)
+focus_mode = 2
+toggle_mode = true
+texture_normal = ExtResource("3_cerrada")
+texture_pressed = ExtResource("2_abierta")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Letra" type="Label" parent="Panel/VBox/Diagrama/ValvulaA"]
+layout_mode = 0
+offset_left = -50.0
+offset_top = -10.0
+offset_right = -6.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 40
+text = "A"
+
+[node name="Estado" type="Label" parent="Panel/VBox/Diagrama/ValvulaA"]
+layout_mode = 0
+offset_left = -20.0
+offset_top = 128.0
+offset_right = 150.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 24
+text = "CERRADA"
+horizontal_alignment = 1
+
+[node name="ValvulaB" type="TextureButton" parent="Panel/VBox/Diagrama"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 375.0
+offset_top = 225.0
+offset_right = 505.0
+offset_bottom = 355.0
+pivot_offset = Vector2(65, 75)
+focus_mode = 2
+toggle_mode = true
+texture_normal = ExtResource("3_cerrada")
+texture_pressed = ExtResource("2_abierta")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Letra" type="Label" parent="Panel/VBox/Diagrama/ValvulaB"]
+layout_mode = 0
+offset_left = -50.0
+offset_top = -10.0
+offset_right = -6.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 40
+text = "B"
+
+[node name="Estado" type="Label" parent="Panel/VBox/Diagrama/ValvulaB"]
+layout_mode = 0
+offset_left = -20.0
+offset_top = 128.0
+offset_right = 150.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 24
+text = "CERRADA"
+horizontal_alignment = 1
+
+[node name="ValvulaC" type="TextureButton" parent="Panel/VBox/Diagrama"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 895.0
+offset_top = 355.0
+offset_right = 1025.0
+offset_bottom = 485.0
+pivot_offset = Vector2(65, 75)
+focus_mode = 2
+toggle_mode = true
+texture_normal = ExtResource("3_cerrada")
+texture_pressed = ExtResource("2_abierta")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Letra" type="Label" parent="Panel/VBox/Diagrama/ValvulaC"]
+layout_mode = 0
+offset_left = -50.0
+offset_top = -10.0
+offset_right = -6.0
+offset_bottom = 40.0
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 40
+text = "C"
+
+[node name="Estado" type="Label" parent="Panel/VBox/Diagrama/ValvulaC"]
+layout_mode = 0
+offset_left = -20.0
+offset_top = 128.0
+offset_right = 150.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 24
+text = "CERRADA"
+horizontal_alignment = 1
+
+[node name="Mensaje" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Mensaje"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Botones" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 30
+
+[node name="BtnCerrar" type="Button" parent="Panel/VBox/Botones"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 84)
+layout_mode = 2
+text = "SALIR"
+
+[node name="BtnAgua" type="Button" parent="Panel/VBox/Botones"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 84)
+layout_mode = 2
+text = "ABRIR EL AGUA"

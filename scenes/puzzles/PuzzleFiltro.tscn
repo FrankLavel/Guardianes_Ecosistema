@@ -1,0 +1,242 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzles/puzzle_filtro.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/tema.tres" id="2_tema"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle_filtro/carta_grava.png" id="c_grava"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle_filtro/carta_arena.png" id="c_arena"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle_filtro/carta_carbon.png" id="c_carbon"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle_filtro/carta_algodon.png" id="c_algodon"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle_filtro/gota_sucia.png" id="g_sucia"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle_filtro/gota_limpia.png" id="g_limpia"]
+
+[sub_resource type="StyleBoxFlat" id="Vidrio"]
+bg_color = Color(0.75, 0.92, 0.95, 0.35)
+border_width_left = 8
+border_width_right = 8
+border_width_bottom = 8
+border_color = Color(0.55, 0.8, 0.82, 1)
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxFlat" id="Boquilla"]
+bg_color = Color(0.55, 0.8, 0.82, 1)
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="PuzzleFiltro" type="CanvasLayer"]
+script = ExtResource("1_script")
+
+[node name="Oscurecer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="PanelContainer" parent="."]
+texture_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -860.0
+offset_top = -520.0
+offset_right = 860.0
+offset_bottom = 520.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_tema")
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Titulo" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 46
+text = "El filtro de agua"
+horizontal_alignment = 1
+
+[node name="Cuerpo" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 70
+
+[node name="Filtro" type="Control" parent="Panel/VBox/Cuerpo"]
+custom_minimum_size = Vector2(300, 600)
+layout_mode = 2
+
+[node name="GotaSucia" type="TextureRect" parent="Panel/VBox/Cuerpo/Filtro"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 110.0
+offset_right = 190.0
+offset_bottom = 100.0
+texture = ExtResource("g_sucia")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Vidrio" type="PanelContainer" parent="Panel/VBox/Cuerpo/Filtro"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 110.0
+offset_right = 280.0
+offset_bottom = 520.0
+theme_override_styles/panel = SubResource("Vidrio")
+
+[node name="Capas" type="VBoxContainer" parent="Panel/VBox/Cuerpo/Filtro/Vidrio"]
+unique_name_in_owner = true
+layout_mode = 2
+alignment = 2
+theme_override_constants/separation = 2
+
+[node name="Boquilla" type="Panel" parent="Panel/VBox/Cuerpo/Filtro"]
+layout_mode = 0
+offset_left = 125.0
+offset_top = 520.0
+offset_right = 175.0
+offset_bottom = 548.0
+theme_override_styles/panel = SubResource("Boquilla")
+
+[node name="GotaLimpia" type="TextureRect" parent="Panel/VBox/Cuerpo/Filtro"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 105.0
+offset_top = 548.0
+offset_right = 195.0
+offset_bottom = 658.0
+pivot_offset = Vector2(45, 0)
+texture = ExtResource("g_limpia")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Cartas" type="GridContainer" parent="Panel/VBox/Cuerpo"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 50
+columns = 4
+
+[node name="CartaGrava" type="TextureButton" parent="Panel/VBox/Cuerpo/Cartas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 300)
+layout_mode = 2
+pivot_offset = Vector2(115, 150)
+focus_mode = 2
+texture_normal = ExtResource("c_grava")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Nombre" type="Label" parent="Panel/VBox/Cuerpo/Cartas/CartaGrava"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -10.0
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 30
+text = "Grava"
+horizontal_alignment = 1
+
+[node name="CartaArena" type="TextureButton" parent="Panel/VBox/Cuerpo/Cartas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 300)
+layout_mode = 2
+pivot_offset = Vector2(115, 150)
+focus_mode = 2
+texture_normal = ExtResource("c_arena")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Nombre" type="Label" parent="Panel/VBox/Cuerpo/Cartas/CartaArena"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -10.0
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 30
+text = "Arena"
+horizontal_alignment = 1
+
+[node name="CartaAlgodon" type="TextureButton" parent="Panel/VBox/Cuerpo/Cartas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 300)
+layout_mode = 2
+pivot_offset = Vector2(115, 150)
+focus_mode = 2
+texture_normal = ExtResource("c_algodon")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Nombre" type="Label" parent="Panel/VBox/Cuerpo/Cartas/CartaAlgodon"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -10.0
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 30
+text = "Algodón"
+horizontal_alignment = 1
+
+[node name="CartaCarbon" type="TextureButton" parent="Panel/VBox/Cuerpo/Cartas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 300)
+layout_mode = 2
+pivot_offset = Vector2(115, 150)
+focus_mode = 2
+texture_normal = ExtResource("c_carbon")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Nombre" type="Label" parent="Panel/VBox/Cuerpo/Cartas/CartaCarbon"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -10.0
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 30
+text = "Carbón"
+horizontal_alignment = 1
+
+[node name="Mensaje" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Mensaje"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Botones" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="BtnCerrar" type="Button" parent="Panel/VBox/Botones"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 84)
+layout_mode = 2
+text = "SALIR"

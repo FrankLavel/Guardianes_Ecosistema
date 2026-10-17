@@ -32,6 +32,7 @@
 [ext_resource type="Script" path="res://scripts/valle/valle_hud.gd" id="30_83x3r"]
 [ext_resource type="PackedScene" path="res://scenes/ui/MenuPausa.tscn" id="31_rxafi"]
 [ext_resource type="Script" path="res://scripts/ui/menu_pausa.gd" id="32_5r0cd"]
+[ext_resource type="PackedScene" path="res://scenes/puzzles/PuzzleFiltro.tscn" id="99_filtro"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_y2o8h"]
 shader = ExtResource("2_qlniw")
@@ -224,12 +225,6 @@ script = ExtResource("8_c17rc")
 
 [node name="DonChucho" type="Area2D" parent="Objetos" unique_id=80711175 instance=ExtResource("9_ym5lv")]
 position = Vector2(990, 720)
-collision_layer = 0
-collision_mask = 2
-monitorable = false
-script = ExtResource("10_21vbe")
-dialogos = Array[PackedStringArray]([PackedStringArray("zona:rio", "don_chucho_rio_limpio"), PackedStringArray("visto:don_chucho_inicio", "don_chucho_repetir"), PackedStringArray("siempre", "don_chucho_inicio")])
-texto_aviso = "E  Hablar"
 
 [node name="EntradaRio" type="Area2D" parent="Objetos" unique_id=488095691 instance=ExtResource("11_fl5k2")]
 position = Vector2(880, 330)
@@ -661,3 +656,5 @@ process_mode = 3
 layer = 40
 script = ExtResource("32_5r0cd")
 permitir_volver_al_valle = false
+
+[node name="PuzzleFiltro" parent="." instance=ExtResource("99_filtro")]

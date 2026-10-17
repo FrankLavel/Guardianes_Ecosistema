@@ -3,7 +3,8 @@ extends ZonaInteraccion
 ## Personaje con el que se habla. Elige el diálogo según el progreso de la partida.
 
 ## Lista de [condición, id de diálogo]; se usa el primero cuya condición se cumpla.
-## Condiciones: "zona:<id>" (zona completa), "visto:<id>" (diálogo ya visto), "siempre".
+## Condiciones: "zona:<id>" (zona completa), "marca:<id>" (meta cumplida),
+## "visto:<id>" (diálogo ya visto), "siempre".
 @export var dialogos: Array[PackedStringArray] = []
 
 @onready var sprite: AnimatedSprite2D = $Sprite
@@ -23,6 +24,8 @@ func _cumple(condicion: String) -> bool:
 	match partes[0]:
 		"zona":
 			return Juego.zona_esta_completa(partes[1])
+		"marca":
+			return Juego.tiene_marca(partes[1])
 		"visto":
 			return partes[1] in Juego.dialogos_vistos
 		"no_visto":

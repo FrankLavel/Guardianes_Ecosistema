@@ -1,10 +1,13 @@
 extends Node2D
 ## Nivel 1 - El río contaminado.
-## El guardián recoge la basura; con cada objeto el río se ve más limpio y la barra de salud sube.
-## Al recoger todo aparecen peces, y al llegar al árbol del final se completa el nivel.
+## El guardián recoge la basura y cierra el paso del agua sucia de la fábrica (puzzle de las
+## compuertas). Con cada acción el río se ve más limpio; al terminar ambas aparecen peces, y al
+## llegar al árbol del final se completa el nivel.
 
 ## Distancia por debajo del terreno a partir de la cual el guardián reaparece.
 const MARGEN_CAIDA := 200.0
+## Cuánto vale arreglar las compuertas en la salud del río (en "basuras").
+const PESO_COMPUERTAS := 4
 
 var recogidas := 0
 var _total_basura := 0
@@ -17,9 +20,11 @@ var nivel_terminado := false
 @onready var meta: Meta = $Meta
 @onready var fondo: FondoZona = $FondoZona1
 @onready var garza: AnimatedSprite2D = $Garza
+@onready var valvulas: EstacionValvulas = $EstacionValvulas
 
 
 func _ready() -> void:
+	Sonido.musica("rio")
 	_ajustar_camara()
 	_total_basura = basuras().size()
 	for basura in basuras():
@@ -27,7 +32,8 @@ func _ready() -> void:
 	for rio in rios():
 		rio.guardian_cayo.connect(_al_caer_al_rio)
 	meta.guardian_llego.connect(_al_llegar_a_meta)
-	hud.actualizar(0, total_basura())
+	valvulas.resuelta.connect(_al_cambiar_salud)
+	hud.actualizar(recogidas, total_basura(), salud_del_rio())
 	hud.mostrar_mensaje("¡El río está contaminado!",
 		"Acércate a la basura y presiona E para recogerla.", 6.0)
 
@@ -52,10 +58,10 @@ func total_basura() -> int:
 	return _total_basura
 
 
-## De 0 (todo contaminado) a 1 (río limpio).
+## De 0 (todo contaminado) a 1 (río limpio): basura recogida + compuertas arregladas.
 func salud_del_rio() -> float:
-	var total := total_basura()
-	return 1.0 if total == 0 else float(recogidas) / total
+	var puntos := recogidas + (PESO_COMPUERTAS if valvulas.esta_resuelta else 0)
+	return float(puntos) / (total_basura() + PESO_COMPUERTAS)
 
 
 func rio_limpio() -> bool:
@@ -82,7 +88,11 @@ func _ajustar_camara() -> void:
 
 func _al_recoger(basura: Basura) -> void:
 	recogidas += 1
-	hud.actualizar(recogidas, total_basura())
+	_al_cambiar_salud(basura)
+
+
+func _al_cambiar_salud(basura: Basura = null) -> void:
+	hud.actualizar(recogidas, total_basura(), salud_del_rio())
 	var salud := salud_del_rio()
 	for rio in rios():
 		rio.limpieza = salud
@@ -95,9 +105,12 @@ func _al_recoger(basura: Basura) -> void:
 		garza.play()
 		hud.mostrar_mensaje("¡El río está limpio!",
 			"Los peces regresaron. Camina hasta el árbol al final del camino.", 6.0)
-	else:
+	elif basura:
 		var datos := basura.datos()
 		hud.mostrar_mensaje(datos.get("nombre", ""), datos.get("dato", ""), 5.0)
+	else:
+		hud.mostrar_mensaje("¡Ya no sale agua sucia!",
+			"Ahora el agua de la fábrica pasa por la planta de tratamiento.", 5.0)
 
 
 func _al_caer_al_rio(cuerpo: Guardian) -> void:
@@ -114,7 +127,10 @@ func _al_llegar_a_meta(_cuerpo: Guardian) -> void:
 	if rio_limpio():
 		nivel_terminado = true
 		pantalla_final.mostrar()
-	else:
+	elif recogidas < total_basura():
 		var faltan := total_basura() - recogidas
 		hud.mostrar_mensaje("Aún hay basura en el río",
 			"Te falta recoger %d. ¡El río te necesita!" % faltan, 4.0)
+	else:
+		hud.mostrar_mensaje("Aún sale agua sucia al río",
+			"Busca la tubería de la fábrica y revisa sus válvulas.", 4.0)

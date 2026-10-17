@@ -23,6 +23,16 @@ signal interactuo(objetivo: Node)
 ## Si el personaje baja de esta altura (coordenada Y global), reaparece.
 @export var limite_caida := 2000.0
 
+@export_group("Nado")
+@export var gravedad_agua := 420.0
+@export var velocidad_caida_agua := 140.0
+## Empuje hacia arriba de cada brazada (tecla de saltar).
+@export var fuerza_brazada := 260.0
+## Qué tan rápido se mueve de lado dentro del agua (fracción de la velocidad normal).
+@export var factor_velocidad_agua := 0.6
+## Cerca de la superficie, saltar la saca del agua con un salto normal.
+@export var margen_salir_agua := 34.0
+
 @export_group("Interacción")
 ## Segundos que dura la pose de interactuar (el guardián no se mueve mientras tanto).
 @export var duracion_interaccion := 0.35
@@ -41,6 +51,8 @@ var _tiempo_buffer_restante := 0.0
 var _tiempo_interaccion_restante := 0.0
 ## Objetos cercanos con un método interactuar(guardian).
 var _interactuables: Array[Node2D] = []
+## Ríos en los que está nadando (puede tocar dos a la vez en una orilla).
+var _aguas: Array[Node2D] = []
 
 ## A partir de esta fracción de la velocidad máxima se usa "correr" en vez de "caminar".
 const UMBRAL_CORRER := 0.6
@@ -65,9 +77,12 @@ func _physics_process(delta: float) -> void:
 		entrada_interactuar = Input.is_action_just_pressed("interactuar")
 
 	_aplicar_interaccion(delta)
-	_aplicar_gravedad(delta)
-	if not esta_interactuando():
-		_aplicar_salto(delta)
+	if esta_nadando():
+		_aplicar_nado(delta)
+	else:
+		_aplicar_gravedad(delta)
+		if not esta_interactuando():
+			_aplicar_salto(delta)
 	_aplicar_movimiento_horizontal(delta)
 	move_and_slide()
 
@@ -78,10 +93,31 @@ func _physics_process(delta: float) -> void:
 		reaparecer()
 
 
+func esta_nadando() -> bool:
+	return not _aguas.is_empty()
+
+
+func entrar_agua(agua: Node2D) -> void:
+	if agua not in _aguas:
+		_aguas.append(agua)
+	# Al caer al agua se frena de golpe (el agua amortigua).
+	velocity.y = minf(velocity.y, velocidad_caida_agua)
+	sprite.modulate = Color(0.75, 0.9, 1.0)
+
+
+func salir_agua(agua: Node2D) -> void:
+	_aguas.erase(agua)
+	if _aguas.is_empty():
+		sprite.modulate = Color.WHITE
+
+
 ## Nombre de la animación que corresponde al estado actual del movimiento.
 func animacion_segun_estado() -> StringName:
 	if esta_interactuando():
 		return &"interactuar"
+	if esta_nadando():
+		# Todavía no hay animación de nado: se usa la de caminar, más lenta.
+		return &"caminar"
 	if not is_on_floor():
 		return &"saltar" if velocity.y < 0.0 else &"caer"
 	var rapidez := absf(velocity.x)
@@ -98,7 +134,9 @@ func _actualizar_animacion() -> void:
 	if sprite.animation != animacion:
 		sprite.play(animacion)
 	# Las piernas avanzan al ritmo real del movimiento (evita que "patine" al acelerar).
-	if animacion == &"caminar" or animacion == &"correr":
+	if esta_nadando():
+		sprite.speed_scale = 0.5
+	elif animacion == &"caminar" or animacion == &"correr":
 		sprite.speed_scale = clampf(absf(velocity.x) / velocidad_maxima, 0.6, 1.2)
 	else:
 		sprite.speed_scale = 1.0
@@ -133,6 +171,8 @@ func reaparecer() -> void:
 	_tiempo_coyote_restante = 0.0
 	_tiempo_buffer_restante = 0.0
 	_tiempo_interaccion_restante = 0.0
+	_aguas.clear()
+	sprite.modulate = Color.WHITE
 	# Con interpolación de física activa, evita que se dibuje "deslizándose" hasta el punto de reaparición.
 	reset_physics_interpolation()
 	camara.reset_smoothing()
@@ -153,6 +193,22 @@ func _aplicar_interaccion(delta: float) -> void:
 	interactuo.emit(objetivo)
 
 
+func _aplicar_nado(delta: float) -> void:
+	var agua: Node2D = _aguas[0]
+	var profundidad: float = global_position.y - agua.superficie_y()
+	velocity.y = minf(velocity.y + gravedad_agua * delta, velocidad_caida_agua)
+	if entrada_salto_presionado:
+		if profundidad < margen_salir_agua:
+			# Cerca de la superficie: salto normal para salir a la orilla.
+			velocity.y = -fuerza_salto
+			Sonido.efecto("salto", 0.05)
+		else:
+			velocity.y = -fuerza_brazada
+			Sonido.efecto("brazada", 0.1)
+	# No se puede "volar" fuera del agua a brazadas: arriba de la superficie no hay empuje.
+	_tiempo_coyote_restante = 0.0
+
+
 func _aplicar_gravedad(delta: float) -> void:
 	if is_on_floor():
 		_tiempo_coyote_restante = tiempo_coyote
@@ -169,6 +225,7 @@ func _aplicar_salto(delta: float) -> void:
 
 	if _tiempo_buffer_restante > 0.0 and _tiempo_coyote_restante > 0.0:
 		velocity.y = -fuerza_salto
+		Sonido.efecto("salto", 0.05)
 		_tiempo_buffer_restante = 0.0
 		_tiempo_coyote_restante = 0.0
 
@@ -178,7 +235,8 @@ func _aplicar_salto(delta: float) -> void:
 
 
 func _aplicar_movimiento_horizontal(delta: float) -> void:
+	var maxima := velocidad_maxima * (factor_velocidad_agua if esta_nadando() else 1.0)
 	if entrada_direccion != 0.0 and not esta_interactuando():
-		velocity.x = move_toward(velocity.x, entrada_direccion * velocidad_maxima, aceleracion * delta)
+		velocity.x = move_toward(velocity.x, entrada_direccion * maxima, aceleracion * delta)
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, friccion * delta)
