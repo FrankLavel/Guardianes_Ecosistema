@@ -147,3 +147,36 @@ Plain flat solid magenta #FF00FF background, no grid, no text, no labels, no wat
 1. Las imágenes originales viven en `assets/fuente_ia/` (Godot las ignora).
 2. `python tools/arte/procesar.py` quita el fondo magenta, separa cada objeto, arma las animaciones y deja los PNG en `assets/` (personajes, mapas, objetos, interfaz).
 3. Si se regenera una imagen, se reemplaza con **el mismo nombre** y se vuelve a ejecutar el script. Si cambia la cantidad u orden de objetos en una hoja, el script avisa y hay que ajustar la lista de nombres en `procesar.py`.
+
+---
+
+## 7. Lista de arte — Sprint 3 (Zona 2: bosque de oyamel)
+
+Hoy el nivel funciona con arte **provisional** (enredadera, tierra fértil y venado dibujados por código; el pájaro carpintero aparece como "?"). Al reemplazarlos con estos, el juego toma el arte nuevo sin cambiar código.
+
+🔴 `zona2_objetos.png`
+```
+[BLOQUE DE ESTILO] Side-view 2D platformer objects, each separate with plenty of space between
+them: a tall climbing green vine with leaves (seamless vertically, about 3 times taller than wide),
+a small mound of dark fertile soil with tiny sprouts, a campfire with burning logs, the same
+campfire put out and smoking, an old rusty barbed wire fence piece, a wooden sign of a tree nursery.
+```
+🔴 `zona2_venado.png`
+```
+[BLOQUE DE ESTILO] Side-view 2D sprite sheet of a white-tailed deer facing right, one row,
+evenly spaced: 2 frames standing, 4 frames running. Same scale as the boy character
+(the deer is a bit taller than him). No text, no grid.
+```
+🔴 `zona2_carpintero.png`
+```
+[BLOQUE DE ESTILO] Acorn woodpecker (Melanerpes formicivorus) clinging to a tree trunk, side view,
+facing right, red cap, black and white face, alone and centered.
+```
+🟡 `zona2_monarca_vuelo.png`
+```
+[BLOQUE DE ESTILO] Monarch butterfly flying, side view, one row of 4 frames of the wings flapping,
+evenly spaced, facing right.
+```
+🟡 `mari_retrato.png` — retrato de Mari (mariposa monarca con carita amigable y ojos grandes, estilo caricatura), de frente, para los diálogos.
+🟡 `zona2_plataformas.png` — mismas piezas que `zona1_plataformas` pero de **bosque de montaña**: tierra más oscura, agujas de pino en el pasto, raíces y piedras con musgo.
+🟢 Animación de **trepar** para el niño y la niña (vista de espaldas subiendo una enredadera, 4 cuadros).

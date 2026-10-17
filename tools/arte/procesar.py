@@ -301,6 +301,98 @@ def textura_material(material: str, lado: int = 48, zoom: int = 4) -> Image.Imag
     return img.resize((lado * zoom, lado * zoom), Image.Resampling.NEAREST).convert("RGBA")
 
 
+# ---------------------------------------------------------------- Zona 2 y bitácora
+def zona2() -> None:
+    # Las antenas quedan separadas del cuerpo: se unen piezas hasta 40 px de distancia.
+    rgba = quitar_fondo(cargar("zona2_mariposa_monarca.jpg"))
+    mariposa = max(separar_objetos(rgba, union=40), key=lambda o: o["mascara"].sum())
+    guardar(recortar(rgba, mariposa), ASSETS / "characters/animales/monarca.png")
+    destino = ASSETS / "maps/zona2/fondos"
+    rgba = arte.quitar_cielo_magenta(cargar("zona2_fondo_talado.jpg"))
+    rgba = arte.quitar_tinte_magenta(rgba, rojo=12, azul=12)
+    img = Image.fromarray(rgba)
+    img = img.crop(img.getbbox())
+    img = hacer_repetible_h(img, 160)
+    img = Image.fromarray(arte.quitar_tinte_magenta(np.asarray(img), rojo=8, azul=8))
+    guardar(img, destino / "bosque_talado.png")
+
+
+def bitacora() -> None:
+    """Una imagen cuadrada por especie (assets/ui/bitacora/<id>.png) con el arte que ya existe."""
+    destino = ASSETS / "ui/bitacora"
+    atlas = Image.open(ASSETS / "characters/animales/zona1_animales_atlas.png")
+    cw, ch = atlas.width // 4, atlas.height // 4
+    fuentes = {
+        "acocil": atlas.crop((0, 0, cw, ch)),
+        "garza": atlas.crop((0, ch, cw, 2 * ch)),
+        "martin_pescador": atlas.crop((0, 2 * ch, cw, 3 * ch)),
+        "pez_rio": atlas.crop((0, 3 * ch, cw, 4 * ch)),
+        "monarca": Image.open(ASSETS / "characters/animales/monarca.png"),
+        "oyamel": Image.open(ASSETS / "maps/valle/objetos/oyamel.png"),
+        "encino": Image.open(ASSETS / "maps/valle/objetos/encino.png"),
+        "pino": Image.open(ASSETS / "maps/valle/objetos/sabino.png"),
+    }
+    for nombre, img in fuentes.items():
+        img = img.convert("RGBA")
+        img = img.crop(img.getbbox())
+        img.thumbnail((240, 240), Image.Resampling.LANCZOS)
+        lienzo = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        lienzo.alpha_composite(img, ((256 - img.width) // 2, (256 - img.height) // 2))
+        guardar(lienzo, destino / f"{nombre}.png")
+
+
+def provisionales() -> None:
+    """Arte PROVISIONAL dibujado por código (pixel art sencillo) hasta tener el arte con IA."""
+    from PIL import ImageDraw
+    destino = ASSETS / "objects/zona2"
+    z = 4  # se dibuja chico y se amplía sin suavizar
+
+    # Enredadera: tira vertical repetible (32x32 -> 128x128).
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    for y in range(32):
+        x = 15 + round(2 * np.sin(y / 32 * 2 * np.pi))
+        d.rectangle([x, y, x + 2, y], fill=(64, 120, 40, 255))
+        d.point((x - 1, y), fill=(30, 70, 25, 255))
+        d.point((x + 3, y), fill=(30, 70, 25, 255))
+    for (hx, hy, lado) in [(8, 4, -1), (20, 12, 1), (8, 20, -1), (20, 27, 1)]:
+        d.ellipse([hx - 4, hy - 3, hx + 4, hy + 3], fill=(96, 170, 60, 255), outline=(30, 80, 25, 255))
+        d.line([hx, hy, hx + 4 * lado, hy], fill=(50, 110, 35, 255))
+    guardar(img.resize((32 * z, 32 * z), Image.Resampling.NEAREST), destino / "enredadera.png")
+
+    # Tierra fértil: montículo con brotes.
+    img = Image.new("RGBA", (32, 14), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    d.ellipse([1, 4, 30, 16], fill=(110, 70, 40, 255), outline=(60, 38, 22, 255))
+    for x in (7, 13, 20, 25):
+        d.point((x, 7), fill=(150, 100, 60, 255))
+    for x in (11, 18):
+        d.line([x, 6, x, 2], fill=(70, 140, 50, 255))
+        d.point((x - 1, 2), fill=(110, 190, 70, 255))
+        d.point((x + 1, 3), fill=(110, 190, 70, 255))
+    guardar(img.resize((32 * z, 14 * z), Image.Resampling.NEAREST), destino / "tierra_fertil.png")
+
+    # Venado (silueta sencilla, de lado, mirando a la derecha).
+    img = Image.new("RGBA", (40, 36), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cafe, oscuro, claro = (150, 95, 55, 255), (70, 42, 25, 255), (225, 205, 175, 255)
+    d.ellipse([6, 12, 30, 24], fill=cafe, outline=oscuro)
+    for x in (9, 13, 24, 28):
+        d.rectangle([x, 22, x + 1, 33], fill=oscuro)
+    d.polygon([(26, 15), (31, 6), (35, 6), (33, 15)], fill=cafe, outline=oscuro)
+    d.ellipse([30, 3, 39, 10], fill=cafe, outline=oscuro)
+    d.point((36, 5), fill=(10, 10, 10, 255))
+    d.line([31, 3, 29, 0], fill=oscuro)
+    d.line([33, 3, 34, 0], fill=oscuro)
+    d.ellipse([3, 12, 8, 17], fill=claro, outline=oscuro)
+    d.ellipse([12, 18, 24, 23], fill=claro)
+    guardar(img.resize((40 * z, 36 * z), Image.Resampling.NEAREST), destino / "venado.png")
+    lienzo = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+    v = Image.open(destino / "venado.png")
+    lienzo.alpha_composite(v, ((256 - v.width) // 2, (256 - v.height) // 2))
+    guardar(lienzo, ASSETS / "ui/bitacora/venado.png")
+
+
 # ---------------------------------------------------------------- Personajes
 def personajes() -> None:
     rgba = quitar_fondo(cargar("don_chucho_hablando.jpg"))
@@ -341,7 +433,7 @@ def ui() -> None:
     guardar(recortar(rgba, logo), ASSETS / "ui" / "logo.png")
 
 
-GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro}
+GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "provisionales": provisionales}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

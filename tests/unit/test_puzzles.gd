@@ -124,3 +124,57 @@ func test_reiniciar_vacia_el_filtro() -> void:
 	p.reiniciar()
 	assert_eq(p.capas.size(), 0)
 	assert_false(p.get_node("%CartaAlgodon").disabled)
+
+
+# ------------------------------------------------------------------ reforestar y hábitats
+
+const ESCENA_REFORESTAR := preload("res://scenes/puzzles/PuzzleReforestar.tscn")
+const ESCENA_HABITAT := preload("res://scenes/puzzles/PuzzleHabitat.tscn")
+
+
+func _asignar_puzzle(escena: PackedScene) -> PuzzleAsignar:
+	var p: PuzzleAsignar = add_child_autofree(escena.instantiate())
+	p.abrir()
+	_sin_pausa()
+	return p
+
+
+func test_reforestar_rechaza_el_arbol_en_el_lugar_equivocado() -> void:
+	var p := _asignar_puzzle(ESCENA_REFORESTAR)
+	assert_false(p.asignar("encino", "arriba"))
+	assert_string_contains(p.mensaje.text, "parte baja")
+	assert_eq(p.colocadas.size(), 0)
+
+
+func test_reforestar_cada_arbol_a_su_altura_lo_resuelve() -> void:
+	Juego.nueva_partida(93)
+	var p := _asignar_puzzle(ESCENA_REFORESTAR)
+	watch_signals(p)
+	assert_true(p.asignar("oyamel", "arriba"))
+	assert_true(p.asignar("pino", "medio"))
+	assert_true(p.asignar("encino", "abajo"))
+	assert_signal_emitted(p, "resuelto")
+	assert_has(Juego.especies_descubiertas, "oyamel", "Se registra en la bitácora")
+	Juego.nueva_partida()
+
+
+func test_habitat_cada_animal_a_su_lugar() -> void:
+	Juego.nueva_partida(93)
+	var p := _asignar_puzzle(ESCENA_HABITAT)
+	watch_signals(p)
+	assert_false(p.asignar("venado", "copa"), "El venado no vive en la copa")
+	assert_true(p.asignar("monarca", "copa"))
+	assert_true(p.asignar("carpintero", "tronco"))
+	assert_true(p.asignar("venado", "suelo"))
+	assert_signal_emitted(p, "resuelto")
+	assert_has(Juego.especies_descubiertas, "monarca")
+	Juego.nueva_partida()
+
+
+func test_elegir_una_tarjeta_y_luego_el_lugar() -> void:
+	var p := _asignar_puzzle(ESCENA_REFORESTAR)
+	p.colocar_en("arriba")
+	assert_string_contains(p.mensaje.text, "Primero elige")
+	p.elegir("oyamel")
+	p.colocar_en("arriba")
+	assert_eq(p.colocadas.get("arriba"), "oyamel")

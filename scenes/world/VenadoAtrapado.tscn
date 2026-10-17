@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/venado_atrapado.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona2/venado.png" id="2_venado"]
+
+[sub_resource type="RectangleShape2D" id="Zona"]
+size = Vector2(130, 80)
+
+[node name="VenadoAtrapado" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_script")
+
+[node name="Venado" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("2_venado")
+offset = Vector2(0, -72)
+
+[node name="Alambre" type="Line2D" parent="."]
+points = PackedVector2Array(-40, -6, -30, -30, -10, -14, 4, -40, 20, -18, 34, -44, 44, -8)
+width = 2.5
+default_color = Color(0.45, 0.42, 0.4, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -40)
+shape = SubResource("Zona")
+
+[node name="Aviso" type="Label" parent="."]
+offset_left = -120.0
+offset_top = -120.0
+offset_right = 120.0
+offset_bottom = -92.0
+theme_override_font_sizes/font_size = 18
+text = "E  Liberar al venado"
+horizontal_alignment = 1

@@ -6,8 +6,22 @@ extends ZonaInteraccion
 ## Condiciones: "zona:<id>" (zona completa), "marca:<id>" (meta cumplida),
 ## "visto:<id>" (diálogo ya visto), "siempre".
 @export var dialogos: Array[PackedStringArray] = []
+## Para personajes que vuelan (Mari): sube y baja y "aletea" estrechando el dibujo.
+@export var aleteo := false
 
 @onready var sprite: AnimatedSprite2D = $Sprite
+
+
+func _ready() -> void:
+	super()
+	if aleteo:
+		var escala := sprite.scale
+		var vuelo := create_tween().set_loops()
+		vuelo.tween_property(sprite, "scale:x", escala.x * 0.35, 0.18)
+		vuelo.tween_property(sprite, "scale:x", escala.x, 0.18)
+		var flotar := create_tween().set_loops()
+		flotar.tween_property(sprite, "position:y", sprite.position.y - 12.0, 0.9).set_trans(Tween.TRANS_SINE)
+		flotar.tween_property(sprite, "position:y", sprite.position.y, 0.9).set_trans(Tween.TRANS_SINE)
 
 
 func dialogo_actual() -> String:

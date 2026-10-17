@@ -33,6 +33,9 @@ signal interactuo(objetivo: Node)
 ## Cerca de la superficie, saltar la saca del agua con un salto normal.
 @export var margen_salir_agua := 34.0
 
+@export_group("Trepar")
+@export var velocidad_trepar := 190.0
+
 @export_group("Interacción")
 ## Segundos que dura la pose de interactuar (el guardián no se mueve mientras tanto).
 @export var duracion_interaccion := 0.35
@@ -43,6 +46,8 @@ var entrada_direccion := 0.0
 var entrada_salto_presionado := false
 var entrada_salto_mantenido := false
 var entrada_interactuar := false
+## -1 arriba, 1 abajo (para trepar).
+var entrada_vertical := 0.0
 
 var punto_reaparicion: Vector2
 
@@ -53,6 +58,9 @@ var _tiempo_interaccion_restante := 0.0
 var _interactuables: Array[Node2D] = []
 ## Ríos en los que está nadando (puede tocar dos a la vez en una orilla).
 var _aguas: Array[Node2D] = []
+## Enredaderas que está tocando y si va agarrado a una.
+var _escalables: Array[Node2D] = []
+var _trepando := false
 
 ## A partir de esta fracción de la velocidad máxima se usa "correr" en vez de "caminar".
 const UMBRAL_CORRER := 0.6
@@ -75,15 +83,20 @@ func _physics_process(delta: float) -> void:
 		entrada_salto_presionado = Input.is_action_just_pressed("saltar")
 		entrada_salto_mantenido = Input.is_action_pressed("saltar")
 		entrada_interactuar = Input.is_action_just_pressed("interactuar")
+		entrada_vertical = Input.get_axis("mover_arriba", "mover_abajo")
 
 	_aplicar_interaccion(delta)
-	if esta_nadando():
+	_actualizar_trepar()
+	if _trepando:
+		_aplicar_trepar()
+	elif esta_nadando():
 		_aplicar_nado(delta)
 	else:
 		_aplicar_gravedad(delta)
 		if not esta_interactuando():
 			_aplicar_salto(delta)
-	_aplicar_movimiento_horizontal(delta)
+	if not _trepando:
+		_aplicar_movimiento_horizontal(delta)
 	move_and_slide()
 
 	entrada_salto_presionado = false
@@ -91,6 +104,48 @@ func _physics_process(delta: float) -> void:
 	_actualizar_animacion()
 	if global_position.y > limite_caida:
 		reaparecer()
+
+
+func esta_trepando() -> bool:
+	return _trepando
+
+
+func entrar_escalable(objeto: Node2D) -> void:
+	if objeto not in _escalables:
+		_escalables.append(objeto)
+
+
+func salir_escalable(objeto: Node2D) -> void:
+	_escalables.erase(objeto)
+
+
+## Se agarra al presionar ↑ (o ↓ en el aire) junto a una enredadera; se suelta al saltar,
+## al salir de la enredadera o al llegar al suelo bajando.
+func _actualizar_trepar() -> void:
+	if _escalables.is_empty():
+		_trepando = false
+		return
+	if not _trepando:
+		var subir := entrada_vertical < -0.5
+		var bajar_en_el_aire := entrada_vertical > 0.5 and not is_on_floor()
+		if subir or bajar_en_el_aire:
+			_trepando = true
+			velocity = Vector2.ZERO
+			# ↑ también es tecla de salto: aquí significa "agarrarse", no saltar.
+			entrada_salto_presionado = false
+			_tiempo_buffer_restante = 0.0
+	elif entrada_vertical > 0.5 and is_on_floor():
+		_trepando = false
+
+
+func _aplicar_trepar() -> void:
+	# Saltar (con una tecla que no sea ↑) suelta la enredadera.
+	if entrada_salto_presionado and entrada_vertical >= 0.0:
+		_trepando = false
+		velocity = Vector2(entrada_direccion * velocidad_maxima * 0.6, -fuerza_salto * 0.8)
+		Sonido.efecto("salto", 0.05)
+		return
+	velocity = Vector2(entrada_direccion * velocidad_trepar * 0.4, entrada_vertical * velocidad_trepar)
 
 
 func esta_nadando() -> bool:
@@ -115,6 +170,9 @@ func salir_agua(agua: Node2D) -> void:
 func animacion_segun_estado() -> StringName:
 	if esta_interactuando():
 		return &"interactuar"
+	if _trepando:
+		# Sin animación propia: los brazos arriba del salto parecen agarrarse.
+		return &"saltar"
 	if esta_nadando():
 		# Todavía no hay animación de nado: se usa la de caminar, más lenta.
 		return &"caminar"
@@ -172,6 +230,8 @@ func reaparecer() -> void:
 	_tiempo_buffer_restante = 0.0
 	_tiempo_interaccion_restante = 0.0
 	_aguas.clear()
+	_escalables.clear()
+	_trepando = false
 	sprite.modulate = Color.WHITE
 	# Con interpolación de física activa, evita que se dibuje "deslizándose" hasta el punto de reaparición.
 	reset_physics_interpolation()

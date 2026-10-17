@@ -82,6 +82,7 @@ text = "¡Lo lograste, {nombre}!"
 horizontal_alignment = 1
 
 [node name="Subtitulo" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 38
 text = "El río está limpio y los peces regresaron.

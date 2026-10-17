@@ -7,6 +7,10 @@
     "jugador": {
       "nombre": "{nombre}",
       "retrato": ""
+    },
+    "mari": {
+      "nombre": "Mari",
+      "retrato": "res://assets/ui/bitacora/monarca.png"
     }
   },
   "dialogos": {
@@ -100,6 +104,70 @@
       {
         "quien": "don_chucho",
         "texto": "Mira el valle, {guardian}: empieza a recuperar sus colores."
+      }
+    ],
+    "mari_espera": [
+      {
+        "quien": "mari",
+        "texto": "Hola... soy Mari. Vine volando desde muy lejos, pero el bosque está lleno de humo."
+      },
+      {
+        "quien": "mari",
+        "texto": "Don Chucho necesita ayuda con el río. ¡Ve con él primero!"
+      }
+    ],
+    "mari_inicio": [
+      {
+        "quien": "mari",
+        "texto": "¡{nombre}! Soy Mari, una mariposa monarca. Cada invierno viajo miles de kilómetros hasta este bosque."
+      },
+      {
+        "quien": "mari",
+        "texto": "Pero cortaron muchos oyameles y alguien dejó una fogata encendida... ya casi no tengo dónde descansar."
+      },
+      {
+        "quien": "jugador",
+        "texto": "¡Yo te ayudo, Mari! ¿Qué hago?"
+      },
+      {
+        "quien": "mari",
+        "texto": "Entra al bosque por el arco de troncos. Las enredaderas te ayudarán a subir la montaña."
+      }
+    ],
+    "mari_habitat": [
+      {
+        "quien": "mari",
+        "texto": "¡Volvieron a crecer árboles en el claro! Gracias, {guardian}."
+      },
+      {
+        "quien": "mari",
+        "texto": "Un solo árbol es la casa de muchos animales. ¿Sabes dónde vive cada uno?"
+      }
+    ],
+    "mari_habitat_repetir": [
+      {
+        "quien": "mari",
+        "texto": "¿Lo intentamos otra vez? Piensa en dónde come y duerme cada animal."
+      }
+    ],
+    "mari_listo": [
+      {
+        "quien": "mari",
+        "texto": "¡Exacto! Por eso cuidar el bosque es cuidar a todos los que viven en él."
+      },
+      {
+        "quien": "mari",
+        "texto": "Te regalo semillas de enredadera: ahora puedes plantarlas donde haya tierra fértil."
+      },
+      {
+        "quien": "mari",
+        "texto": "Dicen que en el lago de Pátzcuaro vive el último achoque... ¡necesita tu ayuda!"
+      }
+    ],
+    "mari_bosque_vivo": [
+      {
+        "quien": "mari",
+        "texto": "Mira cuántas mariposas llegaron este invierno. ¡El bosque está vivo otra vez!"
       }
     ]
   }

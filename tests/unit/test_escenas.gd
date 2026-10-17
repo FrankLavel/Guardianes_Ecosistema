@@ -7,6 +7,8 @@ const MenuPrincipal = preload("res://scripts/menu_principal.gd")
 const Opciones = preload("res://scripts/opciones.gd")
 const RUTAS_EXTRA := [
 	"res://scenes/valle/Valle.tscn",
+	"res://scenes/world/Nivel2.tscn",
+	"res://scenes/ui/Bitacora.tscn",
 	"res://scenes/menu/SeleccionPersonaje.tscn",
 	"res://scenes/ui/MenuPausa.tscn",
 	"res://scenes/ui/Dialogo.tscn",

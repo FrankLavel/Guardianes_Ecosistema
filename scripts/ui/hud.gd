@@ -1,6 +1,10 @@
 class_name HUD
 extends CanvasLayer
-## Interfaz del nivel: salud del río, basura recogida, mensajes educativos y ayuda de controles.
+## Interfaz del nivel: salud del ecosistema, avance, mensajes educativos y ayuda de controles.
+
+## Textos de cada zona (el río usa los de por defecto).
+@export var titulo_salud := "Salud del río"
+@export var formato_contador := "Basura recogida: %d / %d"
 
 @onready var barra_salud: ProgressBar = %BarraSalud
 @onready var etiqueta_basura: Label = %EtiquetaBasura
@@ -13,6 +17,7 @@ var _animacion_mensaje: Tween
 
 func _ready() -> void:
 	_mensaje.visible = false
+	%EtiquetaSalud.text = titulo_salud
 
 
 func actualizar(recogidas: int, total: int, salud := -1.0) -> void:
@@ -20,7 +25,7 @@ func actualizar(recogidas: int, total: int, salud := -1.0) -> void:
 		salud = 1.0 if total == 0 else float(recogidas) / total
 	var animacion := create_tween()
 	animacion.tween_property(barra_salud, "value", salud * 100.0, 0.4)
-	etiqueta_basura.text = "Basura recogida: %d / %d" % [recogidas, total]
+	etiqueta_basura.text = formato_contador % [recogidas, total]
 
 
 func mostrar_mensaje(titulo: String, texto: String, segundos := 4.0) -> void:

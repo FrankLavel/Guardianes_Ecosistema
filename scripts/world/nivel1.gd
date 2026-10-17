@@ -24,6 +24,7 @@ var nivel_terminado := false
 
 
 func _ready() -> void:
+	add_to_group(&"jugable")
 	Sonido.musica("rio")
 	_ajustar_camara()
 	_total_basura = basuras().size()
@@ -103,6 +104,8 @@ func _al_cambiar_salud(basura: Basura = null) -> void:
 		# Vuelven los animales: señal visible de que el ecosistema se recupera.
 		garza.visible = true
 		garza.play()
+		for especie in ["garza", "pez_rio", "acocil"]:
+			Bitacora.descubrir(especie)
 		hud.mostrar_mensaje("¡El río está limpio!",
 			"Los peces regresaron. Camina hasta el árbol al final del camino.", 6.0)
 	elif basura:

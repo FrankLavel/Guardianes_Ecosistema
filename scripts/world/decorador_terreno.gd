@@ -17,7 +17,7 @@ const TILE_PLATAFORMA := Vector2i(2, 0)
 ## Ancho (px de la textura) de los bordes izquierdo/derecho del suelo que no se repiten.
 @export var borde_suelo := 70
 ## Alto (px de la textura) del pasto, que no se estira.
-@export var alto_pasto := 120
+@export var alto_pasto := 195
 @export var textura_plataforma: Texture2D
 @export var borde_plataforma := 34
 ## El pasto sobresale un poco por encima de la colisión para que se vea natural.

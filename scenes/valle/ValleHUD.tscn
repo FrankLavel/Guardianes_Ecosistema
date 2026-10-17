@@ -79,4 +79,4 @@ offset_right = 1400.0
 offset_bottom = -24.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 26
-text = "Flechas / WASD: caminar     E: hablar y entrar     Esc: pausa"
+text = "Flechas / WASD: caminar     E: hablar y entrar     Tab: bitácora     Esc: pausa"
