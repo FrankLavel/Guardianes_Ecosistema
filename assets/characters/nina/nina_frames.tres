@@ -97,6 +97,18 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("c4")
+}, {
+"duration": 1.0,
+"texture": SubResource("c5")
+}, {
+"duration": 1.0,
 "texture": SubResource("c6")
 }, {
 "duration": 1.0,
@@ -104,7 +116,12 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c8")
+}],
+"loop": true,
+"name": &"caminar",
+"speed": 10.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("c9")
 }, {
@@ -116,12 +133,7 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c12")
-}],
-"loop": true,
-"name": &"caminar",
-"speed": 10.0
 }, {
-"frames": [{
 "duration": 1.0,
 "texture": SubResource("c13")
 }, {
@@ -130,18 +142,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c15")
-}, {
-"duration": 1.0,
-"texture": SubResource("c16")
-}, {
-"duration": 1.0,
-"texture": SubResource("c17")
-}, {
-"duration": 1.0,
-"texture": SubResource("c18")
-}, {
-"duration": 1.0,
-"texture": SubResource("c19")
 }],
 "loop": true,
 "name": &"correr",
@@ -149,7 +149,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c2")
+"texture": SubResource("c16")
 }],
 "loop": false,
 "name": &"saltar",
@@ -157,7 +157,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c3")
+"texture": SubResource("c17")
 }],
 "loop": false,
 "name": &"caer",
@@ -165,7 +165,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c4")
+"texture": SubResource("c18")
 }],
 "loop": false,
 "name": &"agachar",
@@ -173,7 +173,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c5")
+"texture": SubResource("c19")
 }],
 "loop": false,
 "name": &"interactuar",

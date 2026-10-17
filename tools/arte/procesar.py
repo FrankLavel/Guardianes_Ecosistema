@@ -99,24 +99,27 @@ def personaje_aereo(fuente: str, carpeta: str, nombre: str, idle: dict[str, int]
 
 def nina_plataformas() -> None:
     """Hoja lateral de la niña para los niveles de plataformas (mismo formato que la de Gara)."""
-    def cuadros_de(fuente: str) -> list[Image.Image]:
+    def cuadros_de(fuente: str, de_pie: int = 0) -> list[Image.Image]:
         rgba = quitar_fondo(cargar(fuente))
         cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
         # Cada hoja viene a otra escala: se lleva a la estatura del niño (~156 px de pie).
-        factor = 156 / cuadros[0].height
+        # `de_pie`: índice de un cuadro donde está parada derecha, para medirla.
+        factor = 156 / cuadros[de_pie].height
         return [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
 
-    # Hoja base (quieta, saltar, caer, agacharse, recoger) + hoja corregida de caminar y correr
-    # (en la base esas filas salieron con la ropa del niño). Índices 23-29: caminar, 30-36: correr.
-    cuadros = cuadros_de("nina_plataformas.jpg") + cuadros_de("nina_plataformas_correr.jpg")
+    # Hoja base (de ella solo se usa "quieta") + hojas corregidas, porque en la base varias poses
+    # salieron con la ropa del niño. Índices: 23-29 caminar, 30-36 correr (nina_plataformas_correr),
+    # 37-49 poses (nina_plataformas_poses: saltar, saltar, caer, de pie, agachar, recoger, ...).
+    cuadros = (cuadros_de("nina_plataformas.jpg") + cuadros_de("nina_plataformas_correr.jpg")
+        + cuadros_de("nina_plataformas_poses.jpg", de_pie=3))
     animaciones = {
             "idle": ([0, 1], 2.0, True),
             "caminar": ([23, 24, 25, 26, 27, 28, 29], 10.0, True),
             "correr": ([30, 31, 32, 33, 34, 35, 36], 12.0, True),
-            "saltar": ([16], 1.0, False),
-            "caer": ([18], 1.0, False),
-            "agachar": ([19], 1.0, False),
-            "interactuar": ([21], 1.0, False),
+            "saltar": ([37], 1.0, False),
+            "caer": ([39], 1.0, False),
+            "agachar": ([41], 1.0, False),
+            "interactuar": ([42], 1.0, False),
     }
     # Solo los cuadros que se usan (las filas viejas de caminar/correr quedan fuera del atlas).
     usados = sorted({i for indices, _, _ in animaciones.values() for i in indices})

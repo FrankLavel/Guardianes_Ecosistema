@@ -47,8 +47,9 @@ Revisado el 16 de octubre de 2026. ✅ listo para integrar · ⚠️ usable con 
 | Archivo | Contenido | Estado |
 |---|---|---|
 | `npc_aldeana_aerea.jpg` | Ahora es **la niña jugable** en el valle | ✅ |
-| `nina_plataformas.jpg` | La niña de lado: quieta, caminar, correr, saltar, caer, agacharse, recoger | ✅ Quieta, saltar, caer, agacharse y recoger (las filas de caminar/correr de esta hoja no se usan) |
+| `nina_plataformas.jpg` | La niña de lado: quieta, caminar, correr, saltar, caer, agacharse, recoger | ✅ Solo se usa "quieta"; las demás poses vienen de las hojas corregidas |
 | `nina_plataformas_correr.jpg` | La niña caminando y corriendo con falda y sandalias | ✅ |
+| `nina_plataformas_poses.jpg` | La niña saltando, cayendo, agachada y recogiendo, con falda | ✅ |
 
 ## Falta
 
