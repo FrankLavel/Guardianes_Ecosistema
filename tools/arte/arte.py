@@ -187,10 +187,13 @@ def construir_atlas(
     tres: Path,
     ruta_res: str,
     por_fila: int = 8,
+    anclar_torso: bool = False,
 ) -> None:
     """Atlas con celdas uniformes (pies abajo y centrados) + recurso SpriteFrames de Godot.
 
     `animaciones`: nombre -> (índices de `cuadros`, fps, repetir).
+    `anclar_torso`: centra cada cuadro por la cabeza/torso y no por su caja completa; así brazos
+    y piernas extendidos no hacen que el personaje "brinque" de lado entre cuadros.
     """
     cw, ch = celda
     filas = (len(cuadros) + por_fila - 1) // por_fila
@@ -199,7 +202,13 @@ def construir_atlas(
         if c.width > cw or c.height > ch:
             raise ValueError(f"El cuadro {i} ({c.size}) no cabe en la celda {celda}")
         ox, oy = (i % por_fila) * cw, (i // por_fila) * ch
-        atlas.alpha_composite(c, (ox + (cw - c.width) // 2, oy + ch - c.height))
+        x = (cw - c.width) // 2
+        if anclar_torso:
+            alfa = np.asarray(c)[: c.height // 2, :, 3] > 0
+            xs = np.nonzero(alfa)[1]
+            if len(xs):
+                x = int(np.clip(cw // 2 - round(xs.mean()), 0, cw - c.width))
+        atlas.alpha_composite(c, (ox + x, oy + ch - c.height))
     guardar(atlas, png)
 
     subs = []

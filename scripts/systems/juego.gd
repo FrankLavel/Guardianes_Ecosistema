@@ -22,7 +22,7 @@ const PERSONAJES := {
 	},
 	"nina": {
 		"aereo": "res://assets/characters/nina/aerea/nina_aerea_frames.tres",
-		"plataformas": "",
+		"plataformas": "res://assets/characters/nina/nina_frames.tres",
 		"retrato": "res://assets/characters/nina/nina_retrato.png",
 		"nombre_sugerido": "",
 	},

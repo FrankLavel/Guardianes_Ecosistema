@@ -42,10 +42,18 @@ Revisado el 16 de octubre de 2026. ✅ listo para integrar · ⚠️ usable con 
 
 **Decisión pendiente — Don Chucho:** hay dos diseños. Recomendado: quedarse con el **nuevo** (retrato + hablando, que ya coinciden entre sí) y regenerar solo la pose de pie de lado con ese diseño (adjuntando `don_chucho_retrato.jpg`). Si no, se usa el nuevo diseño también para estar de pie.
 
+## Tercera tanda (16 oct)
+
+| Archivo | Contenido | Estado |
+|---|---|---|
+| `npc_aldeana_aerea.jpg` | Ahora es **la niña jugable** en el valle | ✅ |
+| `nina_plataformas.jpg` | La niña de lado: quieta, caminar, correr, saltar, caer, agacharse, recoger | ⚠️ En **caminar y correr** trae el overol y las botas del niño en vez de su falda y sandalias; regenerar esas dos filas |
+
 ## Falta
 
 Del sprint 1 ya no falta nada imprescindible. Solo, si se quiere uniformidad:
 - 🟡 Don Chucho de pie (de lado) con el diseño nuevo.
+- 🔴 Filas de caminar y correr de la niña con su falda y sandalias.
 
 ## Notas para la próxima tanda
 - La mayoría vino como **JPG**; si la herramienta permite PNG, mejor. Con JPG también funciona.

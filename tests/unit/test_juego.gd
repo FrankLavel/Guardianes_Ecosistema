@@ -86,3 +86,20 @@ func test_cada_personaje_tiene_su_arte() -> void:
 		var cuadros: SpriteFrames = load(datos["aereo"])
 		for anim in ["idle_abajo", "idle_arriba", "idle_izquierda", "caminar_abajo", "caminar_arriba", "caminar_izquierda"]:
 			assert_true(cuadros.has_animation(anim), "%s: falta %s" % [clave, anim])
+
+
+func test_cada_personaje_tiene_arte_de_plataformas_completo() -> void:
+	for clave in Juego.PERSONAJES:
+		var ruta: String = Juego.PERSONAJES[clave]["plataformas"]
+		assert_true(ResourceLoader.exists(ruta), "Falta arte de plataformas de %s" % clave)
+		var cuadros: SpriteFrames = load(ruta)
+		for anim in ["idle", "caminar", "correr", "saltar", "caer", "agachar", "interactuar"]:
+			assert_true(cuadros.has_animation(anim), "%s: falta %s" % [clave, anim])
+			for i in cuadros.get_frame_count(anim):
+				var img := cuadros.get_frame_texture(anim, i).get_image()
+				var tocado := false
+				for x in img.get_width():
+					tocado = tocado or img.get_pixel(x, 0).a > 0.0
+				for y in img.get_height():
+					tocado = tocado or img.get_pixel(0, y).a > 0.0 or img.get_pixel(img.get_width() - 1, y).a > 0.0
+				assert_false(tocado, "%s: cuadro %d de %s está recortado" % [clave, i, anim])

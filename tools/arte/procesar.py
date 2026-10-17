@@ -97,6 +97,34 @@ def personaje_aereo(fuente: str, carpeta: str, nombre: str, idle: dict[str, int]
     guardar(cabeza.resize((256, 256), Image.Resampling.LANCZOS), ASSETS / "characters" / carpeta / f"{nombre}_retrato.png")
 
 
+def nina_plataformas() -> None:
+    """Hoja lateral de la niña para los niveles de plataformas (mismo formato que la de Gara)."""
+    rgba = quitar_fondo(cargar("nina_plataformas.jpg"))
+    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    # Misma estatura que el niño en su atlas (~156 px de pie).
+    factor = 156 / cuadros[0].height
+    cuadros = [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
+    construir_atlas(
+        cuadros,
+        {
+            "idle": ([0, 1], 2.0, True),
+            "caminar": ([2, 3, 4, 5, 6, 7, 8], 10.0, True),
+            "correr": ([9, 10, 11, 12, 13, 14, 15], 12.0, True),
+            "saltar": ([16], 1.0, False),
+            "caer": ([18], 1.0, False),
+            "agachar": ([19], 1.0, False),
+            "interactuar": ([21], 1.0, False),
+        },
+        # Celdas más anchas que las de Gara: el cuadro de caída es ancho y, centrado por el torso,
+        # tocaría el borde con 160 px.
+        (200, 176),
+        ASSETS / "characters/nina/nina_atlas.png",
+        ASSETS / "characters/nina/nina_frames.tres",
+        "res://assets/characters/nina/nina_atlas.png",
+        anclar_torso=True,
+    )
+
+
 def guardianes() -> None:
     personaje_aereo(
         "gara_aerea.jpg", "gara", "gara",
@@ -110,6 +138,7 @@ def guardianes() -> None:
         caminar={"abajo": [1, 3, 5, 7], "izquierda": [8, 12, 16, 20], "arriba": [27, 28, 29, 31]},
         fps_arriba=8.0,
     )
+    nina_plataformas()
 
 
 # ---------------------------------------------------------------- Valle (mapa aéreo)

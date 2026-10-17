@@ -1,0 +1,193 @@
+[gd_resource type="SpriteFrames" load_steps=25 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/nina/nina_atlas.png" id="1_atlas"]
+
+[sub_resource type="AtlasTexture" id="c0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 0, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(200, 0, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(400, 0, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c3"]
+atlas = ExtResource("1_atlas")
+region = Rect2(600, 0, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c4"]
+atlas = ExtResource("1_atlas")
+region = Rect2(800, 0, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c5"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1000, 0, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c6"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1200, 0, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c7"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1400, 0, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c8"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 176, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c9"]
+atlas = ExtResource("1_atlas")
+region = Rect2(200, 176, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c10"]
+atlas = ExtResource("1_atlas")
+region = Rect2(400, 176, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c11"]
+atlas = ExtResource("1_atlas")
+region = Rect2(600, 176, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c12"]
+atlas = ExtResource("1_atlas")
+region = Rect2(800, 176, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c13"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1000, 176, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c14"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1200, 176, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c15"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1400, 176, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c16"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 352, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c17"]
+atlas = ExtResource("1_atlas")
+region = Rect2(200, 352, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c18"]
+atlas = ExtResource("1_atlas")
+region = Rect2(400, 352, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c19"]
+atlas = ExtResource("1_atlas")
+region = Rect2(600, 352, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c20"]
+atlas = ExtResource("1_atlas")
+region = Rect2(800, 352, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c21"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1000, 352, 200, 176)
+
+[sub_resource type="AtlasTexture" id="c22"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1200, 352, 200, 176)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c0")
+}, {
+"duration": 1.0,
+"texture": SubResource("c1")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("c4")
+}, {
+"duration": 1.0,
+"texture": SubResource("c5")
+}, {
+"duration": 1.0,
+"texture": SubResource("c6")
+}, {
+"duration": 1.0,
+"texture": SubResource("c7")
+}, {
+"duration": 1.0,
+"texture": SubResource("c8")
+}],
+"loop": true,
+"name": &"caminar",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c9")
+}, {
+"duration": 1.0,
+"texture": SubResource("c10")
+}, {
+"duration": 1.0,
+"texture": SubResource("c11")
+}, {
+"duration": 1.0,
+"texture": SubResource("c12")
+}, {
+"duration": 1.0,
+"texture": SubResource("c13")
+}, {
+"duration": 1.0,
+"texture": SubResource("c14")
+}, {
+"duration": 1.0,
+"texture": SubResource("c15")
+}],
+"loop": true,
+"name": &"correr",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c16")
+}],
+"loop": false,
+"name": &"saltar",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c18")
+}],
+"loop": false,
+"name": &"caer",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c19")
+}],
+"loop": false,
+"name": &"agachar",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c21")
+}],
+"loop": false,
+"name": &"interactuar",
+"speed": 1.0
+}]
