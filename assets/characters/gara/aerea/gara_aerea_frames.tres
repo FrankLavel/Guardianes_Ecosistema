@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=20 format=3]
+[gd_resource type="SpriteFrames" load_steps=19 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/characters/gara/aerea/gara_aerea_atlas.png" id="1_atlas"]
 
@@ -70,10 +70,6 @@ region = Rect2(896, 208, 128, 208)
 atlas = ExtResource("1_atlas")
 region = Rect2(0, 416, 128, 208)
 
-[sub_resource type="AtlasTexture" id="c17"]
-atlas = ExtResource("1_atlas")
-region = Rect2(128, 416, 128, 208)
-
 [resource]
 animations = [{
 "frames": [{
@@ -102,6 +98,9 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("c0")
+}, {
+"duration": 1.0,
 "texture": SubResource("c3")
 }, {
 "duration": 1.0,
@@ -109,9 +108,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c5")
-}, {
-"duration": 1.0,
-"texture": SubResource("c6")
 }],
 "loop": true,
 "name": &"caminar_abajo",
@@ -122,19 +118,22 @@ animations = [{
 "texture": SubResource("c2")
 }, {
 "duration": 1.0,
+"texture": SubResource("c6")
+}, {
+"duration": 1.0,
 "texture": SubResource("c7")
 }, {
 "duration": 1.0,
 "texture": SubResource("c8")
-}, {
-"duration": 1.0,
-"texture": SubResource("c9")
 }],
 "loop": true,
 "name": &"caminar_izquierda",
 "speed": 8.0
 }, {
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("c9")
+}, {
 "duration": 1.0,
 "texture": SubResource("c10")
 }, {
@@ -155,9 +154,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c16")
-}, {
-"duration": 1.0,
-"texture": SubResource("c17")
 }],
 "loop": true,
 "name": &"caminar_arriba",

@@ -139,7 +139,7 @@ def guardianes() -> None:
     personaje_aereo(
         "gara_aerea.jpg", "gara", "gara",
         idle={"abajo": 0, "arriba": 11, "izquierda": 4},
-        caminar={"abajo": [8, 9, 10, 13], "izquierda": [4, 5, 6, 12], "arriba": [16, 17, 18, 19, 20, 21, 22, 23]},
+        caminar={"abajo": [0, 1, 2, 3], "izquierda": [4, 5, 6, 12], "arriba": [16, 17, 18, 19, 20, 21, 22, 23]},
         fps_arriba=12.0,
     )
     personaje_aereo(
