@@ -99,22 +99,32 @@ def personaje_aereo(fuente: str, carpeta: str, nombre: str, idle: dict[str, int]
 
 def nina_plataformas() -> None:
     """Hoja lateral de la niña para los niveles de plataformas (mismo formato que la de Gara)."""
-    rgba = quitar_fondo(cargar("nina_plataformas.jpg"))
-    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
-    # Misma estatura que el niño en su atlas (~156 px de pie).
-    factor = 156 / cuadros[0].height
-    cuadros = [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
-    construir_atlas(
-        cuadros,
-        {
+    def cuadros_de(fuente: str) -> list[Image.Image]:
+        rgba = quitar_fondo(cargar(fuente))
+        cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+        # Cada hoja viene a otra escala: se lleva a la estatura del niño (~156 px de pie).
+        factor = 156 / cuadros[0].height
+        return [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
+
+    # Hoja base (quieta, saltar, caer, agacharse, recoger) + hoja corregida de caminar y correr
+    # (en la base esas filas salieron con la ropa del niño). Índices 23-29: caminar, 30-36: correr.
+    cuadros = cuadros_de("nina_plataformas.jpg") + cuadros_de("nina_plataformas_correr.jpg")
+    animaciones = {
             "idle": ([0, 1], 2.0, True),
-            "caminar": ([2, 3, 4, 5, 6, 7, 8], 10.0, True),
-            "correr": ([9, 10, 11, 12, 13, 14, 15], 12.0, True),
+            "caminar": ([23, 24, 25, 26, 27, 28, 29], 10.0, True),
+            "correr": ([30, 31, 32, 33, 34, 35, 36], 12.0, True),
             "saltar": ([16], 1.0, False),
             "caer": ([18], 1.0, False),
             "agachar": ([19], 1.0, False),
             "interactuar": ([21], 1.0, False),
-        },
+    }
+    # Solo los cuadros que se usan (las filas viejas de caminar/correr quedan fuera del atlas).
+    usados = sorted({i for indices, _, _ in animaciones.values() for i in indices})
+    nuevo = {orig: n for n, orig in enumerate(usados)}
+    animaciones = {k: ([nuevo[i] for i in v[0]], v[1], v[2]) for k, v in animaciones.items()}
+    construir_atlas(
+        [cuadros[i] for i in usados],
+        animaciones,
         # Celdas más anchas que las de Gara: el cuadro de caída es ancho y, centrado por el torso,
         # tocaría el borde con 160 px.
         (200, 176),

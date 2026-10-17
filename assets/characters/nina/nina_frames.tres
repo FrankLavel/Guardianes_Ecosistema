@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=25 format=3]
+[gd_resource type="SpriteFrames" load_steps=22 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/characters/nina/nina_atlas.png" id="1_atlas"]
 
@@ -82,18 +82,6 @@ region = Rect2(400, 352, 200, 176)
 atlas = ExtResource("1_atlas")
 region = Rect2(600, 352, 200, 176)
 
-[sub_resource type="AtlasTexture" id="c20"]
-atlas = ExtResource("1_atlas")
-region = Rect2(800, 352, 200, 176)
-
-[sub_resource type="AtlasTexture" id="c21"]
-atlas = ExtResource("1_atlas")
-region = Rect2(1000, 352, 200, 176)
-
-[sub_resource type="AtlasTexture" id="c22"]
-atlas = ExtResource("1_atlas")
-region = Rect2(1200, 352, 200, 176)
-
 [resource]
 animations = [{
 "frames": [{
@@ -109,18 +97,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c2")
-}, {
-"duration": 1.0,
-"texture": SubResource("c3")
-}, {
-"duration": 1.0,
-"texture": SubResource("c4")
-}, {
-"duration": 1.0,
-"texture": SubResource("c5")
-}, {
-"duration": 1.0,
 "texture": SubResource("c6")
 }, {
 "duration": 1.0,
@@ -128,12 +104,7 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c8")
-}],
-"loop": true,
-"name": &"caminar",
-"speed": 10.0
 }, {
-"frames": [{
 "duration": 1.0,
 "texture": SubResource("c9")
 }, {
@@ -145,7 +116,12 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c12")
+}],
+"loop": true,
+"name": &"caminar",
+"speed": 10.0
 }, {
+"frames": [{
 "duration": 1.0,
 "texture": SubResource("c13")
 }, {
@@ -154,6 +130,18 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c15")
+}, {
+"duration": 1.0,
+"texture": SubResource("c16")
+}, {
+"duration": 1.0,
+"texture": SubResource("c17")
+}, {
+"duration": 1.0,
+"texture": SubResource("c18")
+}, {
+"duration": 1.0,
+"texture": SubResource("c19")
 }],
 "loop": true,
 "name": &"correr",
@@ -161,7 +149,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c16")
+"texture": SubResource("c2")
 }],
 "loop": false,
 "name": &"saltar",
@@ -169,7 +157,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c18")
+"texture": SubResource("c3")
 }],
 "loop": false,
 "name": &"caer",
@@ -177,7 +165,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c19")
+"texture": SubResource("c4")
 }],
 "loop": false,
 "name": &"agachar",
@@ -185,7 +173,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c21")
+"texture": SubResource("c5")
 }],
 "loop": false,
 "name": &"interactuar",
