@@ -4,18 +4,18 @@
       "nombre": "Don Chucho",
       "retrato": "res://assets/characters/don_chucho/don_chucho_retrato.png"
     },
-    "gara": {
-      "nombre": "Gara",
+    "jugador": {
+      "nombre": "{nombre}",
       "retrato": ""
     }
   },
   "dialogos": {
     "don_chucho_inicio": [
-      {"quien": "don_chucho", "texto": "¡Hola, muchacha! Soy Don Chucho. Toda mi vida he pescado en el río Cupatitzio."},
+      {"quien": "don_chucho", "texto": "¡Hola, {muchacho}! Soy Don Chucho. Toda mi vida he pescado en el río Cupatitzio."},
       {"quien": "don_chucho", "texto": "Pero ya casi no hay peces... El agua está turbia y huele feo."},
-      {"quien": "gara", "texto": "¿Qué le pasó al río, Don Chucho?"},
+      {"quien": "jugador", "texto": "¿Qué le pasó al río, Don Chucho?"},
       {"quien": "don_chucho", "texto": "La gente tira basura en la orilla, y una tubería vieja suelta agua sucia."},
-      {"quien": "don_chucho", "texto": "Tú eres la nueva guardiana, ¿verdad? Entra por el arco de piedra y ayuda al río."}
+      {"quien": "don_chucho", "texto": "Tú eres {el} {nuevo} {guardian}, ¿verdad? Entra por el arco de piedra y ayuda al río."}
     ],
     "don_chucho_repetir": [
       {"quien": "don_chucho", "texto": "El arco de piedra te lleva al río. ¡Recoge la basura y el agua se aclarará!"}
@@ -23,13 +23,13 @@
     "don_chucho_rio_limpio": [
       {"quien": "don_chucho", "texto": "¡Mira nada más! Volvieron los peces y el agua brilla otra vez."},
       {"quien": "don_chucho", "texto": "El agua limpia es vida: para los peces, las plantas, las aves... y para nosotros."},
-      {"quien": "don_chucho", "texto": "Dicen que en el bosque de oyamel también necesitan ayuda. ¡Ve, guardiana!"}
+      {"quien": "don_chucho", "texto": "Dicen que en el bosque de oyamel también necesitan ayuda. ¡Ve, {guardian}!"}
     ],
     "entrada_bloqueada_bosque": [
-      {"quien": "gara", "texto": "El camino al bosque está lleno de humo. Primero debo ayudar al río."}
+      {"quien": "jugador", "texto": "El camino al bosque está lleno de humo. Primero debo ayudar al río."}
     ],
     "entrada_bloqueada_lago": [
-      {"quien": "gara", "texto": "El lago está muy lejos todavía. Primero debo ayudar al bosque."}
+      {"quien": "jugador", "texto": "El lago está muy lejos todavía. Primero debo ayudar al bosque."}
     ]
   }
 }

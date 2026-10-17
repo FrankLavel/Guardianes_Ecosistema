@@ -105,3 +105,38 @@ func test_menu_de_pausa_pausa_y_reanuda() -> void:
 	assert_true(estaba_pausado)
 	assert_false(get_tree().paused)
 	assert_false(pausa.get_node("Panel/VBox/BtnValle").visible, "En el valle no se ofrece volver al valle")
+
+
+func _presionar_e() -> void:
+	var evento := InputEventAction.new()
+	evento.action = &"interactuar"
+	evento.pressed = true
+	Input.parse_input_event(evento)
+	await wait_physics_frames(1)
+	evento = evento.duplicate()
+	evento.pressed = false
+	Input.parse_input_event(evento)
+	await wait_physics_frames(1)
+
+
+func test_cerrar_el_dialogo_con_e_no_lo_vuelve_a_abrir() -> void:
+	# Regresión: la E que cerraba el diálogo de Don Chucho lo abría otra vez, en bucle.
+	var gara: GaraAerea = valle.gara
+	gara.leer_entrada_del_jugador = true
+	var chucho: PersonajeValle = valle.get_node("Objetos/DonChucho")
+	gara.global_position = chucho.global_position + Vector2(0, 50)
+	gara.reset_physics_interpolation()
+	await wait_physics_frames(5)
+	await _presionar_e()
+	assert_true(Dialogo.activo, "La E abre el diálogo")
+	var lineas := Dialogo.lineas_de(Dialogo.id_actual).size()
+	for i in lineas * 2:
+		await _presionar_e()
+	await wait_physics_frames(15)
+	assert_false(Dialogo.activo, "El diálogo se cerró y no se volvió a abrir")
+
+
+func test_la_nina_camina_con_su_propio_arte() -> void:
+	Juego.nueva_partida(RANURA, "nina", "")
+	var otro: Node2D = add_child_autofree(ESCENA_VALLE.instantiate())
+	assert_eq(otro.gara.sprite.sprite_frames.resource_path, Juego.PERSONAJES["nina"]["aereo"])

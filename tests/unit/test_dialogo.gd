@@ -28,3 +28,24 @@ func test_recorre_las_lineas_y_termina() -> void:
 	assert_false(Juego.entrada_bloqueada)
 	assert_signal_emitted_with_parameters(Dialogo, "terminado", ["don_chucho_inicio"])
 	assert_has(Juego.dialogos_vistos, "don_chucho_inicio")
+
+
+func test_ningun_texto_queda_con_marcadores_sin_reemplazar() -> void:
+	for genero in ["nino", "nina"]:
+		Juego.nueva_partida(98, genero, "")
+		for id in Dialogo._datos["dialogos"]:
+			for linea in Dialogo.lineas_de(id):
+				var texto := Juego.reemplazar(linea["texto"])
+				assert_false(texto.contains("{"), "[%s] %s: %s" % [genero, id, texto])
+	Juego.nueva_partida()
+
+
+func test_don_chucho_le_habla_a_una_nina_en_femenino() -> void:
+	Juego.nueva_partida(98, "nina", "")
+	Dialogo.mostrar("don_chucho_inicio")
+	Dialogo.avanzar()
+	assert_string_contains(Dialogo.get_node("%Texto").text, "muchacha")
+	for i in 20:
+		Dialogo.avanzar()
+	await wait_for_signal(Dialogo.terminado, 1.0)
+	Juego.nueva_partida()

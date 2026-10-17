@@ -74,10 +74,11 @@ layout_mode = 2
 theme_override_constants/separation = 28
 
 [node name="Titulo" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7843, 0.902, 0.5294, 1)
 theme_override_font_sizes/font_size = 64
-text = "¡Lo lograste, guardián!"
+text = "¡Lo lograste, {nombre}!"
 horizontal_alignment = 1
 
 [node name="Subtitulo" type="Label" parent="Panel/VBox"]
@@ -88,12 +89,13 @@ horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="Aprendizaje" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "• Un ecosistema es un lugar donde los seres vivos (peces, plantas, aves) se relacionan con el agua, el suelo y el aire.
 • La basura en el agua daña a los peces, a las plantas y a todos los que la beben.
 • Cuando el agua está limpia, los seres vivos pueden volver a vivir ahí.
-• Tú también eres guardián: tira la basura en su lugar y recicla."
+• Tú también eres {guardian}: tira la basura en su lugar y recicla."
 autowrap_mode = 3
 
 [node name="BtnMenu" type="Button" parent="Panel/VBox"]

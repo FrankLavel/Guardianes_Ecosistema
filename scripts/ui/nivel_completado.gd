@@ -17,6 +17,8 @@ func _ready() -> void:
 
 func mostrar() -> void:
 	Juego.completar_zona(zona)
+	for etiqueta in [%Titulo, %Aprendizaje]:
+		etiqueta.text = Juego.reemplazar(etiqueta.text)
 	visible = true
 	get_tree().paused = true
 	_boton_menu.grab_focus()

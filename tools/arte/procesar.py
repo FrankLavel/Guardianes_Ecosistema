@@ -67,27 +67,48 @@ def rellenar_magenta(img: np.ndarray) -> np.ndarray:
     return img.astype(np.uint8)
 
 
-# ---------------------------------------------------------------- Gara en el valle
-def gara_aerea() -> None:
-    rgba = quitar_fondo(cargar("gara_aerea.jpg"))
+# ---------------------------------------------------------------- Guardianes en el valle
+def personaje_aereo(fuente: str, carpeta: str, nombre: str, idle: dict[str, int], caminar: dict[str, list[int]], fps_arriba: float) -> None:
+    """Atlas de un personaje del mapa aéreo + retrato (cabeza) para los diálogos.
+
+    `idle`/`caminar` usan los índices de los cuadros tal como los numera separar_objetos.
+    La dirección "derecha" no se exporta: el juego voltea "izquierda".
+    """
+    rgba = quitar_fondo(cargar(fuente))
     cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
-    usados = {"abajo": [8, 9, 10, 13], "izquierda": [4, 5, 6, 12], "arriba": [16, 17, 18, 19, 20, 21, 22, 23]}
-    orden = [0, 11] + [i for lista in usados.values() for i in lista]
-    lista = [cuadros[i] for i in orden]
+    orden: list[int] = []
+    for i in list(idle.values()) + [i for lista in caminar.values() for i in lista]:
+        if i not in orden:
+            orden.append(i)
     pos = {orig: n for n, orig in enumerate(orden)}
-    anims = {
-        "idle_abajo": ([pos[0]], 1.0, True),
-        "idle_arriba": ([pos[11]], 1.0, True),
-        "idle_izquierda": ([pos[4]], 1.0, True),
-        "caminar_abajo": ([pos[i] for i in usados["abajo"]], 8.0, True),
-        "caminar_izquierda": ([pos[i] for i in usados["izquierda"]], 8.0, True),
-        "caminar_arriba": ([pos[i] for i in usados["arriba"]], 12.0, True),
-    }
+    anims = {f"idle_{d}": ([pos[i]], 1.0, True) for d, i in idle.items()}
+    for d, lista in caminar.items():
+        anims[f"caminar_{d}"] = ([pos[i] for i in lista], fps_arriba if d == "arriba" else 8.0, True)
+    base = ASSETS / "characters" / carpeta / "aerea"
     construir_atlas(
-        lista, anims, (128, 208),
-        ASSETS / "characters/gara/aerea/gara_aerea_atlas.png",
-        ASSETS / "characters/gara/aerea/gara_aerea_frames.tres",
-        "res://assets/characters/gara/aerea/gara_aerea_atlas.png",
+        [cuadros[i] for i in orden], anims, (128, 208),
+        base / f"{nombre}_aerea_atlas.png", base / f"{nombre}_aerea_frames.tres",
+        f"res://assets/characters/{carpeta}/aerea/{nombre}_aerea_atlas.png",
+    )
+    # Retrato: la cabeza del cuadro de frente, en un cuadrado.
+    frente = cuadros[idle["abajo"]]
+    lado = int(frente.width * 1.05)
+    cabeza = frente.crop(((frente.width - lado) // 2, 0, (frente.width + lado) // 2, lado))
+    guardar(cabeza.resize((256, 256), Image.Resampling.LANCZOS), ASSETS / "characters" / carpeta / f"{nombre}_retrato.png")
+
+
+def guardianes() -> None:
+    personaje_aereo(
+        "gara_aerea.jpg", "gara", "gara",
+        idle={"abajo": 0, "arriba": 11, "izquierda": 4},
+        caminar={"abajo": [8, 9, 10, 13], "izquierda": [4, 5, 6, 12], "arriba": [16, 17, 18, 19, 20, 21, 22, 23]},
+        fps_arriba=12.0,
+    )
+    personaje_aereo(
+        "npc_aldeana_aerea.jpg", "nina", "nina",
+        idle={"abajo": 11, "arriba": 15, "izquierda": 0},
+        caminar={"abajo": [1, 3, 5, 7], "izquierda": [8, 12, 16, 20], "arriba": [27, 28, 29, 31]},
+        fps_arriba=8.0,
     )
 
 
@@ -235,7 +256,7 @@ def ui() -> None:
     guardar(recortar(rgba, logo), ASSETS / "ui" / "logo.png")
 
 
-GRUPOS = {"gara": gara_aerea, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui}
+GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

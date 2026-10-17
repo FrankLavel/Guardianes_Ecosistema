@@ -9,9 +9,40 @@ signal partida_cargada
 
 ## Orden de las zonas: cada una se desbloquea al completar la anterior.
 const ZONAS := ["rio", "bosque", "lago"]
-const VERSION_GUARDADO := 1
+const VERSION_GUARDADO := 2
+
+## Personajes que se pueden elegir. "plataformas" vacío = todavía no hay arte lateral propio
+## y se usa el del niño mientras tanto.
+const PERSONAJES := {
+	"nino": {
+		"aereo": "res://assets/characters/gara/aerea/gara_aerea_frames.tres",
+		"plataformas": "res://assets/characters/gara/gara_frames.tres",
+		"retrato": "res://assets/characters/gara/gara_retrato.png",
+		"nombre_sugerido": "Gara",
+	},
+	"nina": {
+		"aereo": "res://assets/characters/nina/aerea/nina_aerea_frames.tres",
+		"plataformas": "",
+		"retrato": "res://assets/characters/nina/nina_retrato.png",
+		"nombre_sugerido": "",
+	},
+}
+
+## Palabras que cambian según el personaje elegido. En los textos se escriben entre llaves:
+## "¡Gracias, {guardian}!" -> "¡Gracias, guardián!" / "¡Gracias, guardiana!"
+const PALABRAS := {
+	"guardian": ["guardián", "guardiana"],
+	"Guardian": ["Guardián", "Guardiana"],
+	"muchacho": ["muchacho", "muchacha"],
+	"el": ["el", "la"],
+	"nuevo": ["nuevo", "nueva"],
+	"o": ["o", "a"],
+}
 
 var ranura := 1
+## "nino" o "nina".
+var genero := "nino"
+var nombre := ""
 var zonas_completadas: Array[String] = []
 var especies_descubiertas: Array[String] = []
 var dialogos_vistos: Array[String] = []
@@ -23,13 +54,34 @@ var tiene_posicion_valle := false
 var entrada_bloqueada := false
 
 
-func nueva_partida(nueva_ranura := 1) -> void:
+func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := "") -> void:
 	ranura = nueva_ranura
+	genero = nuevo_genero if nuevo_genero in PERSONAJES else "nino"
+	nombre = nuevo_nombre.strip_edges()
 	zonas_completadas.clear()
 	especies_descubiertas.clear()
 	dialogos_vistos.clear()
 	tiene_posicion_valle = false
 	posicion_valle = Vector2.ZERO
+
+
+func datos_personaje() -> Dictionary:
+	return PERSONAJES[genero]
+
+
+## Nombre que escribió el jugador o, si lo dejó vacío, "Guardián"/"Guardiana".
+func nombre_jugador() -> String:
+	return nombre if not nombre.is_empty() else reemplazar("{Guardian}")
+
+
+## Sustituye {nombre} y las palabras de PALABRAS según el personaje elegido.
+func reemplazar(texto: String) -> String:
+	var indice := 0 if genero == "nino" else 1
+	for clave in PALABRAS:
+		texto = texto.replace("{%s}" % clave, PALABRAS[clave][indice])
+	if texto.contains("{nombre}"):
+		texto = texto.replace("{nombre}", nombre_jugador())
+	return texto
 
 
 func zona_desbloqueada(zona: String) -> bool:
@@ -79,6 +131,8 @@ static func existe_partida(numero := 1) -> bool:
 func a_diccionario() -> Dictionary:
 	return {
 		"version": VERSION_GUARDADO,
+		"genero": genero,
+		"nombre": nombre,
 		"zonas_completadas": zonas_completadas,
 		"especies_descubiertas": especies_descubiertas,
 		"dialogos_vistos": dialogos_vistos,
@@ -87,6 +141,10 @@ func a_diccionario() -> Dictionary:
 
 
 func desde_diccionario(datos: Dictionary) -> void:
+	genero = datos.get("genero", "nino")
+	if genero not in PERSONAJES:
+		genero = "nino"
+	nombre = datos.get("nombre", "")
 	zonas_completadas.assign(datos.get("zonas_completadas", []))
 	especies_descubiertas.assign(datos.get("especies_descubiertas", []))
 	dialogos_vistos.assign(datos.get("dialogos_vistos", []))

@@ -10,7 +10,9 @@
 
 El **Valle de Tzintzun**, inspirado en la región lacustre de Michoacán, es el último ecosistema sano de la zona… hasta ahora. Una fábrica abandonada contaminó el río, se taló el bosque de oyamel y el lago donde vive el **achoque** (ajolote de Pátzcuaro) se está enfermando.
 
-**Gara**, la nueva guardiana, debe recorrer el valle, entender qué le pasó a cada lugar y **restaurarlo** resolviendo problemas reales: filtrar agua, cerrar fuentes de contaminación, reforestar con árboles nativos y reconstruir la cadena alimenticia.
+El jugador es **el nuevo guardián o la nueva guardiana** del valle: al empezar elige **niño o niña** y escribe su nombre. Debe recorrer el valle, entender qué le pasó a cada lugar y **restaurarlo** resolviendo problemas reales: filtrar agua, cerrar fuentes de contaminación, reforestar con árboles nativos y reconstruir la cadena alimenticia.
+
+> Los textos nunca suponen el género: se escriben con marcadores (`{guardian}`, `{muchacho}`, `{el}`, `{nuevo}`, `{nombre}`) que el juego cambia según el personaje elegido.
 
 **Lema de diseño:** *el jugador no responde preguntas: arregla el ecosistema usando lo que aprende.*
 
@@ -43,7 +45,7 @@ Menú principal
 | | Mapa aéreo (Valle) | Niveles de plataformas |
 |---|---|---|
 | Cámara | Desde arriba (3/4) | Lateral |
-| Gara | Camina en 4 direcciones | Corre, salta, interactúa |
+| Personaje (niño o niña) | Camina en 4 direcciones | Corre, salta, interactúa |
 | Se hace | Hablar con personajes, puzzles de lógica, encontrar objetos, entrar a zonas | Recorrido con obstáculos, rescates, puzzles físicos |
 
 ---
@@ -92,7 +94,7 @@ Cajas de texto cortas (máx. 2 líneas, lenguaje de 8–9 años), retrato del pe
 
 | Parte | Contenido |
 |---|---|
-| Nivel de plataformas | Subir la montaña usando enredaderas que Gara planta; apagar una fogata mal apagada; rescatar a un venado atorado. |
+| Nivel de plataformas | Subir la montaña usando enredaderas que el personaje planta; apagar una fogata mal apagada; rescatar a un venado atorado. |
 | **Puzzle 3 — Reforestar** | Elegir el árbol correcto para cada suelo/altura (oyamel arriba, pino-encino en medio) y plantarlos. |
 | **Puzzle 4 — ¿Quién vive aquí?** | Llevar a cada animal a su hábitat del bosque (copa, tronco, suelo). |
 | Recompensa | Habilidad **plantar enredaderas** · fichas: mariposa monarca, oyamel, venado cola blanca, pájaro carpintero. |
@@ -113,7 +115,7 @@ Cajas de texto cortas (máx. 2 líneas, lenguaje de 8–9 años), retrato del pe
 **Aprende:** todo en el ecosistema está conectado; separar residuos protege el agua.
 
 ### Final — El Corazón del Valle
-Todas las zonas restauradas. Gara lleva los huevos de achoque al lago limpio; secuencia final con el valle completamente vivo, resumen de lo aprendido y créditos.
+Todas las zonas restauradas. El guardián o la guardiana lleva los huevos de achoque al lago limpio; secuencia final con el valle completamente vivo, resumen de lo aprendido y créditos.
 
 ---
 
@@ -132,7 +134,7 @@ Todos los textos educativos viven en `data/` (JSON) para que el equipo y docente
 
 ## 6. Arte y audio
 
-- **Estilo:** pixel art de alta definición, igual que Gara (contornos oscuros, sombreado suave, colores naturales vivos).
+- **Estilo:** pixel art de alta definición, igual que los personajes (niño y niña) (contornos oscuros, sombreado suave, colores naturales vivos).
 - **Origen:** generado con IA por el equipo siguiendo `docs/arte/GUIA_ARTE.md`; integración y limpieza en el proyecto.
 - **Efectos en Godot (sin arte extra):** fondos con paralaje (profundidad), shader de agua con reflejos y ondas, partículas (hojas, polvo, chispas de restauración), iluminación 2D, transición gris → color al restaurar, temblores y "juice" en interacciones.
 - **Audio:** música por zona (tranquila / misterio / triunfo) y efectos (pasos, salto, agua, recoger, puzzle resuelto). Fuente: bibliotecas con licencia libre (CC0) — se documenta la licencia de cada archivo en `assets/audio/CREDITOS.md`.
@@ -159,7 +161,7 @@ La versión **1.0.0** está completa cuando:
 
 | Sprint | Fechas | Programación | Arte (equipo, con IA) |
 |---|---|---|---|
-| **1** | 14 – 27 oct | Mapa aéreo (movimiento 4 direcciones, colisiones, entradas a zonas), transiciones, estado de partida y guardado, diálogos, pausa | Gara vista aérea, tileset del valle, tileset y fondos de la Zona 1, objetos Zona 1 |
+| **1** | 14 – 27 oct | Mapa aéreo (movimiento 4 direcciones, colisiones, entradas a zonas), transiciones, estado de partida y guardado, diálogos, pausa | Personajes en vista aérea (niño y niña), tileset del valle, tileset y fondos de la Zona 1, objetos Zona 1 |
 | **2** | 28 oct – 10 nov | **Zona 1 completa y pulida** (nivel nuevo, puzzles 1–2, nadar, efectos de agua, paralaje, audio) = *demo vertical* | Personajes y animales Zona 1, UI, arte Zona 2 |
 | **3** | 11 – 24 nov | Zona 2 completa (enredaderas, puzzles 3–4), bitácora | Arte Zona 3 |
 | **4** | 25 nov – 8 dic | Zona 3 + final + créditos (puzzles 5–6) | Arte del final, retoques |
@@ -170,4 +172,4 @@ Riesgo principal: **el arte**. Si una hoja de sprites llega tarde, se trabaja co
 ---
 
 ## 9. Qué se reutiliza de lo ya hecho
-Movimiento y animaciones de Gara, sistema de interacción, basura con datos educativos (`data/basura.json`), HUD de salud, puntos de control, pantalla de nivel completado, pruebas GUT y pipeline de CI/CD.
+Movimiento y animaciones del personaje, sistema de interacción, basura con datos educativos (`data/basura.json`), HUD de salud, puntos de control, pantalla de nivel completado, pruebas GUT y pipeline de CI/CD.

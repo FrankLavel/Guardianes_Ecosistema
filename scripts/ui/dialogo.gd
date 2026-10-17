@@ -73,7 +73,7 @@ func avanzar() -> void:
 		_mostrar_linea()
 
 
-func _unhandled_input(evento: InputEvent) -> void:
+func _input(evento: InputEvent) -> void:
 	if activo and (evento.is_action_pressed("interactuar") or evento.is_action_pressed("ui_accept")):
 		get_viewport().set_input_as_handled()
 		avanzar()
@@ -81,12 +81,15 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 func _mostrar_linea() -> void:
 	var linea: Dictionary = _lineas[_indice]
-	var personaje: Dictionary = _datos.get("personajes", {}).get(linea.get("quien", ""), {})
-	_nombre.text = personaje.get("nombre", "")
+	var quien: String = linea.get("quien", "")
+	var personaje: Dictionary = _datos.get("personajes", {}).get(quien, {})
+	_nombre.text = Juego.reemplazar(personaje.get("nombre", ""))
 	var ruta_retrato: String = personaje.get("retrato", "")
+	if quien == "jugador":
+		ruta_retrato = Juego.datos_personaje()["retrato"]
 	_marco_retrato.visible = not ruta_retrato.is_empty()
 	_retrato.texture = load(ruta_retrato) if not ruta_retrato.is_empty() else null
-	_texto.text = linea.get("texto", "")
+	_texto.text = Juego.reemplazar(linea.get("texto", ""))
 	_texto.visible_ratio = 0.0
 	_continuar.visible = false
 	_escribiendo = create_tween()

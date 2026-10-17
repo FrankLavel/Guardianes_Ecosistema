@@ -113,6 +113,19 @@ water drop icon, trash bag icon, open book icon (journal), pause icon, close ico
 
 ---
 
+### 3.6 Niña para los niveles de plataformas (pendiente)
+🔴 `nina_plataformas.png` — la niña (la de `npc_aldeana_aerea.jpg`) vista de **lado**, para los niveles de plataformas. Mientras no exista, en los niveles se ve al niño.
+*(Adjuntar `npc_aldeana_aerea.jpg` y la hoja de Gara como referencia)*
+```
+[BLOQUE DE ESTILO] Side-view 2D platformer character sprite sheet of the same girl from the
+attached reference (long black braids, green embroidered blouse, brown skirt, cloth bag,
+sandals), same size and proportions as the boy in the other attached sheet. All frames facing
+RIGHT, full body, same size, evenly spaced with plenty of space between them, in rows:
+row 1: idle (2 frames); row 2: walk (6 frames); row 3: run (6 frames);
+row 4: jump up, falling, crouching, kneeling and reaching forward with one hand (interact).
+Plain flat solid magenta #FF00FF background, no grid, no text, no labels, no watermark.
+```
+
 ## 4. Sprints siguientes (resumen; se detallan al llegar)
 - **Sprint 2:** Zona 2 — bosque de oyamel (plataformas, fondos sano/talado, enredaderas que crecen en 4 cuadros, mariposas monarca, venado, pájaro carpintero, Mari la mariposa).
 - **Sprint 3:** Zona 3 — lago de Pátzcuaro (agua profunda, tule, lirio, achoque nadando, pato, pescado blanco, Achi), puzzles de cadena alimenticia y separación de residuos.

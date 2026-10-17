@@ -18,10 +18,15 @@ var _interactuables: Array[Node2D] = []
 @onready var camara: Camera2D = $Camera2D
 
 
+func _ready() -> void:
+	# Niño o niña, según lo que se eligió al empezar la partida.
+	sprite.sprite_frames = load(Juego.datos_personaje()["aereo"])
+	sprite.play(&"idle_abajo")
+
+
 func _physics_process(delta: float) -> void:
 	if leer_entrada_del_jugador:
 		entrada_direccion = Input.get_vector("mover_izquierda", "mover_derecha", "mover_arriba", "mover_abajo")
-		entrada_interactuar = Input.is_action_just_pressed("interactuar")
 	if Juego.entrada_bloqueada:
 		entrada_direccion = Vector2.ZERO
 		entrada_interactuar = false
@@ -35,6 +40,14 @@ func _physics_process(delta: float) -> void:
 		if objetivo:
 			objetivo.interactuar(self)
 	entrada_interactuar = false
+
+
+## La tecla de interactuar se lee como evento (no con Input.is_action_just_pressed): así,
+## cuando el diálogo usa la misma tecla para cerrarse, la marca como atendida y no llega aquí.
+## Leerla en cada paso de física hacía que la E que cerraba el diálogo lo volviera a abrir.
+func _unhandled_input(evento: InputEvent) -> void:
+	if leer_entrada_del_jugador and evento.is_action_pressed("interactuar") and not Juego.entrada_bloqueada:
+		entrada_interactuar = true
 
 
 func registrar_interactuable(objeto: Node2D) -> void:

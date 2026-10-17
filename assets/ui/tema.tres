@@ -39,10 +39,10 @@ texture_margin_right = 30.0
 texture_margin_bottom = 22.0
 
 [sub_resource type="StyleBoxTexture" id="Panel_madera"]
-content_margin_left = 64.0
-content_margin_top = 56.0
-content_margin_right = 64.0
-content_margin_bottom = 56.0
+content_margin_left = 92.0
+content_margin_top = 84.0
+content_margin_right = 120.0
+content_margin_bottom = 76.0
 texture = ExtResource("4_panel")
 texture_margin_left = 62.0
 texture_margin_top = 62.0

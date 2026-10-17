@@ -28,9 +28,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -820.0
-offset_top = -340.0
+offset_top = -400.0
 offset_right = 820.0
-offset_bottom = -30.0
+offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 0
 theme = ExtResource("2_tema")
@@ -41,7 +41,7 @@ theme_override_constants/separation = 36
 
 [node name="MarcoRetrato" type="Panel" parent="Caja/HBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(190, 190)
+custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("Marco_retrato")
@@ -75,9 +75,9 @@ text = "Nombre"
 
 [node name="Texto" type="Label" parent="Caja/HBox/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 110)
+custom_minimum_size = Vector2(0, 124)
 layout_mode = 2
-theme_override_font_sizes/font_size = 34
+theme_override_font_sizes/font_size = 32
 text = "Texto del diálogo"
 autowrap_mode = 3
 

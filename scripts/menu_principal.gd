@@ -3,6 +3,7 @@ extends Control
 const ESCENA_VALLE := "res://scenes/valle/Valle.tscn"
 const ESCENA_NIVEL1 := "res://scenes/world/Nivel1.tscn"
 const ESCENA_OPCIONES := "res://scenes/ui/Opciones.tscn"
+const ESCENA_SELECCION := "res://scenes/menu/SeleccionPersonaje.tscn"
 
 @onready var _boton_continuar: Button = %BtnContinuar
 @onready var _boton_nueva: Button = %BtnJugar
@@ -24,9 +25,8 @@ func _on_btn_continuar_pressed() -> void:
 
 
 func _on_btn_jugar_pressed() -> void:
-	Juego.nueva_partida()
-	Juego.guardar()
-	Transicion.ir_a(ESCENA_VALLE)
+	# Primero se elige niño o niña y el nombre; ahí se crea la partida.
+	Transicion.ir_a(ESCENA_SELECCION)
 
 
 func _on_btn_opciones_pressed() -> void:

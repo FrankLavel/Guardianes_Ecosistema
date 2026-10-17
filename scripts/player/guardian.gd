@@ -51,6 +51,10 @@ const UMBRAL_CORRER := 0.6
 
 func _ready() -> void:
 	punto_reaparicion = global_position
+	var ruta: String = Juego.datos_personaje()["plataformas"]
+	if not ruta.is_empty():
+		sprite.sprite_frames = load(ruta)
+		sprite.play(&"idle")
 
 
 func _physics_process(delta: float) -> void:

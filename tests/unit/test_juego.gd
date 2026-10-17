@@ -51,3 +51,38 @@ func test_guardar_y_cargar_recupera_el_progreso() -> void:
 
 func test_cargar_una_ranura_vacia_falla_sin_romper() -> void:
 	assert_false(Juego.cargar(97))
+
+
+func test_textos_segun_el_personaje() -> void:
+	Juego.nueva_partida(RANURA, "nino", "")
+	assert_eq(Juego.reemplazar("¡Hola, {muchacho}! Eres {el} {nuevo} {guardian}."), "¡Hola, muchacho! Eres el nuevo guardián.")
+	assert_eq(Juego.nombre_jugador(), "Guardián")
+	Juego.nueva_partida(RANURA, "nina", "")
+	assert_eq(Juego.reemplazar("¡Hola, {muchacho}! Eres {el} {nuevo} {guardian}."), "¡Hola, muchacha! Eres la nueva guardiana.")
+	assert_eq(Juego.nombre_jugador(), "Guardiana")
+
+
+func test_el_nombre_escrito_se_usa_en_los_textos() -> void:
+	Juego.nueva_partida(RANURA, "nina", "  Xóchitl ")
+	assert_eq(Juego.nombre_jugador(), "Xóchitl")
+	assert_eq(Juego.reemplazar("¡Lo lograste, {nombre}!"), "¡Lo lograste, Xóchitl!")
+
+
+func test_se_guarda_el_personaje_elegido() -> void:
+	Juego.nueva_partida(RANURA, "nina", "Xóchitl")
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_eq(Juego.genero, "nino")
+	Juego.cargar(RANURA)
+	assert_eq(Juego.genero, "nina")
+	assert_eq(Juego.nombre, "Xóchitl")
+
+
+func test_cada_personaje_tiene_su_arte() -> void:
+	for clave in Juego.PERSONAJES:
+		var datos: Dictionary = Juego.PERSONAJES[clave]
+		assert_true(ResourceLoader.exists(datos["aereo"]), "Falta arte aéreo de %s" % clave)
+		assert_true(ResourceLoader.exists(datos["retrato"]), "Falta retrato de %s" % clave)
+		var cuadros: SpriteFrames = load(datos["aereo"])
+		for anim in ["idle_abajo", "idle_arriba", "idle_izquierda", "caminar_abajo", "caminar_arriba", "caminar_izquierda"]:
+			assert_true(cuadros.has_animation(anim), "%s: falta %s" % [clave, anim])
