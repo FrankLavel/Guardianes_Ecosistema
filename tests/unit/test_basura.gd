@@ -76,3 +76,15 @@ func test_interactuar_sin_nada_cerca_no_hace_nada() -> void:
 	guardian.entrada_interactuar = true
 	await wait_physics_frames(2)
 	assert_false(guardian.esta_interactuando())
+
+
+func test_ninguna_basura_es_desproporcionada() -> void:
+	# Regresión: la lata (acostada) medía más de la mitad del personaje.
+	for tipo in TIPOS:
+		var b: Basura = ESCENA_BASURA.instantiate()
+		b.tipo = tipo
+		add_child_autofree(b)
+		var sprite: Sprite2D = b.get_node("Sprite2D")
+		var tam: Vector2 = sprite.texture.get_size() * sprite.scale
+		assert_lt(maxf(tam.x, tam.y), 30.0, "%s mide %s" % [tipo, tam])
+		assert_gt(maxf(tam.x, tam.y), 12.0, "%s mide %s" % [tipo, tam])
