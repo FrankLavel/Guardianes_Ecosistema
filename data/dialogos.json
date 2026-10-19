@@ -14,7 +14,7 @@
     },
     "achi": {
       "nombre": "Achi",
-      "retrato": "res://assets/ui/bitacora/achoque.png"
+      "retrato": "res://assets/characters/achi/achi_retrato.png"
     }
   },
   "dialogos": {

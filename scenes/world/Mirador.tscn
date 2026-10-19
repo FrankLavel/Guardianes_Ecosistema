@@ -25,25 +25,25 @@ texture = ExtResource("3_letrero")
 offset = Vector2(0, -165)
 
 [node name="Brote1" type="Sprite2D" parent="."]
-texture_filter = 1
+texture_filter = 2
 position = Vector2(0, 0)
-scale = Vector2(0.45, 0.45)
+scale = Vector2(0.17, 0.17)
 texture = ExtResource("2_brote")
-offset = Vector2(0, -92)
+offset = Vector2(0, -140)
 
 [node name="Brote2" type="Sprite2D" parent="."]
 texture_filter = 2
 position = Vector2(26, 0)
-scale = Vector2(0.45, 0.45)
+scale = Vector2(0.17, 0.17)
 texture = ExtResource("2_brote")
-offset = Vector2(0, -92)
+offset = Vector2(0, -140)
 
 [node name="Brote3" type="Sprite2D" parent="."]
 texture_filter = 2
 position = Vector2(50, 0)
-scale = Vector2(0.45, 0.45)
+scale = Vector2(0.17, 0.17)
 texture = ExtResource("2_brote")
-offset = Vector2(0, -92)
+offset = Vector2(0, -140)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -45)

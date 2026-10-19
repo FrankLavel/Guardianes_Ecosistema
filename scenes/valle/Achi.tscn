@@ -1,26 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/valle/personaje_valle.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/objects/zona3/achoque.png" id="2_achoque"]
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_achi"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("2_achoque")
-}],
-"loop": true,
-"name": &"hablar",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("2_achoque")
-}],
-"loop": true,
-"name": &"idle",
-"speed": 5.0
-}]
+[ext_resource type="SpriteFrames" path="res://assets/characters/achi/achi_frames.tres" id="2_frames"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hablar"]
 radius = 100.0
@@ -39,13 +20,13 @@ color = Color(0, 0, 0, 0.22)
 polygon = PackedVector2Array(-34, 0, -26, -6, 0, -8, 26, -6, 34, 0, 26, 6, 0, 8, -26, 6)
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
-texture_filter = 1
+texture_filter = 2
 position = Vector2(0, -4)
-scale = Vector2(0.6, 0.6)
-sprite_frames = SubResource("SpriteFrames_achi")
+scale = Vector2(0.3, 0.3)
+sprite_frames = ExtResource("2_frames")
 animation = &"idle"
 autoplay = "idle"
-offset = Vector2(0, -52)
+offset = Vector2(0, -112)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_hablar")

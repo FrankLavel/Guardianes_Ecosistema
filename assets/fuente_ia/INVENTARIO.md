@@ -64,6 +64,18 @@ Revisado el 16 de octubre de 2026. ✅ listo para integrar · ⚠️ usable con 
 | `gara_trepar.jpg` | El niño trepando de espaldas, 4 cuadros | ✅ |
 | `nina_trepar.jpg` | Fila 1: la niña trepando (7 cuadros) | ⚠️ La fila 2 repite la niña corriendo; solo se usa la fila 1 |
 
+## Quinta tanda — Zona 3 (lago)
+
+| Archivo | Contenido | Estado |
+|---|---|---|
+| `zona3_achoque.jpg` | Achi: 3 quieto + 9 nadando | ✅ |
+| `achi_retrato.jpg` | Retrato de Achi | ✅ |
+| `zona3_objetos.jpg` | Huevo, lirio (x2), tule, muelle, canoa | ✅ |
+| `zona3_animales.jpg` | Pato mexicano y pescado blanco | ✅ |
+| `zona3_fondo_lago.jpg` / `_contaminado` | Lago con Janitzio | ✅ |
+| `zona3_cadena.jpg` | Sol, plantas, larva de insecto | ✅ |
+| `zona3_residuos.jpg` | Cáscara, papel, frasco y 5 contenedores | ⚠️ El frasco salió rosado (se corrige al procesarlo) |
+
 ## Falta
 
 - 🟡 **Animación de nadar** para el niño y la niña (vista lateral, 4–6 cuadros, mirando a la derecha). Mientras no exista, al nadar se usa la de caminar con un tono azulado.

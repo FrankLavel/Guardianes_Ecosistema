@@ -185,7 +185,7 @@ evenly spaced, facing right.
 
 ## 8. Lista de arte — Sprint 4 (Zona 3: lago de Pátzcuaro)
 
-Hoy el lago usa arte **provisional dibujado por código** (`tools/arte/provisional_lago.py`): achoque, huevo, lirio, tule, sol, insecto, cáscara y papel. El pato mexicano y el pescado blanco aparecen como "?" en la bitácora.
+✅ **Integrado** (19 oct). Se procesa con `python tools/arte/procesar.py zona3`.
 
 🔴 `zona3_achoque.png` — Achi, el achoque (ajolote de Pátzcuaro): café-morado con branquias rosas, carita amigable; de lado mirando a la derecha: 2 cuadros quieto, 4 nadando. Además, **retrato** de frente para los diálogos (`achi_retrato.png`).
 🔴 `zona3_objetos.png` — huevo de achoque (gelatinoso, transparente), lirio acuático flotando con flor morada, tule (varias cañas con espigas cafés), muelle de madera, canoa de pescador de Pátzcuaro.

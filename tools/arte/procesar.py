@@ -347,6 +347,64 @@ def textura_material(material: str, lado: int = 48, zoom: int = 4) -> Image.Imag
     return img.resize((lado * zoom, lado * zoom), Image.Resampling.NEAREST).convert("RGBA")
 
 
+# ---------------------------------------------------------------- Zona 3 (lago)
+def zona3() -> None:
+    z3 = "objects/zona3"
+    objetos("zona3_objetos.jpg", ["lirio", "huevo", "lirio_2", "tule", "muelle", "canoa"], z3)
+    (ASSETS / z3 / "lirio_2.png").unlink()
+
+    # Achi: 12 cuadros (los 3 primeros quieto, los demás nadando).
+    rgba = quitar_fondo(cargar("zona3_achoque.jpg"))
+    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    construir_atlas(
+        cuadros,
+        {"idle": ([0, 1, 2, 1], 4.0, True), "hablar": ([0, 1, 2, 1], 7.0, True), "nadar": (list(range(3, 12)), 10.0, True)},
+        (352, 224),
+        ASSETS / "characters/achi/achi_atlas.png",
+        ASSETS / "characters/achi/achi_frames.tres",
+        "res://assets/characters/achi/achi_atlas.png",
+        por_fila=4,
+    )
+    guardar(cuadros[0], ASSETS / z3 / "achoque.png")
+    retrato = objetos("achi_retrato.jpg", ["achi_retrato"], "characters/achi")["achi_retrato"]
+    guardar(retrato.resize((512, round(512 * retrato.height / retrato.width)), Image.Resampling.LANCZOS),
+            ASSETS / "characters/achi/achi_retrato.png")
+
+    # Pato mexicano (2) y pescado blanco (2).
+    rgba = quitar_fondo(cargar("zona3_animales.jpg"))
+    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    construir_atlas(
+        cuadros,
+        {"pato": ([0, 1], 3.0, True), "pescado_blanco": ([2, 3], 6.0, True)},
+        (496, 320),
+        ASSETS / "characters/animales/zona3_animales_atlas.png",
+        ASSETS / "characters/animales/zona3_animales_frames.tres",
+        "res://assets/characters/animales/zona3_animales_atlas.png",
+        por_fila=2,
+    )
+    guardar(cuadros[0], ASSETS / "characters/animales/pato_mexicano.png")
+    guardar(cuadros[2], ASSETS / "characters/animales/pescado_blanco.png")
+
+    objetos("zona3_cadena.jpg", ["sol", "plantas", "insecto"], z3)
+    piezas = objetos("zona3_residuos.jpg", [
+        "cascara", "papel", "frasco", "contenedor_organico",
+        "contenedor_plastico", "contenedor_papel", "contenedor_vidrio_metal", "contenedor_peligrosos",
+    ], z3)
+    px = np.asarray(piezas["frasco"]).copy()
+    r, g, b = (px[..., i].astype(np.int16) for i in range(3))
+    rosa = (r - g > 30) & (b - g > 20)
+    px[rosa, 0] = (px[rosa, 0] * 0.55).astype(np.uint8)
+    px[rosa, 1] = np.clip(g[rosa] * 1.15 + 20, 0, 255).astype(np.uint8)
+    px[rosa, 3] = 150
+    guardar(Image.fromarray(px), ASSETS / z3 / "frasco.png")
+
+    # Fondo: el lago con Janitzio (sano y contaminado), mismo tamaño para poder mezclarlos.
+    destino = ASSETS / "maps/zona3/fondos"
+    for nombre, fuente in [("lago", "zona3_fondo_lago.jpg"), ("lago_contaminado", "zona3_fondo_lago_contaminado.jpg")]:
+        img = Image.fromarray(cargar(fuente).astype(np.uint8)).convert("RGBA")
+        guardar(hacer_repetible_h(img, 220), destino / f"{nombre}.png")
+
+
 # ---------------------------------------------------------------- Zona 2 y bitácora
 def zona2() -> None:
     # Las antenas quedan separadas del cuerpo: se unen piezas hasta 40 px de distancia.
@@ -445,6 +503,10 @@ def bitacora() -> None:
         "pino": Image.open(ASSETS / "maps/valle/objetos/sabino.png"),
         "venado": Image.open(ASSETS / "objects/zona2/venado.png"),
         "carpintero": Image.open(ASSETS / "characters/animales/carpintero.png"),
+        "achoque": Image.open(ASSETS / "objects/zona3/achoque.png"),
+        "tule": Image.open(ASSETS / "objects/zona3/tule.png"),
+        "pato_mexicano": Image.open(ASSETS / "characters/animales/pato_mexicano.png"),
+        "pescado_blanco": Image.open(ASSETS / "characters/animales/pescado_blanco.png"),
     }
     for nombre, img in fuentes.items():
         img = img.convert("RGBA")
@@ -495,7 +557,7 @@ def ui() -> None:
     guardar(recortar(rgba, logo), ASSETS / "ui" / "logo.png")
 
 
-GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora}
+GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

@@ -50,6 +50,9 @@ func _initialize() -> void:
 	var lago: Node2D = _instancia("res://scenes/world/Rio.tscn", "Lago", Vector2(LAGO_DESDE * T, SUPERFICIE * T))
 	lago.set("tamano", Vector2((LAGO_HASTA - LAGO_DESDE + 1) * T, (LECHO - SUPERFICIE) * T))
 	lago.set("limpieza_minima_nado", 0.4)
+	lago.set("frames_peces", load("res://assets/characters/animales/zona3_animales_frames.tres"))
+	lago.set("animacion_peces", "pescado_blanco")
+	lago.set("escala_peces", 0.09)
 
 	# Tule en las orillas.
 	var tules := Node2D.new()
@@ -59,8 +62,7 @@ func _initialize() -> void:
 		var s := Sprite2D.new()
 		s.name = "Tule%d" % x
 		s.texture = load("res://assets/objects/zona3/tule.png")
-		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		s.scale = Vector2(0.5, 0.5)
+		s.scale = Vector2(0.3, 0.3)
 		s.offset = Vector2(0, -s.texture.get_height() / 2.0 + 4)
 		s.position = Vector2(x * T, SUPERFICIE * T)
 		s.z_index = -1

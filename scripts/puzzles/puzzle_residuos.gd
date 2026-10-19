@@ -19,6 +19,8 @@ const BASURA := [
 		"El papel se recicla para hacer cuadernos y cajas nuevas."],
 	["lata", "Lata", "res://assets/objects/basura/lata.png", "vidrio_metal",
 		"Las latas son de metal y se pueden reciclar muchas veces."],
+	["frasco", "Frasco de vidrio", "res://assets/objects/zona3/frasco.png", "vidrio_metal",
+		"El vidrio se puede reciclar una y otra vez sin perder calidad."],
 	["pila", "Pila", "res://assets/objects/basura/pila.png", "peligrosos",
 		"¡Cuidado! Las pilas tienen sustancias tóxicas: van en un contenedor especial, nunca al agua."],
 	["bolsa", "Bolsa de plástico", "res://assets/objects/basura/bolsa.png", "plastico",
@@ -68,8 +70,12 @@ func _construir() -> void:
 	for id in CONTENEDORES:
 		var datos: Dictionary = CONTENEDORES[id]
 		var boton := Button.new()
-		boton.custom_minimum_size = Vector2(150, 190)
+		boton.custom_minimum_size = Vector2(170, 220)
 		boton.text = datos["nombre"]
+		boton.icon = load("res://assets/objects/zona3/contenedor_%s.png" % id)
+		boton.expand_icon = true
+		boton.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		boton.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		boton.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		boton.add_theme_font_size_override("font_size", 24)
 		for estilo in ["normal", "hover", "pressed", "focus"]:

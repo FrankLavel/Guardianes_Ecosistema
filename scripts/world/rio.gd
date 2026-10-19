@@ -16,6 +16,10 @@ const FRAMES_ANIMALES := preload("res://assets/characters/animales/zona1_animale
 ## Desde qué limpieza se puede nadar. El río exige agua limpia (1.0); el lago, turbio por el
 ## lirio pero sin veneno, permite nadar desde antes.
 @export_range(0.0, 1.0) var limpieza_minima_nado := 0.99
+## Peces que aparecen al limpiarlo (por defecto, los del río).
+@export var frames_peces: SpriteFrames
+@export var animacion_peces := "pez"
+@export var escala_peces := 0.11
 
 var limpieza := 0.0:
 	set(valor):
@@ -81,10 +85,10 @@ func mostrar_peces(cantidad := 2) -> void:
 		return
 	for i in cantidad:
 		var pez := AnimatedSprite2D.new()
-		pez.sprite_frames = FRAMES_ANIMALES
-		pez.animation = &"pez"
+		pez.sprite_frames = frames_peces if frames_peces else FRAMES_ANIMALES
+		pez.animation = StringName(animacion_peces)
 		pez.play()
-		pez.scale = Vector2(0.11, 0.11)
+		pez.scale = Vector2(escala_peces, escala_peces)
 		pez.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 		var x := tamano.x * (i + 1) / (cantidad + 1)
 		pez.position = Vector2(x, 24.0)

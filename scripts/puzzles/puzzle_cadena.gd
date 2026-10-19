@@ -7,7 +7,7 @@ const ORDEN := ["sol", "plantas", "insectos", "achoque", "garza"]
 const DATOS := {
 	"sol": {"nombre": "Sol", "imagen": "res://assets/objects/zona3/sol.png",
 		"pista": "Todo empieza con el Sol: sin su luz, nada puede crecer."},
-	"plantas": {"nombre": "Plantas del lago", "imagen": "res://assets/objects/zona3/tule.png",
+	"plantas": {"nombre": "Plantas del lago", "imagen": "res://assets/objects/zona3/plantas.png",
 		"pista": "Las plantas usan la luz del Sol para crecer. Son la comida de los animales pequeños."},
 	"insectos": {"nombre": "Insectos del agua", "imagen": "res://assets/objects/zona3/insecto.png",
 		"pista": "Los insectos y animalitos del agua comen plantas."},

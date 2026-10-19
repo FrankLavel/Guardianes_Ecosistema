@@ -29,8 +29,8 @@ func _ready() -> void:
 	_ajustar_camara()
 	# La meta del lago es el muelle.
 	var muelle: Sprite2D = meta.get_node("Sprite2D")
-	muelle.texture = preload("res://assets/maps/valle/objetos/muelle.png")
-	muelle.scale = Vector2(0.45, 0.45)
+	muelle.texture = preload("res://assets/objects/zona3/muelle.png")
+	muelle.scale = Vector2(0.35, 0.35)
 	muelle.offset = Vector2(0, -muelle.texture.get_height() / 2.0 + 10)
 	for lirio in lirios():
 		lirio.quitado.connect(_al_quitar_lirio)
@@ -127,6 +127,7 @@ func _actualizar() -> void:
 	if lago_listo() and not lago.hay_peces():
 		lago.mostrar_peces(3)
 		Bitacora.descubrir("pescado_blanco")
+		_traer_pato()
 
 
 func _al_quitar_lirio() -> void:
@@ -172,3 +173,24 @@ func _al_llegar_a_meta(_cuerpo: Guardian) -> void:
 	if not cadena.esta_resuelta:
 		falta.append("armar la cadena alimenticia en el mirador")
 	hud.mostrar_mensaje("El lago todavía necesita ayuda", "Te falta: " + ", ".join(falta) + ".", 5.0)
+
+
+## Con el lago limpio llega un pato mexicano nadando.
+func _traer_pato() -> void:
+	var pato := AnimatedSprite2D.new()
+	pato.name = "Pato"
+	pato.sprite_frames = preload("res://assets/characters/animales/zona3_animales_frames.tres")
+	pato.animation = &"pato"
+	pato.play()
+	pato.scale = Vector2(0.16, 0.16)
+	pato.offset = Vector2(0, -150)
+	pato.z_index = 2
+	var superficie := lago.global_position.y + 6.0
+	pato.global_position = Vector2(lago.global_position.x + lago.tamano.x - 60.0, superficie)
+	pato.flip_h = true
+	add_child(pato)
+	var paseo := create_tween().set_loops()
+	paseo.tween_property(pato, "global_position:x", lago.global_position.x + 120.0, 14.0)
+	paseo.tween_callback(func(): pato.flip_h = false)
+	paseo.tween_property(pato, "global_position:x", lago.global_position.x + lago.tamano.x - 60.0, 14.0)
+	paseo.tween_callback(func(): pato.flip_h = true)
