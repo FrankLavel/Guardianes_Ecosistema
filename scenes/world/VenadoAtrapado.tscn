@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/venado_atrapado.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/objects/zona2/venado.png" id="2_venado"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/animales/venado_frames.tres" id="2_venado"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona2/alambre.png" id="3_alambre"]
 
 [sub_resource type="RectangleShape2D" id="Zona"]
 size = Vector2(130, 80)
@@ -12,16 +13,20 @@ collision_mask = 2
 monitorable = false
 script = ExtResource("1_script")
 
-[node name="Venado" type="Sprite2D" parent="."]
-texture_filter = 1
-scale = Vector2(0.42, 0.42)
-texture = ExtResource("2_venado")
-offset = Vector2(0, -72)
+[node name="Venado" type="AnimatedSprite2D" parent="."]
+texture_filter = 2
+position = Vector2(0, 2)
+scale = Vector2(0.21, 0.21)
+sprite_frames = ExtResource("2_venado")
+animation = &"idle"
+offset = Vector2(0, -180)
 
-[node name="Alambre" type="Line2D" parent="."]
-points = PackedVector2Array(-40, -6, -30, -30, -10, -14, 4, -40, 20, -18, 34, -44, 44, -8)
-width = 2.5
-default_color = Color(0.45, 0.42, 0.4, 1)
+[node name="Alambre" type="Sprite2D" parent="."]
+texture_filter = 2
+position = Vector2(4, 2)
+scale = Vector2(0.24, 0.24)
+texture = ExtResource("3_alambre")
+offset = Vector2(0, -117)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -40)

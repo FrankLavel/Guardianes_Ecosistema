@@ -39,8 +39,10 @@ func _initialize() -> void:
 	visual.name = "TerrenoVisual"
 	visual.set_script(load("res://scripts/world/decorador_terreno.gd"))
 	visual.set("terreno", capa)
-	visual.set("textura_suelo", load("res://assets/maps/zona1/plataformas/suelo_tira.png"))
-	visual.set("textura_plataforma", load("res://assets/maps/zona1/plataformas/troncos_doble.png"))
+	visual.set("textura_suelo", load("res://assets/maps/zona2/plataformas/suelo_tira.png"))
+	visual.set("alto_pasto", 195)
+	visual.set("textura_plataforma", load("res://assets/maps/zona2/plataformas/tronco.png"))
+	visual.set("borde_plataforma", 40)
 	_agregar(raiz, visual)
 
 	# Tocones: lo que dejó la tala.

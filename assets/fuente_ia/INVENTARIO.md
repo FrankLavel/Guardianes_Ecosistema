@@ -51,6 +51,19 @@ Revisado el 16 de octubre de 2026. ✅ listo para integrar · ⚠️ usable con 
 | `nina_plataformas_correr.jpg` | La niña caminando y corriendo con falda y sandalias | ✅ |
 | `nina_plataformas_poses.jpg` | La niña saltando, cayendo, agachada y recogiendo, con falda | ✅ |
 
+## Cuarta tanda (19 oct) — Zona 2
+
+| Archivo | Contenido | Estado |
+|---|---|---|
+| `zona2_objetos.png` | Enredadera, tierra fértil, fogata encendida y apagada, cerca de alambre, letrero del vivero | ✅ |
+| `zona2_venado.png` | Venado: 2 quieto (de pie, comiendo) + 4 corriendo | ✅ |
+| `zona2_carpintero.png` | Pájaro carpintero en un tronco | ✅ |
+| `zona2_monarca_vuelo.png` | Mariposa volando, 4 cuadros | ✅ |
+| `mari_retrato.png` | Retrato de Mari | ✅ |
+| `zona2_plataformas.png` | Suelo, islas, troncos, pilar, rampa y orillas de bosque | ✅ |
+| `gara_trepar.jpg` | El niño trepando de espaldas, 4 cuadros | ✅ |
+| `nina_trepar.jpg` | Fila 1: la niña trepando (7 cuadros) | ⚠️ La fila 2 repite la niña corriendo; solo se usa la fila 1 |
+
 ## Falta
 
 - 🟡 **Animación de nadar** para el niño y la niña (vista lateral, 4–6 cuadros, mirando a la derecha). Mientras no exista, al nadar se usa la de caminar con un tono azulado.

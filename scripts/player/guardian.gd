@@ -171,8 +171,7 @@ func animacion_segun_estado() -> StringName:
 	if esta_interactuando():
 		return &"interactuar"
 	if _trepando:
-		# Sin animación propia: los brazos arriba del salto parecen agarrarse.
-		return &"saltar"
+		return &"trepar" if sprite.sprite_frames.has_animation(&"trepar") else &"saltar"
 	if esta_nadando():
 		# Todavía no hay animación de nado: se usa la de caminar, más lenta.
 		return &"caminar"
@@ -192,7 +191,10 @@ func _actualizar_animacion() -> void:
 	if sprite.animation != animacion:
 		sprite.play(animacion)
 	# Las piernas avanzan al ritmo real del movimiento (evita que "patine" al acelerar).
-	if esta_nadando():
+	if _trepando:
+		# Quieto en la enredadera: la animación se detiene.
+		sprite.speed_scale = 1.0 if absf(velocity.y) > 1.0 else 0.0
+	elif esta_nadando():
 		sprite.speed_scale = 0.5
 	elif animacion == &"caminar" or animacion == &"correr":
 		sprite.speed_scale = clampf(absf(velocity.x) / velocidad_maxima, 0.6, 1.2)

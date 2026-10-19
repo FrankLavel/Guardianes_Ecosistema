@@ -6,8 +6,7 @@ extends Area2D
 signal termino_de_crecer
 
 const TEXTURA := preload("res://assets/objects/zona2/enredadera.png")
-const ANCHO := 34.0
-const ESCALA_TEXTURA := 0.25
+const ANCHO := 40.0
 
 @export var altura := 192.0
 
@@ -28,8 +27,8 @@ func _ready() -> void:
 	_visual.stretch_mode = TextureRect.STRETCH_TILE
 	_visual.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_visual.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
-	_visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_visual.scale = Vector2(ESCALA_TEXTURA, ESCALA_TEXTURA)
+	_visual.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_visual.scale = Vector2.ONE * _escala()
 	_visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_visual)
 	_forma = CollisionShape2D.new()
@@ -63,9 +62,14 @@ func crecer_ya() -> void:
 	crecida = true
 
 
+## La textura se escala para que mida ANCHO de ancho en el mundo.
+func _escala() -> float:
+	return ANCHO / TEXTURA.get_width()
+
+
 func _ajustar(fraccion: float) -> void:
 	var alto := maxf(altura * fraccion, 1.0)
-	_visual.size = Vector2(ANCHO, alto) / ESCALA_TEXTURA
+	_visual.size = Vector2(ANCHO, alto) / _escala()
 	_visual.position = Vector2(-ANCHO / 2.0, -alto)
 	(_forma.shape as RectangleShape2D).size = Vector2(ANCHO, alto)
 	_forma.position = Vector2(0, -alto / 2.0)

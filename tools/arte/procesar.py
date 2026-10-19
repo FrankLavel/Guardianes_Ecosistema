@@ -10,7 +10,9 @@ y volver a ejecutar este script. Los nombres de cada objeto dependen del orden e
 """
 from __future__ import annotations
 
+import re
 import sys
+from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageFilter
@@ -138,6 +140,49 @@ def nina_plataformas() -> None:
     )
 
 
+def agregar_animacion(tres: Path, nombre: str, cuadros: list[Image.Image], fps: float, celda: tuple[int, int]) -> None:
+    """Agrega (o reemplaza) una animación a un SpriteFrames existente, con su propio atlas."""
+    png = tres.with_name(tres.stem.replace("_frames", "") + f"_{nombre}.png")
+    ruta_res = "res://" + png.relative_to(RAIZ).as_posix()
+    cw, ch = celda
+    atlas = Image.new("RGBA", (cw * len(cuadros), ch), (0, 0, 0, 0))
+    for i, c in enumerate(cuadros):
+        atlas.alpha_composite(c, (i * cw + (cw - c.width) // 2, ch - c.height))
+    guardar(atlas, png)
+    texto = tres.read_text(encoding="utf-8")
+    # Quitar una versión anterior de esta animación.
+    texto = re.sub(r'\n\[ext_resource [^\n]*id="%s_atlas"\]' % nombre, "", texto)
+    texto = re.sub(r'\[sub_resource type="AtlasTexture" id="%s_\d+"\]\n[^\[]*' % nombre, "", texto)
+    texto = re.sub(r', \{\n"frames": \[[^\]]*\],\n"loop": \w+,\n"name": &"%s",\n"speed": [\d.]+\n\}' % nombre, "", texto)
+    ext = f'[ext_resource type="Texture2D" path="{ruta_res}" id="{nombre}_atlas"]'
+    i = texto.index("\n\n", texto.rindex("[ext_resource"))
+    texto = texto[:i] + "\n" + ext + texto[i:]
+    subs = "".join(
+        f'[sub_resource type="AtlasTexture" id="{nombre}_{k}"]\natlas = ExtResource("{nombre}_atlas")\n'
+        f"region = Rect2({k * cw}, 0, {cw}, {ch})\n\n"
+        for k in range(len(cuadros))
+    )
+    texto = texto.replace("[resource]", subs + "[resource]", 1)
+    frames = ", ".join(f'{{\n"duration": 1.0,\n"texture": SubResource("{nombre}_{k}")\n}}' for k in range(len(cuadros)))
+    anim = f', {{\n"frames": [{frames}],\n"loop": true,\n"name": &"{nombre}",\n"speed": {fps}\n}}'
+    k = texto.rstrip().rindex("]")
+    texto = texto[:k] + anim + texto[k:]
+    tres.write_text(texto, encoding="utf-8", newline="\n")
+
+
+def trepar() -> None:
+    for fuente, carpeta, usar, celda in [("gara_trepar.jpg", "gara", None, (160, 176)), ("nina_trepar.jpg", "nina", 7, (200, 176))]:
+        rgba = quitar_fondo(cargar(fuente))
+        objs = separar_objetos(rgba)
+        if usar:
+            objs = sorted(objs, key=lambda o: (o["caja"][1] // 200, o["caja"][0]))[:usar]
+        cuadros = [recortar(rgba, o) for o in objs]
+        # Misma estatura que en el resto de sus animaciones (~165 px con los brazos arriba).
+        factor = 165 / max(c.height for c in cuadros)
+        cuadros = [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
+        agregar_animacion(ASSETS / f"characters/{carpeta}/{carpeta}_frames.tres", "trepar", cuadros, 8.0, celda)
+
+
 def guardianes() -> None:
     personaje_aereo(
         "gara_aerea.jpg", "gara", "gara",
@@ -152,6 +197,7 @@ def guardianes() -> None:
         fps_arriba=8.0,
     )
     nina_plataformas()
+    trepar()
 
 
 # ---------------------------------------------------------------- Valle (mapa aéreo)
@@ -316,6 +362,72 @@ def zona2() -> None:
     img = Image.fromarray(arte.quitar_tinte_magenta(np.asarray(img), rojo=8, azul=8))
     guardar(img, destino / "bosque_talado.png")
 
+    # Objetos (orden de la hoja: enredadera, fogata, fogata apagada, letrero, tierra, alambre).
+    piezas = objetos("zona2_objetos.png", [
+        "enredadera_original", "fogata", "fogata_apagada", "letrero_vivero", "tierra_fertil", "alambre",
+    ], "objects/zona2")
+    # La enredadera se repite hacia arriba: se hace repetible en vertical.
+    vertical = piezas["enredadera_original"].transpose(Image.Transpose.TRANSPOSE)
+    guardar(hacer_repetible_h(vertical, 60).transpose(Image.Transpose.TRANSPOSE), ASSETS / "objects/zona2/enredadera.png")
+    (ASSETS / "objects/zona2/enredadera_original.png").unlink()
+
+    # Venado: 0 de pie, 1-4 corriendo, 5 comiendo.
+    rgba = quitar_fondo(cargar("zona2_venado.png"))
+    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    construir_atlas(
+        cuadros,
+        {"idle": ([0], 1.0, True), "comer": ([5, 0], 1.2, True), "correr": ([1, 2, 3, 4], 10.0, True)},
+        (360, 360),
+        ASSETS / "characters/animales/venado_atlas.png",
+        ASSETS / "characters/animales/venado_frames.tres",
+        "res://assets/characters/animales/venado_atlas.png",
+        por_fila=3,
+    )
+    guardar(cuadros[0], ASSETS / "objects/zona2/venado.png")
+
+    objetos("zona2_carpintero.png", ["carpintero"], "characters/animales")
+
+    # Mari: mariposa volando (4 cuadros, ordenados de izquierda a derecha) + retrato.
+    rgba = quitar_fondo(cargar("zona2_monarca_vuelo.png"))
+    vuelo = sorted(separar_objetos(rgba, union=40), key=lambda o: o["caja"][0])
+    cuadros = [recortar(rgba, o) for o in vuelo]
+    construir_atlas(
+        cuadros,
+        {"idle": ([0, 1, 2, 3, 2, 1], 12.0, True), "hablar": ([0, 1, 2, 3, 2, 1], 14.0, True)},
+        (560, 600),
+        ASSETS / "characters/mari/mari_atlas.png",
+        ASSETS / "characters/mari/mari_frames.tres",
+        "res://assets/characters/mari/mari_atlas.png",
+        por_fila=4,
+    )
+    retrato = objetos("mari_retrato.png", ["mari_retrato"], "characters/mari")["mari_retrato"]
+    guardar(retrato.resize((512, round(512 * retrato.height / retrato.width)), Image.Resampling.LANCZOS),
+            ASSETS / "characters/mari/mari_retrato.png")
+
+    # Plataformas del bosque: 0 bloque de suelo, 5 tronco.
+    piezas = objetos("zona2_plataformas.png", [
+        "suelo_bloque", "isla_grande", "isla_chica", "rampa_orilla", "pilar", "tronco", "tronco_2", "orilla_izquierda",
+    ], "maps/zona2/plataformas")
+    # El bloque trae un pino a la izquierda: la tira se arma con la parte derecha (sin árbol) y
+    # el borde izquierdo es el derecho volteado.
+    suelo = piezas["suelo_bloque"]
+    tapa = 70
+    derecha = suelo.crop((suelo.width - tapa, 0, suelo.width, suelo.height))
+    izquierda = derecha.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    centro = hacer_repetible_h(suelo.crop((330, 0, suelo.width - tapa, suelo.height)), 40)
+    tira = Image.new("RGBA", (tapa * 2 + centro.width, suelo.height))
+    tira.alpha_composite(izquierda, (0, 0))
+    tira.alpha_composite(centro, (tapa, 0))
+    tira.alpha_composite(derecha, (tapa + centro.width, 0))
+    tira = tira.crop(tira.getbbox())
+    tira = Image.fromarray(arte.quitar_tinte_magenta(np.asarray(tira), rojo=20, azul=20))
+    guardar(tira, ASSETS / "maps/zona2/plataformas/suelo_tira.png")
+    # Alto del pasto (para que el decorador no lo estire): última fila mayormente verde.
+    a = np.asarray(tira).astype(int)
+    verde = [y for y in range(a.shape[0]) if (a[y, :, 3] > 0).any()
+             and (a[y, a[y, :, 3] > 0, 1] > a[y, a[y, :, 3] > 0, 0] + 15).mean() > 0.5]
+    print("  suelo_tira zona2:", tira.size, "pasto hasta y =", max(verde) if verde else "?")
+
 
 def bitacora() -> None:
     """Una imagen cuadrada por especie (assets/ui/bitacora/<id>.png) con el arte que ya existe."""
@@ -331,6 +443,8 @@ def bitacora() -> None:
         "oyamel": Image.open(ASSETS / "maps/valle/objetos/oyamel.png"),
         "encino": Image.open(ASSETS / "maps/valle/objetos/encino.png"),
         "pino": Image.open(ASSETS / "maps/valle/objetos/sabino.png"),
+        "venado": Image.open(ASSETS / "objects/zona2/venado.png"),
+        "carpintero": Image.open(ASSETS / "characters/animales/carpintero.png"),
     }
     for nombre, img in fuentes.items():
         img = img.convert("RGBA")
@@ -339,58 +453,6 @@ def bitacora() -> None:
         lienzo = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
         lienzo.alpha_composite(img, ((256 - img.width) // 2, (256 - img.height) // 2))
         guardar(lienzo, destino / f"{nombre}.png")
-
-
-def provisionales() -> None:
-    """Arte PROVISIONAL dibujado por código (pixel art sencillo) hasta tener el arte con IA."""
-    from PIL import ImageDraw
-    destino = ASSETS / "objects/zona2"
-    z = 4  # se dibuja chico y se amplía sin suavizar
-
-    # Enredadera: tira vertical repetible (32x32 -> 128x128).
-    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    for y in range(32):
-        x = 15 + round(2 * np.sin(y / 32 * 2 * np.pi))
-        d.rectangle([x, y, x + 2, y], fill=(64, 120, 40, 255))
-        d.point((x - 1, y), fill=(30, 70, 25, 255))
-        d.point((x + 3, y), fill=(30, 70, 25, 255))
-    for (hx, hy, lado) in [(8, 4, -1), (20, 12, 1), (8, 20, -1), (20, 27, 1)]:
-        d.ellipse([hx - 4, hy - 3, hx + 4, hy + 3], fill=(96, 170, 60, 255), outline=(30, 80, 25, 255))
-        d.line([hx, hy, hx + 4 * lado, hy], fill=(50, 110, 35, 255))
-    guardar(img.resize((32 * z, 32 * z), Image.Resampling.NEAREST), destino / "enredadera.png")
-
-    # Tierra fértil: montículo con brotes.
-    img = Image.new("RGBA", (32, 14), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    d.ellipse([1, 4, 30, 16], fill=(110, 70, 40, 255), outline=(60, 38, 22, 255))
-    for x in (7, 13, 20, 25):
-        d.point((x, 7), fill=(150, 100, 60, 255))
-    for x in (11, 18):
-        d.line([x, 6, x, 2], fill=(70, 140, 50, 255))
-        d.point((x - 1, 2), fill=(110, 190, 70, 255))
-        d.point((x + 1, 3), fill=(110, 190, 70, 255))
-    guardar(img.resize((32 * z, 14 * z), Image.Resampling.NEAREST), destino / "tierra_fertil.png")
-
-    # Venado (silueta sencilla, de lado, mirando a la derecha).
-    img = Image.new("RGBA", (40, 36), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    cafe, oscuro, claro = (150, 95, 55, 255), (70, 42, 25, 255), (225, 205, 175, 255)
-    d.ellipse([6, 12, 30, 24], fill=cafe, outline=oscuro)
-    for x in (9, 13, 24, 28):
-        d.rectangle([x, 22, x + 1, 33], fill=oscuro)
-    d.polygon([(26, 15), (31, 6), (35, 6), (33, 15)], fill=cafe, outline=oscuro)
-    d.ellipse([30, 3, 39, 10], fill=cafe, outline=oscuro)
-    d.point((36, 5), fill=(10, 10, 10, 255))
-    d.line([31, 3, 29, 0], fill=oscuro)
-    d.line([33, 3, 34, 0], fill=oscuro)
-    d.ellipse([3, 12, 8, 17], fill=claro, outline=oscuro)
-    d.ellipse([12, 18, 24, 23], fill=claro)
-    guardar(img.resize((40 * z, 36 * z), Image.Resampling.NEAREST), destino / "venado.png")
-    lienzo = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
-    v = Image.open(destino / "venado.png")
-    lienzo.alpha_composite(v, ((256 - v.width) // 2, (256 - v.height) // 2))
-    guardar(lienzo, ASSETS / "ui/bitacora/venado.png")
 
 
 # ---------------------------------------------------------------- Personajes
@@ -433,7 +495,7 @@ def ui() -> None:
     guardar(recortar(rgba, logo), ASSETS / "ui" / "logo.png")
 
 
-GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "provisionales": provisionales}
+GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

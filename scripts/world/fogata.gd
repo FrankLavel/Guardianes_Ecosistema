@@ -9,6 +9,7 @@ var esta_apagada := false
 @onready var _fuego: CPUParticles2D = $Fuego
 @onready var _humo: CPUParticles2D = $Humo
 @onready var _luz: Sprite2D = $Luz
+@onready var _imagen: Sprite2D = $Imagen
 @onready var _bloqueo: CollisionShape2D = $Bloqueo/CollisionShape2D
 @onready var _aviso: Label = $Aviso
 
@@ -30,6 +31,7 @@ func interactuar(guardian: Node) -> void:
 	if guardian.has_method("quitar_interactuable"):
 		guardian.quitar_interactuable(self)
 	_fuego.emitting = false
+	_imagen.texture = preload("res://assets/objects/zona2/fogata_apagada.png")
 	_humo.amount = 30
 	_humo.emitting = true
 	create_tween().tween_property(_luz, "modulate:a", 0.0, 0.6)

@@ -10,7 +10,7 @@
     },
     "mari": {
       "nombre": "Mari",
-      "retrato": "res://assets/ui/bitacora/monarca.png"
+      "retrato": "res://assets/characters/mari/mari_retrato.png"
     }
   },
   "dialogos": {

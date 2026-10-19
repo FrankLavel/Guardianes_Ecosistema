@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/world/estacion_puzzle.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/objects/zona1/brote_control.png" id="2_brote"]
-[ext_resource type="Texture2D" path="res://assets/maps/valle/objetos/letrero.png" id="3_letrero"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona2/letrero_vivero.png" id="3_letrero"]
 [ext_resource type="PackedScene" path="res://scenes/puzzles/PuzzleReforestar.tscn" id="4_puzzle"]
 
 [sub_resource type="RectangleShape2D" id="Zona"]
@@ -19,10 +19,10 @@ texto_aviso = "E  Plantar árboles"
 
 [node name="Letrero" type="Sprite2D" parent="."]
 texture_filter = 2
-position = Vector2(-50, 0)
-scale = Vector2(0.28, 0.28)
+position = Vector2(-56, 2)
+scale = Vector2(0.24, 0.24)
 texture = ExtResource("3_letrero")
-offset = Vector2(0, -137)
+offset = Vector2(0, -165)
 
 [node name="Brote1" type="Sprite2D" parent="."]
 texture_filter = 2

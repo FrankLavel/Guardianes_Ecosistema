@@ -6,8 +6,8 @@ signal liberado
 
 var esta_libre := false
 
-@onready var _venado: Sprite2D = $Venado
-@onready var _alambre: Line2D = $Alambre
+@onready var _venado: AnimatedSprite2D = $Venado
+@onready var _alambre: Sprite2D = $Alambre
 @onready var _aviso: Label = $Aviso
 
 
@@ -33,6 +33,7 @@ func interactuar(guardian: Node) -> void:
 	liberado.emit()
 	var huida := create_tween()
 	huida.tween_property(_venado, "rotation", 0.0, 0.1)
+	huida.tween_callback(_venado.play.bind(&"correr"))
 	huida.tween_property(_venado, "position:x", _venado.position.x + 420.0, 1.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	huida.parallel().tween_property(_venado, "modulate:a", 0.0, 1.6)
 

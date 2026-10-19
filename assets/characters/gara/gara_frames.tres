@@ -1,6 +1,7 @@
 [gd_resource type="SpriteFrames" load_steps=17 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/characters/gara/gara_atlas.png" id="1_atlas"]
+[ext_resource type="Texture2D" path="res://assets/characters/gara/gara_trepar.png" id="trepar_atlas"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_r0c4"]
 atlas = ExtResource("1_atlas")
@@ -61,6 +62,22 @@ region = Rect2(800, 176, 160, 176)
 [sub_resource type="AtlasTexture" id="AtlasTexture_r1c7"]
 atlas = ExtResource("1_atlas")
 region = Rect2(960, 176, 160, 176)
+
+[sub_resource type="AtlasTexture" id="trepar_0"]
+atlas = ExtResource("trepar_atlas")
+region = Rect2(0, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="trepar_1"]
+atlas = ExtResource("trepar_atlas")
+region = Rect2(160, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="trepar_2"]
+atlas = ExtResource("trepar_atlas")
+region = Rect2(320, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="trepar_3"]
+atlas = ExtResource("trepar_atlas")
+region = Rect2(480, 0, 160, 176)
 
 [resource]
 animations = [{
@@ -143,4 +160,21 @@ animations = [{
 "loop": false,
 "name": &"interactuar",
 "speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("trepar_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("trepar_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("trepar_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("trepar_3")
+}],
+"loop": true,
+"name": &"trepar",
+"speed": 8.0
 }]
