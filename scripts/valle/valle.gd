@@ -4,6 +4,7 @@ extends Node2D
 const TAMANO := Vector2(2800, 1800)
 ## Gris del mundo cuando nada está restaurado (0 = colores normales).
 const DESATURACION_INICIAL := 0.55
+const ESCENA_FINAL := "res://scenes/ui/Final.tscn"
 
 @onready var gara: GaraAerea = $Objetos/Gara
 @onready var rio: Line2D = $Rio
@@ -11,6 +12,7 @@ const DESATURACION_INICIAL := 0.55
 @onready var hud: CanvasLayer = $HUD
 @onready var puzzle_filtro: PuzzleFiltro = $PuzzleFiltro
 @onready var puzzle_habitat: PuzzleHabitat = $PuzzleHabitat
+@onready var puzzle_residuos: PuzzleResiduos = $PuzzleResiduos
 
 
 func _ready() -> void:
@@ -30,6 +32,8 @@ func _ready() -> void:
 	puzzle_filtro.cerrado.connect(_al_cerrar_filtro)
 	puzzle_habitat.resuelto.connect(_al_resolver_habitat)
 	puzzle_habitat.cerrado.connect(_al_cerrar_habitat)
+	puzzle_residuos.resuelto.connect(_al_resolver_residuos)
+	puzzle_residuos.cerrado.connect(_al_cerrar_residuos)
 	_especies_de_zonas_terminadas()
 	actualizar_mundo()
 	hud.mostrar_objetivo(objetivo_actual())
@@ -57,8 +61,12 @@ func objetivo_actual() -> String:
 		return "Entra al bosque por el arco de troncos."
 	if not Juego.zona_esta_completa("bosque"):
 		return "Habla con Mari: quiere enseñarte algo."
+	if not Juego.tiene_marca("lago_nivel"):
+		if "achi_inicio" not in Juego.dialogos_vistos:
+			return "Habla con Achi, el achoque, junto al lago."
+		return "Entra al lago por el arco de tule."
 	if not Juego.zona_esta_completa("lago"):
-		return "Ve al lago de Pátzcuaro."
+		return "Habla con Achi: necesita tu ayuda."
 	return "¡El valle está restaurado!"
 
 
@@ -105,6 +113,9 @@ func _al_terminar_dialogo(id: String) -> void:
 	if id in ["mari_habitat", "mari_habitat_repetir"] and not Juego.zona_esta_completa("bosque"):
 		puzzle_habitat.abrir()
 		return
+	if id in ["achi_residuos", "achi_residuos_repetir"] and not Juego.zona_esta_completa("lago"):
+		puzzle_residuos.abrir()
+		return
 	hud.mostrar_objetivo(objetivo_actual())
 
 
@@ -135,3 +146,17 @@ func _al_cerrar_habitat() -> void:
 		hud.mostrar_objetivo("¡Nueva habilidad: PLANTAR ENREDADERAS!")
 		await get_tree().create_timer(4.0).timeout
 	hud.mostrar_objetivo(objetivo_actual())
+
+
+func _al_resolver_residuos() -> void:
+	Juego.completar_zona("lago")
+	Juego.guardar()
+
+
+func _al_cerrar_residuos() -> void:
+	if not Juego.zona_esta_completa("lago"):
+		hud.mostrar_objetivo(objetivo_actual())
+		return
+	Sonido.efecto("zona_restaurada")
+	await Dialogo.mostrar("achi_listo")
+	Transicion.ir_a(ESCENA_FINAL)

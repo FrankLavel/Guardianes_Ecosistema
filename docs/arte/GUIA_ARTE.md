@@ -180,3 +180,18 @@ evenly spaced, facing right.
 🟡 `mari_retrato.png` — retrato de Mari (mariposa monarca con carita amigable y ojos grandes, estilo caricatura), de frente, para los diálogos.
 🟡 `zona2_plataformas.png` — mismas piezas que `zona1_plataformas` pero de **bosque de montaña**: tierra más oscura, agujas de pino en el pasto, raíces y piedras con musgo.
 🟢 Animación de **trepar** para el niño y la niña (vista de espaldas subiendo una enredadera, 4 cuadros).
+
+---
+
+## 8. Lista de arte — Sprint 4 (Zona 3: lago de Pátzcuaro)
+
+Hoy el lago usa arte **provisional dibujado por código** (`tools/arte/provisional_lago.py`): achoque, huevo, lirio, tule, sol, insecto, cáscara y papel. El pato mexicano y el pescado blanco aparecen como "?" en la bitácora.
+
+🔴 `zona3_achoque.png` — Achi, el achoque (ajolote de Pátzcuaro): café-morado con branquias rosas, carita amigable; de lado mirando a la derecha: 2 cuadros quieto, 4 nadando. Además, **retrato** de frente para los diálogos (`achi_retrato.png`).
+🔴 `zona3_objetos.png` — huevo de achoque (gelatinoso, transparente), lirio acuático flotando con flor morada, tule (varias cañas con espigas cafés), muelle de madera, canoa de pescador de Pátzcuaro.
+🟡 `zona3_animales.png` — pato mexicano de lado (2 cuadros) y pescado blanco de lado (casi transparente, 2 cuadros).
+🟡 `zona3_fondo_lago.png` (3:1) — el lago de Pátzcuaro de fondo con la isla de Janitzio a lo lejos, sin personajes; y la misma imagen **contaminada** (`zona3_fondo_lago_contaminado.png`): agua verde cubierta de lirio, cielo gris.
+🟡 `zona3_cadena.png` — íconos para el puzzle de la cadena alimenticia, cada uno separado: sol con carita, plantas acuáticas, larva de insecto acuático (libélula joven).
+🟡 `zona3_residuos.png` — cáscara de plátano, hoja de papel arrugada, frasco de vidrio, y 5 contenedores de basura de colores (verde, amarillo, azul, gris, rojo).
+
+Todos con el **bloque de estilo** de la sección 2 y fondo magenta.

@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/huevo_achoque.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona3/huevo.png" id="2_huevo"]
+
+[sub_resource type="Gradient" id="Gradient_brillo"]
+colors = PackedColorArray(0.85, 1, 0.9, 0.6, 0.6, 1, 0.8, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_brillo"]
+gradient = SubResource("Gradient_brillo")
+width = 96
+height = 96
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="CircleShape2D" id="Zona"]
+radius = 24.0
+
+[node name="HuevoAchoque" type="Area2D"]
+z_index = 2
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_script")
+
+[node name="Brillo" type="Sprite2D" parent="."]
+scale = Vector2(0.7, 0.7)
+texture = SubResource("GradientTexture2D_brillo")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_huevo")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("Zona")

@@ -13,6 +13,9 @@ const FRAMES_ANIMALES := preload("res://assets/characters/animales/zona1_animale
 @export var tamano := Vector2(96, 104)
 ## Si es false, nunca se puede nadar aquí (por ejemplo, un río que sigue contaminado).
 @export var nadable_si_limpio := true
+## Desde qué limpieza se puede nadar. El río exige agua limpia (1.0); el lago, turbio por el
+## lirio pero sin veneno, permite nadar desde antes.
+@export_range(0.0, 1.0) var limpieza_minima_nado := 0.99
 
 var limpieza := 0.0:
 	set(valor):
@@ -48,7 +51,7 @@ func _ready() -> void:
 
 
 func es_nadable() -> bool:
-	return nadable_si_limpio and limpieza >= 0.99 and Juego.tiene_habilidad("nadar")
+	return nadable_si_limpio and limpieza >= limpieza_minima_nado and Juego.tiene_habilidad("nadar")
 
 
 func superficie_y() -> float:

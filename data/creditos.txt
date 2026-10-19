@@ -1,0 +1,50 @@
+GUARDIANES DEL ÚLTIMO ECOSISTEMA
+
+
+Un videojuego educativo sobre los ecosistemas de Michoacán
+para niñas y niños de tercero de primaria
+
+
+EQUIPO DE DESARROLLO
+
+Diego Arellano Bautista
+Ignacio Emiliano Santoyo Gonzales
+Francisco Gabriel Lazo Velázquez
+
+
+ASESOR
+
+Ing. Uriel Cambrón Hernández
+
+
+Proyecto de la materia
+Gestión del proceso de desarrollo de software
+
+Universidad Tecnológica de Oriente de Michoacán
+
+
+ARTE
+
+Ilustraciones y personajes generados con IA
+y dirigidos por el equipo de desarrollo
+
+
+MÚSICA Y SONIDO
+
+Música y efectos generados por el equipo
+
+
+HECHO CON
+
+Godot Engine
+GUT (Godot Unit Test)
+
+
+AGRADECIMIENTOS
+
+A todas las personas que cuidan el agua,
+los bosques y los lagos de Michoacán.
+
+
+Recuerda:
+tú también eres guardián del último ecosistema.

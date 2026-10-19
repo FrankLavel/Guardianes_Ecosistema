@@ -1,0 +1,197 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/final.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/cielo.png" id="2_cielo"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/montanas.png" id="3_montanas"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/arboles.png" id="4_arboles"]
+[ext_resource type="Texture2D" path="res://assets/ui/logo.png" id="5_logo"]
+
+[node name="Final" type="Control"]
+texture_filter = 2
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Cielo" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_cielo")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Montanas" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -760.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("3_montanas")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Arboles" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -560.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("4_arboles")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Velo" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03, 0.08, 0.05, 0.35)
+
+[node name="Resumen" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -720.0
+offset_top = -500.0
+offset_right = 720.0
+offset_bottom = 500.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Resumen"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 18
+
+[node name="Logo" type="TextureRect" parent="Resumen/VBox"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+texture = ExtResource("5_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Titulo" type="Label" parent="Resumen/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 60
+text = "¡Gracias!"
+horizontal_alignment = 1
+
+[node name="Mensaje" type="Label" parent="Resumen/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "El río corre limpio, el bosque de oyamel vuelve a crecer y las crías de Achi nadan en el lago.
+El Valle de Tzintzun está vivo otra vez gracias a ti, {guardian}."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Aprendiste" type="Label" parent="Resumen/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Lo que aprendiste:
+• El agua limpia es vida: se cuida y se puede limpiar.
+• Los árboles son hogar y alimento de muchos seres vivos.
+• En un ecosistema todo está conectado.
+• Separar la basura evita que llegue a ríos y lagos."
+autowrap_mode = 3
+
+[node name="Especies" type="Label" parent="Resumen/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 0.7, 1)
+theme_override_font_sizes/font_size = 30
+text = "Especies en tu bitácora: 0 de 0"
+horizontal_alignment = 1
+
+[node name="Botones" type="HBoxContainer" parent="Resumen/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="BtnCreditos" type="Button" parent="Resumen/VBox/Botones"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 86)
+layout_mode = 2
+text = "CRÉDITOS"
+
+[node name="BtnValle" type="Button" parent="Resumen/VBox/Botones"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 86)
+layout_mode = 2
+text = "SEGUIR EXPLORANDO"
+
+[node name="BtnMenu" type="Button" parent="Resumen/VBox/Botones"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 86)
+layout_mode = 2
+text = "MENÚ PRINCIPAL"
+
+[node name="Creditos" type="Control" parent="."]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Oscuro" type="ColorRect" parent="Creditos"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.05, 0.03, 0.75)
+
+[node name="TextoCreditos" type="Label" parent="Creditos"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 1600.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 38
+text = "Créditos"
+horizontal_alignment = 1
+
+[node name="BtnSaltar" type="Button" parent="Creditos"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -330.0
+offset_top = -110.0
+offset_right = -30.0
+offset_bottom = -30.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "SALTAR"

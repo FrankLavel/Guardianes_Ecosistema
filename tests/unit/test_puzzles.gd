@@ -178,3 +178,55 @@ func test_elegir_una_tarjeta_y_luego_el_lugar() -> void:
 	p.elegir("oyamel")
 	p.colocar_en("arriba")
 	assert_eq(p.colocadas.get("arriba"), "oyamel")
+
+
+# ------------------------------------------------------------------ cadena alimenticia y residuos
+
+const ESCENA_CADENA := preload("res://scenes/puzzles/PuzzleCadena.tscn")
+const ESCENA_RESIDUOS := preload("res://scenes/puzzles/PuzzleResiduos.tscn")
+
+
+func test_la_cadena_empieza_por_el_sol() -> void:
+	var p: PuzzleCadena = add_child_autofree(ESCENA_CADENA.instantiate())
+	p.abrir()
+	_sin_pausa()
+	assert_false(p.poner("achoque"))
+	assert_string_contains(p.mensaje.text, "Sol")
+	assert_true(p.poner("sol"))
+	assert_false(p.poner("achoque"), "El achoque no come luz")
+	assert_eq(p.cadena, ["sol"] as Array[String])
+
+
+func test_cadena_completa_lo_resuelve() -> void:
+	Juego.nueva_partida(93)
+	var p: PuzzleCadena = add_child_autofree(ESCENA_CADENA.instantiate())
+	p.abrir()
+	_sin_pausa()
+	watch_signals(p)
+	for id in PuzzleCadena.ORDEN:
+		assert_true(p.poner(id), id)
+	assert_signal_emitted(p, "resuelto")
+	assert_has(Juego.especies_descubiertas, "tule")
+	Juego.nueva_partida()
+
+
+func test_residuos_cada_cosa_en_su_contenedor() -> void:
+	Juego.nueva_partida(93)
+	var p: PuzzleResiduos = add_child_autofree(ESCENA_RESIDUOS.instantiate())
+	p.abrir()
+	_sin_pausa()
+	watch_signals(p)
+	assert_eq(p.item_actual()[0], "cascara")
+	assert_false(p.clasificar("plastico"), "La cáscara no es plástico")
+	assert_eq(p.indice, 0)
+	for item in PuzzleResiduos.BASURA:
+		assert_true(p.clasificar(item[3]), item[0])
+	assert_signal_emitted(p, "resuelto")
+	assert_has(Juego.especies_descubiertas, "pato_mexicano")
+	Juego.nueva_partida()
+
+
+func test_la_pila_va_en_peligrosos() -> void:
+	for item in PuzzleResiduos.BASURA:
+		if item[0] == "pila":
+			assert_eq(item[3], "peligrosos")

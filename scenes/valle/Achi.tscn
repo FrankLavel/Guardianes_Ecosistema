@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/valle/personaje_valle.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona3/achoque.png" id="2_achoque"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_achi"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_achoque")
+}],
+"loop": true,
+"name": &"hablar",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_achoque")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hablar"]
+radius = 100.0
+
+[node name="Achi" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_script")
+texto_aviso = "E  Hablar con Achi"
+dialogos = Array[PackedStringArray]([PackedStringArray("zona:lago", "achi_final"), PackedStringArray("visto:achi_residuos", "achi_residuos_repetir"), PackedStringArray("marca:lago_nivel", "achi_residuos"), PackedStringArray("zona:bosque", "achi_inicio"), PackedStringArray("siempre", "achi_espera")])
+aleteo = true
+
+[node name="Sombra" type="Polygon2D" parent="."]
+color = Color(0, 0, 0, 0.22)
+polygon = PackedVector2Array(-34, 0, -26, -6, 0, -8, 26, -6, 34, 0, 26, 6, 0, 8, -26, 6)
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+position = Vector2(0, -4)
+scale = Vector2(0.6, 0.6)
+sprite_frames = SubResource("SpriteFrames_achi")
+animation = &"idle"
+autoplay = "idle"
+offset = Vector2(0, -52)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_hablar")
+
+[node name="Aviso" type="Label" parent="."]
+offset_left = -150.0
+offset_top = -130.0
+offset_right = 150.0
+offset_bottom = -92.0
+theme_override_font_sizes/font_size = 26
+text = "E"
+horizontal_alignment = 1

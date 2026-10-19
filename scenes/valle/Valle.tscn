@@ -35,6 +35,8 @@
 [ext_resource type="PackedScene" path="res://scenes/puzzles/PuzzleFiltro.tscn" id="99_filtro"]
 [ext_resource type="PackedScene" path="res://scenes/valle/Mari.tscn" id="98_mari"]
 [ext_resource type="PackedScene" path="res://scenes/puzzles/PuzzleHabitat.tscn" id="97_habitat"]
+[ext_resource type="PackedScene" path="res://scenes/valle/Achi.tscn" id="96_achi"]
+[ext_resource type="PackedScene" path="res://scenes/puzzles/PuzzleResiduos.tscn" id="95_residuos"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_y2o8h"]
 shader = ExtResource("2_qlniw")
@@ -231,6 +233,9 @@ position = Vector2(990, 720)
 [node name="Mari" parent="Objetos" instance=ExtResource("98_mari")]
 position = Vector2(2280, 560)
 
+[node name="Achi" parent="Objetos" instance=ExtResource("96_achi")]
+position = Vector2(2240, 1560)
+
 [node name="EntradaRio" type="Area2D" parent="Objetos" unique_id=488095691 instance=ExtResource("11_fl5k2")]
 position = Vector2(880, 330)
 collision_layer = 0
@@ -260,6 +265,7 @@ script = ExtResource("12_fcusl")
 zona = "lago"
 nombre_zona = "Lago de Pátzcuaro"
 textura = ExtResource("15_2wbvf")
+escena = "res://scenes/world/Nivel3.tscn"
 
 [node name="CasaAdobe1" type="StaticBody2D" parent="Objetos" unique_id=309493326]
 position = Vector2(1680, 880)
@@ -666,3 +672,5 @@ permitir_volver_al_valle = false
 [node name="PuzzleFiltro" parent="." instance=ExtResource("99_filtro")]
 
 [node name="PuzzleHabitat" parent="." instance=ExtResource("97_habitat")]
+
+[node name="PuzzleResiduos" parent="." instance=ExtResource("95_residuos")]

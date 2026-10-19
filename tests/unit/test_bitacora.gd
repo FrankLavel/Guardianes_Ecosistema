@@ -29,7 +29,7 @@ func test_cada_especie_tiene_sus_datos() -> void:
 
 func test_las_especies_de_rio_y_bosque_tienen_imagen() -> void:
 	for id in Bitacora.especies:
-		if Bitacora.especies[id]["zona"] in ["rio", "bosque"]:
+		if Bitacora.especies[id]["zona"] in ["rio", "bosque"] or id in ["achoque", "tule"]:
 			assert_not_null(Bitacora.imagen_de(id), "Falta imagen de %s" % id)
 
 

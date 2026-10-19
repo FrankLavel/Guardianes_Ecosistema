@@ -1,0 +1,87 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzles/puzzle_cadena.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/tema.tres" id="2_tema"]
+
+[sub_resource type="StyleBoxFlat" id="Marco"]
+bg_color = Color(0.2, 0.3, 0.2, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[node name="PuzzleCadena" type="CanvasLayer"]
+script = ExtResource("1_script")
+
+[node name="Oscurecer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="PanelContainer" parent="."]
+texture_filter = 2
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -860.0
+offset_top = -525.0
+offset_right = 860.0
+offset_bottom = 525.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_tema")
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Titulo" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 44
+text = "La cadena alimenticia del lago"
+horizontal_alignment = 1
+
+[node name="Cuerpo" type="VBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 30
+
+[node name="Escenario" type="Panel" parent="Panel/VBox/Cuerpo"]
+unique_name_in_owner = true
+clip_contents = true
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(1300, 260)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Marco")
+
+[node name="Tarjetas" type="HBoxContainer" parent="Panel/VBox/Cuerpo"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 16
+
+[node name="Mensaje" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Mensaje"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Botones" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="BtnCerrar" type="Button" parent="Panel/VBox/Botones"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 80)
+layout_mode = 2
+text = "SALIR"

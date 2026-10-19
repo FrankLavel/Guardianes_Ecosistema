@@ -243,7 +243,8 @@ func reaparecer() -> void:
 
 func _aplicar_interaccion(delta: float) -> void:
 	_tiempo_interaccion_restante = maxf(_tiempo_interaccion_restante - delta, 0.0)
-	if not entrada_interactuar or esta_interactuando() or not is_on_floor():
+	# También se puede interactuar nadando (quitar lirio, recoger basura que flota).
+	if not entrada_interactuar or esta_interactuando() or not (is_on_floor() or esta_nadando()):
 		return
 	var objetivo := interactuable_mas_cercano()
 	if objetivo == null:

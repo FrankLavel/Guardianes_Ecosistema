@@ -11,6 +11,10 @@
     "mari": {
       "nombre": "Mari",
       "retrato": "res://assets/characters/mari/mari_retrato.png"
+    },
+    "achi": {
+      "nombre": "Achi",
+      "retrato": "res://assets/ui/bitacora/achoque.png"
     }
   },
   "dialogos": {
@@ -168,6 +172,74 @@
       {
         "quien": "mari",
         "texto": "Mira cuántas mariposas llegaron este invierno. ¡El bosque está vivo otra vez!"
+      }
+    ],
+    "achi_espera": [
+      {
+        "quien": "achi",
+        "texto": "Glub... hola. Soy Achi, un achoque. Vivo en el lago, pero ahora estoy muy cansado..."
+      },
+      {
+        "quien": "achi",
+        "texto": "Primero ayuda al río y al bosque. Luego ven conmigo, ¿sí?"
+      }
+    ],
+    "achi_inicio": [
+      {
+        "quien": "achi",
+        "texto": "¡{nombre}! Soy Achi, el último achoque del lago de Pátzcuaro."
+      },
+      {
+        "quien": "achi",
+        "texto": "Los achoques solo vivimos aquí, en ningún otro lugar del mundo."
+      },
+      {
+        "quien": "achi",
+        "texto": "Pero el lirio cubre el lago, hay basura flotando... y mis huevos están en el fondo, en peligro."
+      },
+      {
+        "quien": "jugador",
+        "texto": "¡Yo los rescato, Achi! Ya sé nadar."
+      },
+      {
+        "quien": "achi",
+        "texto": "Entra por el arco de tule. ¡Gracias, {guardian}!"
+      }
+    ],
+    "achi_residuos": [
+      {
+        "quien": "achi",
+        "texto": "¡Mis huevos están a salvo y el agua se ve más clara!"
+      },
+      {
+        "quien": "achi",
+        "texto": "Sacaste mucha basura del lago. Pero si la tiramos toda junta, vuelve a terminar en el agua."
+      },
+      {
+        "quien": "achi",
+        "texto": "¿Me ayudas a separarla? Así se puede reciclar."
+      }
+    ],
+    "achi_residuos_repetir": [
+      {
+        "quien": "achi",
+        "texto": "¿Lo intentamos otra vez? Piensa de qué está hecha cada cosa."
+      }
+    ],
+    "achi_listo": [
+      {
+        "quien": "achi",
+        "texto": "¡Lo lograste, {nombre}! El río, el bosque y el lago están vivos otra vez."
+      },
+      {
+        "quien": "achi",
+        "texto": "Ven, acompáñame al corazón del valle. Hay algo que quiero que veas."
+      }
+    ],
+    "achi_final": [
+      {
+        "quien": "achi",
+        "texto": "Mis crías ya nadan en el lago. Gracias por cuidarnos, {guardian}."
       }
     ]
   }
