@@ -74,104 +74,111 @@ offset_bottom = 510.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="Libro/Panel"]
+[node name="Margen" type="MarginContainer" parent="Libro/Panel"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 40
 
-[node name="Encabezado" type="HBoxContainer" parent="Libro/Panel/VBox"]
+[node name="VBox" type="VBoxContainer" parent="Libro/Panel/Margen"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Encabezado" type="HBoxContainer" parent="Libro/Panel/Margen/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Icono" type="TextureRect" parent="Libro/Panel/VBox/Encabezado"]
+[node name="Icono" type="TextureRect" parent="Libro/Panel/Margen/VBox/Encabezado"]
 layout_mode = 2
 texture = ExtResource("3_icono")
 stretch_mode = 5
 
-[node name="Titulo" type="Label" parent="Libro/Panel/VBox/Encabezado"]
+[node name="Titulo" type="Label" parent="Libro/Panel/Margen/VBox/Encabezado"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
-theme_override_font_sizes/font_size = 46
+theme_override_font_sizes/font_size = 40
 text = "Bitácora del guardián"
 
-[node name="Espacio" type="Control" parent="Libro/Panel/VBox/Encabezado"]
+[node name="Espacio" type="Control" parent="Libro/Panel/Margen/VBox/Encabezado"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Contador" type="Label" parent="Libro/Panel/VBox/Encabezado"]
+[node name="Contador" type="Label" parent="Libro/Panel/Margen/VBox/Encabezado"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 28
 text = "Especies descubiertas: 0 / 0"
 
-[node name="Pestanas" type="HBoxContainer" parent="Libro/Panel/VBox"]
+[node name="Pestanas" type="HBoxContainer" parent="Libro/Panel/Margen/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="PestanaRio" type="Button" parent="Libro/Panel/VBox/Pestanas"]
+[node name="PestanaRio" type="Button" parent="Libro/Panel/Margen/VBox/Pestanas"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 70)
+custom_minimum_size = Vector2(220, 62)
 layout_mode = 2
 toggle_mode = true
 text = "RÍO"
 
-[node name="PestanaBosque" type="Button" parent="Libro/Panel/VBox/Pestanas"]
+[node name="PestanaBosque" type="Button" parent="Libro/Panel/Margen/VBox/Pestanas"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 70)
+custom_minimum_size = Vector2(220, 62)
 layout_mode = 2
 toggle_mode = true
 text = "BOSQUE"
 
-[node name="PestanaLago" type="Button" parent="Libro/Panel/VBox/Pestanas"]
+[node name="PestanaLago" type="Button" parent="Libro/Panel/Margen/VBox/Pestanas"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(240, 70)
+custom_minimum_size = Vector2(220, 62)
 layout_mode = 2
 toggle_mode = true
 text = "LAGO"
 
-[node name="Paginas" type="HBoxContainer" parent="Libro/Panel/VBox"]
+[node name="Paginas" type="HBoxContainer" parent="Libro/Panel/Margen/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 24
 
-[node name="Izquierda" type="PanelContainer" parent="Libro/Panel/VBox/Paginas"]
-custom_minimum_size = Vector2(700, 0)
+[node name="Izquierda" type="PanelContainer" parent="Libro/Panel/Margen/VBox/Paginas"]
+custom_minimum_size = Vector2(640, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("Pagina")
 
-[node name="Rejilla" type="GridContainer" parent="Libro/Panel/VBox/Paginas/Izquierda"]
+[node name="Rejilla" type="GridContainer" parent="Libro/Panel/Margen/VBox/Paginas/Izquierda"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/h_separation = 18
 theme_override_constants/v_separation = 18
 columns = 4
 
-[node name="Derecha" type="PanelContainer" parent="Libro/Panel/VBox/Paginas"]
+[node name="Derecha" type="PanelContainer" parent="Libro/Panel/Margen/VBox/Paginas"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("Pagina")
 
-[node name="Ficha" type="VBoxContainer" parent="Libro/Panel/VBox/Paginas/Derecha"]
+[node name="Ficha" type="VBoxContainer" parent="Libro/Panel/Margen/VBox/Paginas/Derecha"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ImagenGrande" type="TextureRect" parent="Libro/Panel/VBox/Paginas/Derecha/Ficha"]
+[node name="ImagenGrande" type="TextureRect" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 260)
+custom_minimum_size = Vector2(0, 190)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="NombreEspecie" type="Label" parent="Libro/Panel/VBox/Paginas/Derecha/Ficha"]
+[node name="NombreEspecie" type="Label" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.32, 0.2, 0.08, 1)
 theme_override_constants/outline_size = 0
-theme_override_font_sizes/font_size = 44
+theme_override_font_sizes/font_size = 38
 text = "Nombre"
 horizontal_alignment = 1
 
-[node name="Cientifico" type="Label" parent="Libro/Panel/VBox/Paginas/Derecha/Ficha"]
+[node name="Cientifico" type="Label" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.35, 0.22, 1)
@@ -180,25 +187,25 @@ theme_override_font_sizes/font_size = 26
 text = "Nombre científico"
 horizontal_alignment = 1
 
-[node name="Estado" type="Label" parent="Libro/Panel/VBox/Paginas/Derecha/Ficha"]
+[node name="Estado" type="Label" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "Estado"
 horizontal_alignment = 1
 
-[node name="Dato" type="Label" parent="Libro/Panel/VBox/Paginas/Derecha/Ficha"]
+[node name="Dato" type="Label" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.25, 0.17, 0.08, 1)
 theme_override_constants/outline_size = 0
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 25
 text = "Dato"
 autowrap_mode = 3
 
-[node name="BtnCerrarBitacora" type="Button" parent="Libro/Panel/VBox"]
+[node name="BtnCerrarBitacora" type="Button" parent="Libro/Panel/Margen/VBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(320, 76)
+custom_minimum_size = Vector2(300, 70)
 layout_mode = 2
 size_flags_horizontal = 4
 text = "CERRAR"

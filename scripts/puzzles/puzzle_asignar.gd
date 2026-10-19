@@ -5,8 +5,11 @@ extends PuzzleBase
 ## Lo usan "Reforestar" (cada árbol a su altura) y "¿Quién vive aquí?" (cada animal a su hábitat).
 
 ## id -> {nombre, imagen (ruta o ""), destino, pista}
+## Tamaño para el que se escribieron las posiciones; se escalan al tamaño real del escenario.
+const TAMANO_DISENO := Vector2(860, 520)
+
 var opciones: Dictionary = {}
-## id -> {nombre, posicion (centro dentro de %Escenario)}
+## id -> {nombre, posicion (centro dentro de %Escenario, en un escenario de TAMANO_DISENO)}
 var destinos: Dictionary = {}
 var texto_inicio := ""
 var texto_final := ""
@@ -45,9 +48,10 @@ func _construir() -> void:
 	for id in destinos:
 		var datos: Dictionary = destinos[id]
 		var boton := Button.new()
-		boton.custom_minimum_size = Vector2(190, 160)
+		boton.custom_minimum_size = Vector2(160, 140)
 		boton.size = boton.custom_minimum_size
-		boton.position = (datos["posicion"] as Vector2) - boton.size / 2.0
+		var escala := escenario.custom_minimum_size / TAMANO_DISENO
+		boton.position = (datos["posicion"] as Vector2) * escala - boton.size / 2.0
 		boton.text = datos["nombre"]
 		boton.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		boton.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -62,7 +66,9 @@ func _construir() -> void:
 	for id in opciones:
 		var datos: Dictionary = opciones[id]
 		var tarjeta := Button.new()
-		tarjeta.custom_minimum_size = Vector2(220, 230)
+		tarjeta.custom_minimum_size = Vector2(190, 210)
+		tarjeta.autowrap_mode = TextServer.AUTOWRAP_WORD
+		tarjeta.add_theme_font_size_override("font_size", 26)
 		tarjeta.toggle_mode = true
 		tarjeta.text = datos["nombre"]
 		tarjeta.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP

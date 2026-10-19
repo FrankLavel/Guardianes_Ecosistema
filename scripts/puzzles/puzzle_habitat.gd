@@ -37,4 +37,4 @@ func _dibujar_bosque() -> void:
 	# El oyamel grande, al centro-derecha.
 	var alto := tam.y - 30
 	var ancho := alto * ARBOL.get_width() / ARBOL.get_height()
-	escenario.draw_texture_rect(ARBOL, Rect2(Vector2(640 - ancho / 2.0, 10), Vector2(ancho, alto)), false)
+	escenario.draw_texture_rect(ARBOL, Rect2(Vector2(tam.x * 0.744 - ancho / 2.0, 10), Vector2(ancho, alto)), false)

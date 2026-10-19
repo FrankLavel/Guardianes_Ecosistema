@@ -170,6 +170,20 @@ def agregar_animacion(tres: Path, nombre: str, cuadros: list[Image.Image], fps: 
     tres.write_text(texto, encoding="utf-8", newline="\n")
 
 
+def nadar() -> None:
+    """Animación de nado (si ya se generó el arte): gara_nadar.* y nina_nadar.* en fuente_ia."""
+    for carpeta, celda in [("gara", (160, 176)), ("nina", (200, 176))]:
+        fuente = next((f.name for f in arte.FUENTE.glob(f"{carpeta}_nadar.*")), None)
+        if fuente is None:
+            print(f"  (sin arte de nado para {carpeta})")
+            continue
+        rgba = quitar_fondo(cargar(fuente))
+        cuadros = [recortar(rgba, o) for o in sorted(separar_objetos(rgba), key=lambda o: (o["caja"][1] // 200, o["caja"][0]))]
+        factor = min(150 / max(c.width for c in cuadros), 120 / max(c.height for c in cuadros))
+        cuadros = [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
+        agregar_animacion(ASSETS / f"characters/{carpeta}/{carpeta}_frames.tres", "nadar", cuadros, 8.0, celda)
+
+
 def trepar() -> None:
     for fuente, carpeta, usar, celda in [("gara_trepar.jpg", "gara", None, (160, 176)), ("nina_trepar.jpg", "nina", 7, (200, 176))]:
         rgba = quitar_fondo(cargar(fuente))
@@ -198,6 +212,7 @@ def guardianes() -> None:
     )
     nina_plataformas()
     trepar()
+    nadar()
 
 
 # ---------------------------------------------------------------- Valle (mapa aéreo)

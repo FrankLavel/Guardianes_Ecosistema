@@ -20,14 +20,18 @@ const TILE_PLATAFORMA := Vector2i(2, 0)
 @export var alto_pasto := 195
 @export var textura_plataforma: Texture2D
 @export var borde_plataforma := 34
-## El pasto sobresale un poco por encima de la colisión para que se vea natural.
-@export var sobresale_pasto := 8.0
+## Cuánto se hunden los pies en el pasto (px de la textura, bajo el borde del pasto sólido).
+@export var hundimiento_pies := 10
+## Distancia (en el mundo) desde el borde superior de la textura hasta donde se pisa. Se calcula
+## sola a partir de la textura: las matas y flores que sobresalen arriba del pasto no cuentan.
+var sobresale_pasto := 8.0
 @export var ocultar_tiles := true
 
 
 func _ready() -> void:
 	if terreno == null:
 		return
+	sobresale_pasto = (linea_de_pisada(textura_suelo) + hundimiento_pies) * escala_arte
 	if ocultar_tiles:
 		# Transparente pero activo: las colisiones siguen funcionando.
 		terreno.self_modulate = Color(1, 1, 1, 0)
@@ -57,6 +61,25 @@ func construir() -> void:
 		var alto_tronco := textura_plataforma.get_height() * escala_arte
 		var rect := Rect2(tramo.x * tam.x - 4.0, tramo.y * tam.y - 4.0, (tramo.z - tramo.x + 1) * tam.x + 8.0, alto_tronco)
 		_agregar_parche(textura_plataforma, rect, borde_plataforma, 0, 0)
+
+
+## Primera fila de la textura donde el pasto ya es continuo (más del 90 % de la fila tiene
+## dibujo, sin contar los bordes izquierdo y derecho).
+static func linea_de_pisada(textura: Texture2D) -> int:
+	var img := textura.get_image()
+	if img.is_compressed():
+		img.decompress()
+	var margen := mini(80, img.get_width() / 4)
+	for y in img.get_height():
+		var llenos := 0
+		var total := 0
+		for x in range(margen, img.get_width() - margen, 4):
+			total += 1
+			if img.get_pixel(x, y).a > 0.1:
+				llenos += 1
+		if total > 0 and float(llenos) / total > 0.9:
+			return y
+	return 0
 
 
 ## Tramos horizontales de celdas de un tipo: Vector3i(x_inicio, fila, x_fin).

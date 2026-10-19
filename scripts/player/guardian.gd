@@ -157,7 +157,9 @@ func entrar_agua(agua: Node2D) -> void:
 		_aguas.append(agua)
 	# Al caer al agua se frena de golpe (el agua amortigua).
 	velocity.y = minf(velocity.y, velocidad_caida_agua)
-	sprite.modulate = Color(0.75, 0.9, 1.0)
+	# Tono azulado bajo el agua solo mientras no haya arte de nado.
+	if not sprite.sprite_frames.has_animation(&"nadar"):
+		sprite.modulate = Color(0.75, 0.9, 1.0)
 
 
 func salir_agua(agua: Node2D) -> void:
@@ -173,8 +175,8 @@ func animacion_segun_estado() -> StringName:
 	if _trepando:
 		return &"trepar" if sprite.sprite_frames.has_animation(&"trepar") else &"saltar"
 	if esta_nadando():
-		# Todavía no hay animación de nado: se usa la de caminar, más lenta.
-		return &"caminar"
+		# Si el personaje no tiene animación de nado, se usa la de caminar, más lenta.
+		return &"nadar" if sprite.sprite_frames.has_animation(&"nadar") else &"caminar"
 	if not is_on_floor():
 		return &"saltar" if velocity.y < 0.0 else &"caer"
 	var rapidez := absf(velocity.x)
@@ -195,7 +197,7 @@ func _actualizar_animacion() -> void:
 		# Quieto en la enredadera: la animación se detiene.
 		sprite.speed_scale = 1.0 if absf(velocity.y) > 1.0 else 0.0
 	elif esta_nadando():
-		sprite.speed_scale = 0.5
+		sprite.speed_scale = 1.0 if sprite.animation == &"nadar" else 0.5
 	elif animacion == &"caminar" or animacion == &"correr":
 		sprite.speed_scale = clampf(absf(velocity.x) / velocidad_maxima, 0.6, 1.2)
 	else:

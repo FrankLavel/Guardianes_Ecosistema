@@ -138,7 +138,7 @@ func mostrar_zona(zona: String) -> void:
 func _crear_tarjeta(id: String) -> Button:
 	var conocida: bool = id in Juego.especies_descubiertas
 	var tarjeta := Button.new()
-	tarjeta.custom_minimum_size = Vector2(150, 150)
+	tarjeta.custom_minimum_size = Vector2(132, 132)
 	tarjeta.expand_icon = true
 	tarjeta.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	for estilo in ["normal", "hover", "pressed", "focus"]:
