@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" path="res://assets/characters/gara/gara_atlas.png" id="1_atlas"]
 [ext_resource type="Texture2D" path="res://assets/characters/gara/gara_trepar.png" id="trepar_atlas"]
+[ext_resource type="Texture2D" path="res://assets/characters/gara/gara_nadar.png" id="nadar_atlas"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_r0c4"]
 atlas = ExtResource("1_atlas")
@@ -78,6 +79,30 @@ region = Rect2(320, 0, 160, 176)
 [sub_resource type="AtlasTexture" id="trepar_3"]
 atlas = ExtResource("trepar_atlas")
 region = Rect2(480, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="nadar_0"]
+atlas = ExtResource("nadar_atlas")
+region = Rect2(0, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="nadar_1"]
+atlas = ExtResource("nadar_atlas")
+region = Rect2(160, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="nadar_2"]
+atlas = ExtResource("nadar_atlas")
+region = Rect2(320, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="nadar_3"]
+atlas = ExtResource("nadar_atlas")
+region = Rect2(480, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="nadar_4"]
+atlas = ExtResource("nadar_atlas")
+region = Rect2(640, 0, 160, 176)
+
+[sub_resource type="AtlasTexture" id="nadar_5"]
+atlas = ExtResource("nadar_atlas")
+region = Rect2(800, 0, 160, 176)
 
 [resource]
 animations = [{
@@ -176,5 +201,28 @@ animations = [{
 }],
 "loop": true,
 "name": &"trepar",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("nadar_0")
+}, {
+"duration": 1.0,
+"texture": SubResource("nadar_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("nadar_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("nadar_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("nadar_4")
+}, {
+"duration": 1.0,
+"texture": SubResource("nadar_5")
+}],
+"loop": true,
+"name": &"nadar",
 "speed": 8.0
 }]

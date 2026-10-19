@@ -177,8 +177,14 @@ def nadar() -> None:
         if fuente is None:
             print(f"  (sin arte de nado para {carpeta})")
             continue
-        rgba = quitar_fondo(cargar(fuente))
-        cuadros = [recortar(rgba, o) for o in sorted(separar_objetos(rgba), key=lambda o: (o["caja"][1] // 200, o["caja"][0]))]
+        img = cargar(fuente)
+        if carpeta == "nina":
+            # La hoja de la niña trae abajo otra cuadrícula (caminando en el valle): solo la mitad de arriba.
+            img = img[:375]
+        rgba = quitar_fondo(img)
+        # Los 6 objetos más grandes son los cuadros (las burbujas sueltas se descartan).
+        objs = sorted(separar_objetos(rgba, union=14), key=lambda o: -o["mascara"].sum())[:6]
+        cuadros = [recortar(rgba, o) for o in sorted(objs, key=lambda o: (o["caja"][1] // 150, o["caja"][0]))]
         factor = min(150 / max(c.width for c in cuadros), 120 / max(c.height for c in cuadros))
         cuadros = [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
         agregar_animacion(ASSETS / f"characters/{carpeta}/{carpeta}_frames.tres", "nadar", cuadros, 8.0, celda)
