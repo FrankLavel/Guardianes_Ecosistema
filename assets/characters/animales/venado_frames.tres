@@ -1,30 +1,34 @@
-[gd_resource type="SpriteFrames" load_steps=8 format=3]
+[gd_resource type="SpriteFrames" load_steps=9 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/characters/animales/venado_atlas.png" id="1_atlas"]
 
 [sub_resource type="AtlasTexture" id="c0"]
 atlas = ExtResource("1_atlas")
-region = Rect2(0, 0, 360, 360)
+region = Rect2(0, 0, 500, 360)
 
 [sub_resource type="AtlasTexture" id="c1"]
 atlas = ExtResource("1_atlas")
-region = Rect2(360, 0, 360, 360)
+region = Rect2(500, 0, 500, 360)
 
 [sub_resource type="AtlasTexture" id="c2"]
 atlas = ExtResource("1_atlas")
-region = Rect2(720, 0, 360, 360)
+region = Rect2(1000, 0, 500, 360)
 
 [sub_resource type="AtlasTexture" id="c3"]
 atlas = ExtResource("1_atlas")
-region = Rect2(0, 360, 360, 360)
+region = Rect2(0, 360, 500, 360)
 
 [sub_resource type="AtlasTexture" id="c4"]
 atlas = ExtResource("1_atlas")
-region = Rect2(360, 360, 360, 360)
+region = Rect2(500, 360, 500, 360)
 
 [sub_resource type="AtlasTexture" id="c5"]
 atlas = ExtResource("1_atlas")
-region = Rect2(720, 360, 360, 360)
+region = Rect2(1000, 360, 500, 360)
+
+[sub_resource type="AtlasTexture" id="c6"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 720, 500, 360)
 
 [resource]
 animations = [{
@@ -38,7 +42,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c5")
+"texture": SubResource("c3")
 }, {
 "duration": 1.0,
 "texture": SubResource("c0")
@@ -55,10 +59,13 @@ animations = [{
 "texture": SubResource("c2")
 }, {
 "duration": 1.0,
-"texture": SubResource("c3")
+"texture": SubResource("c4")
 }, {
 "duration": 1.0,
-"texture": SubResource("c4")
+"texture": SubResource("c5")
+}, {
+"duration": 1.0,
+"texture": SubResource("c6")
 }],
 "loop": true,
 "name": &"correr",

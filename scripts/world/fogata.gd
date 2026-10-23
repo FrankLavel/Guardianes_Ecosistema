@@ -31,7 +31,10 @@ func interactuar(guardian: Node) -> void:
 	if guardian.has_method("quitar_interactuable"):
 		guardian.quitar_interactuable(self)
 	_fuego.emitting = false
+	var alto_antes := _imagen.texture.get_height()
 	_imagen.texture = preload("res://assets/objects/zona2/fogata_apagada.png")
+	# La apagada es más alta (lleva el humo): se sube para que la leña quede en el mismo piso.
+	_imagen.offset.y -= (_imagen.texture.get_height() - alto_antes) / 2.0
 	_humo.amount = 30
 	_humo.emitting = true
 	create_tween().tween_property(_luz, "modulate:a", 0.0, 0.6)

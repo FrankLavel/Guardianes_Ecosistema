@@ -38,6 +38,22 @@ def objetos(fuente: str, nombres: list[str | None], destino: str, area_min: int 
     return piezas
 
 
+def a_alto(img: Image.Image, alto: int) -> Image.Image:
+    """Mismo alto que el arte anterior: las escenas usan offsets y escalas calculados con ese alto."""
+    return img.resize((round(img.width * alto / img.height), alto), Image.Resampling.LANCZOS)
+
+
+def unir(a: dict, b: dict) -> dict:
+    """Une dos objetos de separar_objetos en uno (p. ej. el humo suelto de la fogata apagada)."""
+    caja = (min(a["caja"][0], b["caja"][0]), min(a["caja"][1], b["caja"][1]),
+            max(a["caja"][2], b["caja"][2]), max(a["caja"][3], b["caja"][3]))
+    mascara = np.zeros((caja[3] - caja[1], caja[2] - caja[0]), bool)
+    for o in (a, b):
+        x0, y0, x1, y1 = o["caja"]
+        mascara[y0 - caja[1]:y1 - caja[1], x0 - caja[0]:x1 - caja[0]] |= o["mascara"]
+    return {"caja": caja, "mascara": mascara}
+
+
 def rellenar_magenta(img: np.ndarray) -> np.ndarray:
     """Tapa las líneas magenta de la cuadrícula copiando los pixeles vecinos."""
     img = img.astype(np.float32).copy()
@@ -92,11 +108,6 @@ def personaje_aereo(fuente: str, carpeta: str, nombre: str, idle: dict[str, int]
         base / f"{nombre}_aerea_atlas.png", base / f"{nombre}_aerea_frames.tres",
         f"res://assets/characters/{carpeta}/aerea/{nombre}_aerea_atlas.png",
     )
-    # Retrato: la cabeza del cuadro de frente, en un cuadrado.
-    frente = cuadros[idle["abajo"]]
-    lado = int(frente.width * 1.05)
-    cabeza = frente.crop(((frente.width - lado) // 2, 0, (frente.width + lado) // 2, lado))
-    guardar(cabeza.resize((256, 256), Image.Resampling.LANCZOS), ASSETS / "characters" / carpeta / f"{nombre}_retrato.png")
 
 
 def nina_plataformas() -> None:
@@ -216,6 +227,14 @@ def guardianes() -> None:
         caminar={"abajo": [1, 3, 5, 7], "izquierda": [8, 12, 16, 20], "arriba": [27, 28, 29, 31]},
         fps_arriba=8.0,
     )
+    # Retratos de los diálogos: niño a la izquierda, niña a la derecha; en un cuadrado, pegados abajo.
+    rgba = quitar_fondo(cargar("retratos.jpg"))
+    for carpeta, obj in zip(["gara", "nina"], separar_objetos(rgba)):
+        busto = recortar(rgba, obj)
+        lado = max(busto.size)
+        cuadro = Image.new("RGBA", (lado, lado))
+        cuadro.alpha_composite(busto, ((lado - busto.width) // 2, lado - busto.height))
+        guardar(cuadro.resize((512, 512), Image.Resampling.LANCZOS), ASSETS / "characters" / carpeta / f"{carpeta}_retrato.png")
     nina_plataformas()
     trepar()
     nadar()
@@ -268,7 +287,7 @@ def zona1() -> None:
     guardar(tira, ASSETS / "maps/zona1/plataformas/suelo_tira.png")
 
     objetos("zona1_objetos.jpg", [
-        "botella", None, "bolsa", "pila", "unicel", "arbol_meta", "tuberia_sucia",
+        None, None, None, None, None, "arbol_meta", None,
         None, "tronco_empujable", "brote_control", "lancha", "charco_toxico",
     ], "objects/zona1")
     # El brillo del brote salió rosa (mezclado con el fondo); se quita y el brillo lo pone el juego.
@@ -280,10 +299,12 @@ def zona1() -> None:
     px[..., 3] = np.where(brillo, 0, px[..., 3])
     brote = Image.fromarray(arte.quitar_tinte_magenta(px, rojo=30, azul=-10))
     guardar(brote.crop(brote.getbbox()), ASSETS / "objects/zona1/brote_control.png")
-    lata = objetos("zona1_lata.jpg", ["lata"], "objects/zona1")["lata"]
-    # La IA la dibujó enorme; se reduce al tamaño de los demás objetos.
-    guardar(lata.resize((200, round(200 * lata.height / lata.width)), Image.Resampling.LANCZOS), ASSETS / "objects/zona1/lata.png")
-    objetos("zona1_valvula.jpg", ["valvula_abierta", "valvula_cerrada"], "objects/zona1")
+    # En el juego la basura se escala por su lado más largo (basura.gd), así que el tamaño aquí no importa.
+    objetos("zona1_basura.jpg", ["bolsa", "botella", "lata", "unicel", "pila"], "objects/zona1")
+    # Los objetos 1, 2, 4 y 5 son los letreros "OPEN"/"CLOSED" que dibujó la IA.
+    valvulas = objetos("zona1_valvulas.jpg", ["valvula_abierta", None, None, "valvula_cerrada", None, None, "tuberia_sucia"], "objects/zona1")
+    for nombre, alto in {"valvula_abierta": 613, "valvula_cerrada": 532, "tuberia_sucia": 462}.items():
+        guardar(a_alto(valvulas[nombre], alto), ASSETS / "objects/zona1" / f"{nombre}.png")
     # La basura se carga por tipo desde assets/objects/basura/<tipo>.png
     for tipo in ["botella", "lata", "bolsa", "pila", "unicel"]:
         img = Image.open(ASSETS / "objects/zona1" / f"{tipo}.png")
@@ -291,6 +312,11 @@ def zona1() -> None:
 
     rgba = quitar_fondo(cargar("zona1_animales.jpg"))
     cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    # El martín pescador viene de su propia hoja (4 cuadros de izquierda a derecha), del alto de la celda.
+    rgba = quitar_fondo(cargar("zona1_martin.jpg"))
+    martin = [recortar(rgba, o) for o in sorted(separar_objetos(rgba), key=lambda o: o["caja"][0])]
+    factor = 215 / max(c.height for c in martin)
+    cuadros[8:12] = [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in martin]
     construir_atlas(
         cuadros,
         {"acocil": ([0, 1, 2, 3], 6.0, True), "garza": ([4, 5, 6, 7], 5.0, True),
@@ -331,7 +357,9 @@ def puzzle_filtro() -> None:
     for fuente, nombre in [("puzzle_filtro_vacio.jpg", "botella"), ("puzzle_filtro_grava.jpg", "carta_grava"),
                            ("puzzle_filtro_arena.jpg", "carta_arena"), ("puzzle_filtro_carbon.jpg", "carta_carbon")]:
         piezas.update(objetos(fuente, [nombre], destino))
-    piezas.update(objetos("puzzle_filtro_extras.jpg", ["carta_algodon", "gota_sucia", "gota_limpia"], destino))
+    piezas.update(objetos("puzzle_filtro_extras.jpg", ["carta_algodon", None, None], destino))
+    for nombre, gota in objetos("puzzle_gotas.jpg", ["gota_sucia", "gota_limpia"], destino).items():
+        guardar(a_alto(gota, 521), ASSETS / destino / f"{nombre}.png")
     # Texturas de cada material para pintar las capas dentro del filtro. Se dibujan a baja
     # resolución y se amplían sin suavizar, para que sean pixel art como el resto.
     for material in ["grava", "arena", "carbon", "algodon"]:
@@ -441,22 +469,32 @@ def zona2() -> None:
     img = Image.fromarray(arte.quitar_tinte_magenta(np.asarray(img), rojo=8, azul=8))
     guardar(img, destino / "bosque_talado.png")
 
-    # Objetos (orden de la hoja: enredadera, fogata, fogata apagada, letrero, tierra, alambre).
-    piezas = objetos("zona2_objetos.png", [
-        "enredadera_original", "fogata", "fogata_apagada", "letrero_vivero", "tierra_fertil", "alambre",
-    ], "objects/zona2")
+    # De la hoja vieja solo queda la enredadera; lo demás viene de zona2_objetos_pixel.
+    piezas = objetos("zona2_objetos.png", ["enredadera_original", None, None, None, None, None], "objects/zona2")
+    # Orden: humo suelto, alambre, fogata apagada, fogata, letrero, tierra. El humo va con la fogata apagada.
+    rgba = quitar_fondo(cargar("zona2_objetos_pixel.jpg"))
+    o = separar_objetos(rgba)
+    nuevos = {"fogata": o[3], "fogata_apagada": unir(o[2], o[0]), "letrero_vivero": o[4], "tierra_fertil": o[5], "alambre": o[1]}
+    altos = {"fogata": 353, "letrero_vivero": 319, "tierra_fertil": 212, "alambre": 222}
+    # La apagada (con su humo, más alta) usa la escala de la encendida para que la leña mida igual.
+    escala = 353 / recortar(rgba, nuevos["fogata"]).height
+    for nombre, obj in nuevos.items():
+        pieza = recortar(rgba, obj)
+        guardar(a_alto(pieza, altos.get(nombre, round(pieza.height * escala))), ASSETS / "objects/zona2" / f"{nombre}.png")
     # La enredadera se repite hacia arriba: se hace repetible en vertical.
     vertical = piezas["enredadera_original"].transpose(Image.Transpose.TRANSPOSE)
     guardar(hacer_repetible_h(vertical, 60).transpose(Image.Transpose.TRANSPOSE), ASSETS / "objects/zona2/enredadera.png")
     (ASSETS / "objects/zona2/enredadera_original.png").unlink()
 
-    # Venado: 0 de pie, 1-4 corriendo, 5 comiendo.
-    rgba = quitar_fondo(cargar("zona2_venado.png"))
+    # Venado: 0 de pie, 3 comiendo, 1, 2, 4, 5 y 6 corriendo. De pie mide lo mismo que el anterior (328 px).
+    rgba = quitar_fondo(cargar("zona2_venado.jpg"))
     cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    factor = 328 / cuadros[0].height
+    cuadros = [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
     construir_atlas(
         cuadros,
-        {"idle": ([0], 1.0, True), "comer": ([5, 0], 1.2, True), "correr": ([1, 2, 3, 4], 10.0, True)},
-        (360, 360),
+        {"idle": ([0], 1.0, True), "comer": ([3, 0], 1.2, True), "correr": ([1, 2, 4, 5, 6], 10.0, True)},
+        (500, 360),
         ASSETS / "characters/animales/venado_atlas.png",
         ASSETS / "characters/animales/venado_frames.tres",
         "res://assets/characters/animales/venado_atlas.png",
@@ -464,7 +502,12 @@ def zona2() -> None:
     )
     guardar(cuadros[0], ASSETS / "objects/zona2/venado.png")
 
-    objetos("zona2_carpintero.png", ["carpintero"], "characters/animales")
+    # La hoja trae venados de relleno; el tronco con el carpintero está arriba al centro y en la
+    # fila de abajo toca a un venado, así que se borra esa fila antes de separar.
+    rgba = quitar_fondo(cargar("zona2_carpintero.jpg"))
+    rgba[415:, :, 3] = 0
+    tronco = next(o for o in separar_objetos(rgba) if 500 < o["caja"][0] < 700)
+    guardar(recortar(rgba, tronco), ASSETS / "characters/animales/carpintero.png")
 
     # Mari: mariposa volando (4 cuadros, ordenados de izquierda a derecha) + retrato.
     rgba = quitar_fondo(cargar("zona2_monarca_vuelo.png"))
