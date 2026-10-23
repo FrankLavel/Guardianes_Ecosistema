@@ -264,6 +264,9 @@ def valle() -> None:
     guardar(Image.fromarray(px), destino / "camino.png")
     rio = Image.fromarray(tiles[100:282, 818:1000]).convert("RGBA").transpose(Image.Transpose.ROTATE_90)
     guardar(hacer_repetible_h(rio, 30), destino / "rio.png")
+    # Agua sola (la parte honda del río, sin orillas) para el estanque de Achi.
+    agua = Image.open(destino / "rio.png").convert("RGBA").crop((0, 66, 152, 114))
+    guardar(hacer_repetible(agua, 10), destino / "agua.png")
     puente = Image.fromarray(tiles[296:392, 772:1028]).convert("RGBA")
     guardar(puente, ASSETS / "maps/valle/objetos/puente.png")
 

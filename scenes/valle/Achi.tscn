@@ -4,7 +4,7 @@
 [ext_resource type="SpriteFrames" path="res://assets/characters/achi/achi_frames.tres" id="2_frames"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hablar"]
-radius = 100.0
+radius = 190.0
 
 [node name="Achi" type="Area2D"]
 collision_layer = 0
@@ -14,8 +14,10 @@ script = ExtResource("1_script")
 texto_aviso = "E  Hablar con Achi"
 dialogos = Array[PackedStringArray]([PackedStringArray("zona:lago", "achi_final"), PackedStringArray("visto:achi_residuos", "achi_residuos_repetir"), PackedStringArray("marca:lago_nivel", "achi_residuos"), PackedStringArray("zona:bosque", "achi_inicio"), PackedStringArray("siempre", "achi_espera")])
 aleteo = true
+anim_quieto = &"nadar"
 
 [node name="Sombra" type="Polygon2D" parent="."]
+visible = false
 color = Color(0, 0, 0, 0.22)
 polygon = PackedVector2Array(-34, 0, -26, -6, 0, -8, 26, -6, 34, 0, 26, 6, 0, 8, -26, 6)
 

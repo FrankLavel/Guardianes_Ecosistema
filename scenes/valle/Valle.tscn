@@ -234,7 +234,7 @@ position = Vector2(990, 720)
 position = Vector2(2280, 560)
 
 [node name="Achi" parent="Objetos" instance=ExtResource("96_achi")]
-position = Vector2(2240, 1560)
+position = Vector2(2250, 1660)
 
 [node name="EntradaRio" type="Area2D" parent="Objetos" unique_id=488095691 instance=ExtResource("11_fl5k2")]
 position = Vector2(880, 330)

@@ -8,12 +8,15 @@ extends ZonaInteraccion
 @export var dialogos: Array[PackedStringArray] = []
 ## Para personajes que vuelan (Mari): sube y baja suavemente.
 @export var aleteo := false
+## Animación cuando no habla (Achi, que vive en el estanque, nada).
+@export var anim_quieto := &"idle"
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
 
 func _ready() -> void:
 	super()
+	sprite.play(anim_quieto)
 	if aleteo:
 		var flotar := create_tween().set_loops()
 		flotar.tween_property(sprite, "position:y", sprite.position.y - 12.0, 0.9).set_trans(Tween.TRANS_SINE)
@@ -52,4 +55,4 @@ func _al_interactuar(jugador: Node2D) -> void:
 	sprite.flip_h = jugador.global_position.x < global_position.x
 	sprite.play(&"hablar")
 	await Dialogo.mostrar(id)
-	sprite.play(&"idle")
+	sprite.play(anim_quieto)

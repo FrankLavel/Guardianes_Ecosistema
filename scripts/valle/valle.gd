@@ -69,6 +69,12 @@ func _ready() -> void:
 	_noche = CanvasModulate.new()
 	add_child(_noche)
 	_crear_animales()
+	# Achi vive en un estanque (los achoques solo viven en el agua).
+	var estanque := Estanque.new()
+	estanque.name = "Estanque"
+	estanque.position = $Objetos/Achi.position + Vector2(0, -15)
+	add_child(estanque)
+	move_child(estanque, $Objetos.get_index())
 	var puerta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 	puerta.texto_aviso = "E  Entrar a tu casa"
 	puerta.position = PUERTA_CASA
