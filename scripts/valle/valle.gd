@@ -5,6 +5,33 @@ const TAMANO := Vector2(2800, 1800)
 ## Gris del mundo cuando nada está restaurado (0 = colores normales).
 const DESATURACION_INICIAL := 0.55
 const ESCENA_FINAL := "res://scenes/ui/Final.tscn"
+const ESCENA_CASA := "res://scenes/valle/Casa.tscn"
+const ESCENA_ANIMAL := preload("res://scenes/valle/AnimalValle.tscn")
+const ESCENA_PUERTA := preload("res://scenes/valle/ZonaInteraccion.tscn")
+## Frente a la puerta de la casa de adobe (dónde se entra y dónde se aparece al salir).
+const PUERTA_CASA := Vector2(1615, 905)
+const COLOR_NOCHE := Color(0.5, 0.56, 0.82)
+
+## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
+## shortcut: usan el arte de perfil de los niveles hasta que haya sprites vistos desde arriba.
+const ANIMALES := [
+	{"nombre": "Venado1", "especie": "venado", "zona": "bosque", "pos": Vector2(2050, 330), "paseo": Rect2(1900, 220, 380, 260),
+		"cuadros": "res://assets/characters/animales/venado_frames.tres", "quieto": &"idle", "caminar": &"correr", "escala": 0.28, "velocidad": 70.0},
+	{"nombre": "Venado2", "especie": "venado", "zona": "bosque", "pos": Vector2(1250, 1350), "paseo": Rect2(1050, 1250, 500, 300),
+		"cuadros": "res://assets/characters/animales/venado_frames.tres", "quieto": &"comer", "caminar": &"correr", "escala": 0.28, "velocidad": 70.0},
+	{"nombre": "Garza1", "especie": "garza", "zona": "rio", "pos": Vector2(850, 520), "paseo": Rect2(810, 420, 80, 460),
+		"cuadros": "res://assets/characters/animales/zona1_animales_frames.tres", "quieto": &"garza", "caminar": &"garza", "escala": 0.4, "velocidad": 40.0},
+	{"nombre": "Garza2", "especie": "garza", "zona": "rio", "pos": Vector2(800, 1250), "paseo": Rect2(770, 1150, 100, 250),
+		"cuadros": "res://assets/characters/animales/zona1_animales_frames.tres", "quieto": &"garza", "caminar": &"garza", "escala": 0.4, "velocidad": 40.0},
+	{"nombre": "Pato1", "especie": "pato_mexicano", "zona": "lago", "pos": Vector2(2050, 1400), "paseo": Rect2(1900, 1320, 300, 200),
+		"cuadros": "res://assets/characters/animales/zona3_animales_frames.tres", "quieto": &"pato", "caminar": &"pato", "escala": 0.3, "velocidad": 50.0, "mira_derecha": false},
+	{"nombre": "Pato2", "especie": "pato_mexicano", "zona": "lago", "pos": Vector2(1950, 1650), "paseo": Rect2(1850, 1590, 300, 110),
+		"cuadros": "res://assets/characters/animales/zona3_animales_frames.tres", "quieto": &"pato", "caminar": &"pato", "escala": 0.3, "velocidad": 50.0, "mira_derecha": false},
+	{"nombre": "Monarca1", "especie": "monarca", "zona": "bosque", "pos": Vector2(1500, 450), "paseo": Rect2(1300, 300, 500, 300),
+		"cuadros": "res://assets/characters/mari/mari_frames.tres", "quieto": &"idle", "caminar": &"idle", "escala": 0.07, "velocidad": 60.0, "vuela": true},
+	{"nombre": "Monarca2", "especie": "monarca", "zona": "bosque", "pos": Vector2(2150, 800), "paseo": Rect2(2000, 700, 400, 300),
+		"cuadros": "res://assets/characters/mari/mari_frames.tres", "quieto": &"idle", "caminar": &"idle", "escala": 0.07, "velocidad": 60.0, "vuela": true},
+]
 
 @onready var gara: GaraAerea = $Objetos/Gara
 @onready var rio: Line2D = $Rio
@@ -13,6 +40,10 @@ const ESCENA_FINAL := "res://scenes/ui/Final.tscn"
 @onready var puzzle_filtro: PuzzleFiltro = $PuzzleFiltro
 @onready var puzzle_habitat: PuzzleHabitat = $PuzzleHabitat
 @onready var puzzle_residuos: PuzzleResiduos = $PuzzleResiduos
+
+var pedidos: PedidosAyuda
+var animales: Array[AnimalValle] = []
+var _noche: CanvasModulate
 
 
 func _ready() -> void:
@@ -35,9 +66,53 @@ func _ready() -> void:
 	puzzle_residuos.resuelto.connect(_al_resolver_residuos)
 	puzzle_residuos.cerrado.connect(_al_cerrar_residuos)
 	_especies_de_zonas_terminadas()
+	_noche = CanvasModulate.new()
+	add_child(_noche)
+	_crear_animales()
+	var puerta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
+	puerta.texto_aviso = "E  Entrar a tu casa"
+	puerta.position = PUERTA_CASA
+	puerta.activada.connect(_entrar_a_casa)
+	$Objetos.add_child(puerta)
+	pedidos = PedidosAyuda.new()
+	pedidos.name = "Pedidos"
+	add_child(pedidos)
+	pedidos.configurar(animales, gara, hud, $Objetos)
+	pedidos.pedido_cambio.connect(func(): actualizar_mundo())
+	Juego.hojas_cambiaron.connect(func(_h): actualizar_mundo())
 	actualizar_mundo()
 	hud.mostrar_objetivo(objetivo_actual())
 	Dialogo.terminado.connect(_al_terminar_dialogo)
+
+
+func _crear_animales() -> void:
+	for datos in ANIMALES:
+		var animal: AnimalValle = ESCENA_ANIMAL.instantiate()
+		animal.name = datos["nombre"]
+		animal.especie = datos["especie"]
+		animal.requiere_zona = datos["zona"]
+		animal.position = datos["pos"]
+		animal.zona_paseo = datos["paseo"]
+		animal.cuadros = load(datos["cuadros"])
+		animal.anim_quieto = datos["quieto"]
+		animal.anim_caminar = datos["caminar"]
+		animal.escala = datos["escala"]
+		animal.velocidad = datos["velocidad"]
+		animal.vuela = datos.get("vuela", false)
+		animal.mira_derecha = datos.get("mira_derecha", true)
+		$Objetos.add_child(animal)
+		animales.append(animal)
+
+
+func _entrar_a_casa(_jugador: Node2D) -> void:
+	if Transicion.en_curso:
+		return
+	Juego.posicion_valle = PUERTA_CASA + Vector2(0, 50)
+	Juego.tiene_posicion_valle = true
+	Juego.guardar()
+	gara.leer_entrada_del_jugador = false
+	gara.entrada_direccion = Vector2.ZERO
+	Transicion.ir_a(ESCENA_CASA)
 
 
 ## Partidas guardadas antes de que existiera la bitácora: se registran las especies de las zonas
@@ -49,6 +124,10 @@ func _especies_de_zonas_terminadas() -> void:
 
 
 func objetivo_actual() -> String:
+	if Juego.juego_terminado():
+		if pedidos and Juego.pedido.get("estado") == "activo":
+			return pedidos.texto_objetivo()
+		return "Pasea por el valle: los animales te buscarán si necesitan ayuda. Tu casa es tu base."
 	if "don_chucho_inicio" not in Juego.dialogos_vistos:
 		return "Habla con Don Chucho, junto al río."
 	if not Juego.tiene_marca("rio_nivel"):
@@ -102,7 +181,11 @@ func actualizar_mundo() -> void:
 		if nodo.name.begins_with("Tocon"):
 			nodo.visible = not Juego.zona_esta_completa("bosque")
 			nodo.collision_layer = 1 if nodo.visible else 0
-	hud.actualizar_progreso(Juego.zonas_completadas.size(), Juego.ZONAS.size())
+	for animal in animales:
+		animal.actualizar_visibilidad()
+	_noche.color = COLOR_NOCHE if Juego.es_de_noche else Color.WHITE
+	hud.actualizar_progreso(Juego.zonas_completadas.size(), Juego.ZONAS.size(),
+		Juego.hojas if Juego.juego_terminado() else -1)
 
 
 func _al_terminar_dialogo(id: String) -> void:

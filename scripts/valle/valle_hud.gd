@@ -10,8 +10,11 @@ func _ready() -> void:
 	_panel_objetivo.visible = false
 
 
-func actualizar_progreso(restauradas: int, total: int) -> void:
+## `hojas` < 0: todavía no se muestran (se ganan después del final).
+func actualizar_progreso(restauradas: int, total: int, hojas := -1) -> void:
 	etiqueta_progreso.text = "Zonas restauradas: %d / %d" % [restauradas, total]
+	if hojas >= 0:
+		etiqueta_progreso.text += "   ·   Hojas: %d" % hojas
 
 
 func mostrar_objetivo(texto: String) -> void:

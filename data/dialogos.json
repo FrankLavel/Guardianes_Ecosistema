@@ -12,6 +12,10 @@
       "nombre": "Mari",
       "retrato": "res://assets/characters/mari/mari_retrato.png"
     },
+    "venado": {"nombre": "Venado", "retrato": "res://assets/ui/bitacora/venado.png"},
+    "garza": {"nombre": "Garza", "retrato": "res://assets/ui/bitacora/garza.png"},
+    "pato_mexicano": {"nombre": "Pato mexicano", "retrato": "res://assets/ui/bitacora/pato_mexicano.png"},
+    "monarca": {"nombre": "Mariposa monarca", "retrato": "res://assets/ui/bitacora/monarca.png"},
     "achi": {
       "nombre": "Achi",
       "retrato": "res://assets/characters/achi/achi_retrato.png"

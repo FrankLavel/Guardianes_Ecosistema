@@ -58,6 +58,12 @@ func mostrar(id: String) -> void:
 	await terminado
 
 
+## Muestra líneas que no están en dialogos.json (por ejemplo, el pedido de un animal).
+func mostrar_lineas(id: String, lineas: Array) -> void:
+	_datos["dialogos"][id] = lineas
+	await mostrar(id)
+
+
 func avanzar() -> void:
 	if not activo:
 		return

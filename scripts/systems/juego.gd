@@ -6,10 +6,11 @@ extends Node
 
 signal zona_completada(zona: String)
 signal partida_cargada
+signal hojas_cambiaron(total: int)
 
 ## Orden de las zonas: cada una se desbloquea al completar la anterior.
 const ZONAS := ["rio", "bosque", "lago"]
-const VERSION_GUARDADO := 3
+const VERSION_GUARDADO := 4
 ## Habilidad que se gana al restaurar cada zona.
 const HABILIDAD_POR_ZONA := {"rio": "nadar", "bosque": "enredaderas"}
 
@@ -55,6 +56,15 @@ var habilidades: Array[String] = []
 var posicion_valle := Vector2.ZERO
 var tiene_posicion_valle := false
 
+## Después del final: hojas que regalan los animales al ayudarlos (se gastan en muebles),
+## cuántas veces se ayudó con cada tipo de pedido, muebles comprados para la casa y el pedido
+## de ayuda en curso ({} si no hay).
+var hojas := 0
+var ayudas: Dictionary = {}
+var muebles: Array[String] = []
+var pedido: Dictionary = {}
+var es_de_noche := false
+
 ## Mientras haya un diálogo o menú abierto, los personajes no se mueven.
 var entrada_bloqueada := false
 
@@ -70,6 +80,11 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	habilidades.clear()
 	tiene_posicion_valle = false
 	posicion_valle = Vector2.ZERO
+	hojas = 0
+	ayudas.clear()
+	muebles.clear()
+	pedido.clear()
+	es_de_noche = false
 
 
 func datos_personaje() -> Dictionary:
@@ -110,6 +125,36 @@ func completar_zona(zona: String) -> void:
 		dar_habilidad(HABILIDAD_POR_ZONA[zona])
 	zona_completada.emit(zona)
 	guardar()
+
+
+## Las tres zonas restauradas: empieza la parte libre (animales que piden ayuda, la casa).
+func juego_terminado() -> bool:
+	return zonas_completadas.size() == ZONAS.size()
+
+
+func dar_hojas(cantidad: int) -> void:
+	hojas += cantidad
+	hojas_cambiaron.emit(hojas)
+
+
+## Devuelve false (y no gasta nada) si no alcanzan.
+func gastar_hojas(cantidad: int) -> bool:
+	if cantidad > hojas:
+		return false
+	hojas -= cantidad
+	hojas_cambiaron.emit(hojas)
+	return true
+
+
+func contar_ayuda(tipo: String) -> void:
+	ayudas[tipo] = int(ayudas.get(tipo, 0)) + 1
+
+
+func total_ayudas() -> int:
+	var total := 0
+	for tipo in ayudas:
+		total += int(ayudas[tipo])
+	return total
 
 
 ## De 0 a 1: qué tanto del valle está restaurado.
@@ -166,6 +211,11 @@ func a_diccionario() -> Dictionary:
 		"marcas": marcas,
 		"habilidades": habilidades,
 		"posicion_valle": [posicion_valle.x, posicion_valle.y] if tiene_posicion_valle else null,
+		"hojas": hojas,
+		"ayudas": ayudas,
+		"muebles": muebles,
+		"pedido": pedido,
+		"es_de_noche": es_de_noche,
 	}
 
 
@@ -182,6 +232,12 @@ func desde_diccionario(datos: Dictionary) -> void:
 	var pos = datos.get("posicion_valle")
 	tiene_posicion_valle = pos is Array and pos.size() == 2
 	posicion_valle = Vector2(pos[0], pos[1]) if tiene_posicion_valle else Vector2.ZERO
+	# Partidas de antes de la versión 4 no tienen estos datos.
+	hojas = int(datos.get("hojas", 0))
+	ayudas = datos.get("ayudas", {}) if datos.get("ayudas") is Dictionary else {}
+	muebles.assign(datos.get("muebles", []))
+	pedido = datos.get("pedido", {}) if datos.get("pedido") is Dictionary else {}
+	es_de_noche = bool(datos.get("es_de_noche", false))
 
 
 func guardar() -> bool:

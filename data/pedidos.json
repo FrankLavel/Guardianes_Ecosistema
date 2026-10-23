@@ -1,0 +1,77 @@
+{
+	"saludos": {
+		"venado": [
+			"El bosque de oyamel volvió a crecer. Ahora tengo sombra y comida.",
+			"Me gusta comer hojas tiernas y bellotas del encino. ¡Gracias por cuidar el bosque, {nombre}!"
+		],
+		"garza": [
+			"Desde que el río está limpio, hay peces y acociles para comer.",
+			"Me paro en una sola pata para no gastar calor. ¿Sabías?"
+		],
+		"pato_mexicano": [
+			"Cuac. El lago está mucho mejor sin tanto lirio.",
+			"Los patos mexicanos solo vivimos en México. ¡Cuida nuestros lagos!"
+		],
+		"monarca": [
+			"Vengo volando desde Canadá cada invierno. ¡Son miles de kilómetros!",
+			"Los oyameles nos protegen del frío. ¡Gracias por plantarlos!"
+		]
+	},
+	"pedidos": {
+		"basura": {
+			"recompensa": 5,
+			"meta": 3,
+			"animales": ["venado", "garza", "pato_mexicano"],
+			"objetivo": "Recoge la basura cerca {del_animal}",
+			"pedir": [
+				"¡{nombre}! Qué bueno que te encuentro.",
+				"Alguien tiró basura donde busco comida. Si me la como, me puedo enfermar.",
+				"¿Me ayudas a recogerla? Son 3 cosas, están aquí cerca."
+			],
+			"recordar": ["Todavía queda basura por aquí cerca. ¡Tú puedes!"],
+			"gracias": [
+				"¡Gracias, {guardian}! Ya puedo comer sin tragarme el plástico.",
+				"Toma estas hojas. Te las regalo para tu casa."
+			]
+		},
+		"cria": {
+			"recompensa": 8,
+			"meta": 1,
+			"animales": ["venado", "pato_mexicano"],
+			"objetivo": "Busca a la cría {del_animal} y tráela",
+			"pedir": [
+				"¡{nombre}, ayúdame! ¡No encuentro a mi cría!",
+				"Se fue a explorar por el valle y no regresó.",
+				"Búscala, por favor. Cuando la encuentres, te seguirá hasta mí."
+			],
+			"recordar": ["Mi cría es pequeña y se asusta fácil. Búscala por todo el valle."],
+			"gracias": [
+				"¡Mi cría! ¡Gracias, {guardian}!",
+				"Las crías se pierden cuando el ruido o la basura las asustan. Tú las cuidas.",
+				"Toma estas hojas, te las ganaste."
+			]
+		},
+		"plantar": {
+			"recompensa": 6,
+			"meta": 2,
+			"animales": ["venado", "monarca"],
+			"objetivo": "Planta 2 arbolitos cerca {del_animal}",
+			"pedir": [
+				"Hola, {nombre}. Aquí hace mucho sol y casi no hay plantas.",
+				"Encontré tierra suelta para plantar. ¿Plantas 2 arbolitos?",
+				"Así habrá sombra y comida para todos."
+			],
+			"recordar": ["Todavía falta plantar. La tierra suelta está aquí cerca."],
+			"gracias": [
+				"¡Qué bonitos arbolitos! Cuando crezcan darán sombra y hogar.",
+				"Toma estas hojas para tu casa, {guardian}."
+			]
+		}
+	},
+	"nombres": {
+		"venado": "del venado",
+		"garza": "de la garza",
+		"pato_mexicano": "del pato",
+		"monarca": "de la mariposa monarca"
+	}
+}
