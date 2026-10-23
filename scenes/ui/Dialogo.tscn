@@ -35,45 +35,52 @@ grow_horizontal = 2
 grow_vertical = 0
 theme = ExtResource("2_tema")
 
-[node name="HBox" type="HBoxContainer" parent="Caja"]
+[node name="Margen" type="MarginContainer" parent="Caja"]
+layout_mode = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 24
+
+[node name="HBox" type="HBoxContainer" parent="Caja/Margen"]
 layout_mode = 2
 theme_override_constants/separation = 36
 
-[node name="MarcoRetrato" type="Panel" parent="Caja/HBox"]
+[node name="MarcoRetrato" type="Panel" parent="Caja/Margen/HBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 180)
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("Marco_retrato")
 
-[node name="Retrato" type="TextureRect" parent="Caja/HBox/MarcoRetrato"]
+[node name="Retrato" type="TextureRect" parent="Caja/Margen/HBox/MarcoRetrato"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
 expand_mode = 1
 stretch_mode = 5
 
-[node name="VBox" type="VBoxContainer" parent="Caja/HBox"]
+[node name="VBox" type="VBoxContainer" parent="Caja/Margen/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 
-[node name="Nombre" type="Label" parent="Caja/HBox/VBox"]
+[node name="Nombre" type="Label" parent="Caja/Margen/HBox/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
 theme_override_font_sizes/font_size = 38
 text = "Nombre"
 
-[node name="Texto" type="Label" parent="Caja/HBox/VBox"]
+[node name="Texto" type="Label" parent="Caja/Margen/HBox/VBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 124)
 layout_mode = 2
@@ -81,7 +88,7 @@ theme_override_font_sizes/font_size = 32
 text = "Texto del diálogo"
 autowrap_mode = 3
 
-[node name="Continuar" type="Label" parent="Caja/HBox/VBox"]
+[node name="Continuar" type="Label" parent="Caja/Margen/HBox/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 1, 0.7, 1)

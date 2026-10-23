@@ -27,14 +27,14 @@ func _configurar() -> void:
 
 func _ready() -> void:
 	super()
-	escenario.draw.connect(_dibujar_bosque)
+	lienzo.draw.connect(_dibujar_bosque)
 
 
 func _dibujar_bosque() -> void:
-	var tam := escenario.size
-	escenario.draw_rect(Rect2(Vector2.ZERO, tam), Color(0.6, 0.82, 0.9))
-	escenario.draw_rect(Rect2(0, tam.y - 110, tam.x, 110), Color(0.36, 0.52, 0.26))
+	var tam := lienzo.size
+	lienzo.draw_rect(Rect2(Vector2.ZERO, tam), Color(0.6, 0.82, 0.9))
+	lienzo.draw_rect(Rect2(0, tam.y - 110, tam.x, 110), Color(0.36, 0.52, 0.26))
 	# El oyamel grande, al centro-derecha.
 	var alto := tam.y - 30
 	var ancho := alto * ARBOL.get_width() / ARBOL.get_height()
-	escenario.draw_texture_rect(ARBOL, Rect2(Vector2(tam.x * 0.744 - ancho / 2.0, 10), Vector2(ancho, alto)), false)
+	lienzo.draw_texture_rect(ARBOL, Rect2(Vector2(tam.x * 0.744 - ancho / 2.0, 10), Vector2(ancho, alto)), false)

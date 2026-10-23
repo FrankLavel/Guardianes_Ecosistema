@@ -22,12 +22,21 @@ const TUBOS := {
 	"b": [UNION, Vector2(440, 430), PLANTA],
 	"c": [PLANTA, Vector2(RIO_X, 430)],
 }
+## De qué tubo le llega el agua a cada uno: el agua avanza en orden por el camino.
+const ALIMENTA := {"fabrica": "", "a": "fabrica", "b": "fabrica", "c": "b"}
+const ANCHO_BORDE := 34.0
+const ANCHO_TUBO := 24.0
+const ANCHO_AGUA := 16.0
+## Separación y velocidad de las ondas que muestran hacia dónde corre el agua.
+const ONDA_CADA := 36.0
+const ONDA_VELOCIDAD := 70.0
 
 ## Estado de las válvulas: true = abierta.
 var valvulas := {"a": true, "b": false, "c": false}
 ## Resultado de la última vez que se abrió el agua: color de cada tubo ("" = sin agua aún).
 var flujo := {}
 var _avance := 1.0
+var _fase := 0.0
 
 @onready var diagrama: Control = %Diagrama
 @onready var _botones := {"a": %ValvulaA, "b": %ValvulaB, "c": %ValvulaC}
@@ -46,7 +55,17 @@ func _ready() -> void:
 		boton.focus_exited.connect(func(): boton.scale = Vector2.ONE)
 	_boton_agua.pressed.connect(abrir_agua)
 	diagrama.draw.connect(_dibujar)
+	# B va en el tubo vertical: su imagen se gira para que quede alineada con él.
+	var imagen: Image = _botones["b"].texture_normal.get_image()
+	imagen.rotate_90(CLOCKWISE)
+	_botones["b"].texture_normal = ImageTexture.create_from_image(imagen)
 	_actualizar_botones()
+
+
+func _process(delta: float) -> void:
+	if not flujo.is_empty():
+		_fase = fmod(_fase + delta * ONDA_VELOCIDAD, ONDA_CADA)
+		diagrama.queue_redraw()
 
 
 func _al_abrir() -> void:
@@ -95,7 +114,7 @@ func abrir_agua() -> void:
 	flujo = calculo["colores"]
 	_avance = 0.0
 	var animacion := create_tween()
-	animacion.tween_method(func(v): _avance = v; diagrama.queue_redraw(), 0.0, 1.0, 0.9)
+	animacion.tween_method(func(v): _avance = v; diagrama.queue_redraw(), 0.0, 1.0, 1.6)
 	await animacion.finished
 	match calculo["resultado"]:
 		"sucia_al_rio":
@@ -121,28 +140,70 @@ func _actualizar_botones() -> void:
 		boton.get_node("Estado").text = "ABIERTA" if valvulas[id] else "CERRADA"
 
 
-func _dibujar() -> void:
-	for id in TUBOS:
-		var puntos: Array = TUBOS[id]
-		for i in puntos.size() - 1:
-			diagrama.draw_line(puntos[i], puntos[i + 1], Color(0.2, 0.2, 0.22), 34.0, true)
-			diagrama.draw_line(puntos[i], puntos[i + 1], COLOR_VACIO, 24.0, true)
-		if flujo.has(id):
-			_dibujar_agua(puntos, flujo[id])
-
-
-## El agua avanza por el tubo según `_avance` (0 a 1).
-func _dibujar_agua(puntos: Array, color: Color) -> void:
+func _largo(id: String) -> float:
+	var puntos: Array = TUBOS[id]
 	var largo := 0.0
 	for i in puntos.size() - 1:
 		largo += (puntos[i] as Vector2).distance_to(puntos[i + 1])
-	var falta := largo * _avance
+	return largo
+
+
+## Distancia que recorre el agua desde la fábrica hasta el inicio del tubo.
+func _inicio(id: String) -> float:
+	var anterior: String = ALIMENTA[id]
+	return 0.0 if anterior == "" else _inicio(anterior) + _largo(anterior)
+
+
+func _dibujar() -> void:
+	# Por capas (borde, tubo, agua) y con uniones redondas, para que las esquinas y los cruces
+	# se vean como un solo tubo.
+	for id in TUBOS:
+		_trazo(TUBOS[id], Color(0.2, 0.2, 0.22), ANCHO_BORDE)
+	for id in TUBOS:
+		_trazo(TUBOS[id], COLOR_VACIO, ANCHO_TUBO)
+	if flujo.is_empty():
+		return
+	var recorrido := 0.0
+	for id in flujo:
+		recorrido = maxf(recorrido, _inicio(id) + _largo(id))
+	recorrido *= _avance
+	for id in flujo:
+		_dibujar_agua(id, recorrido - _inicio(id))
+
+
+func _trazo(puntos: Array, color: Color, ancho: float) -> void:
+	for i in puntos.size() - 1:
+		diagrama.draw_line(puntos[i], puntos[i + 1], color, ancho, true)
+	for p in puntos:
+		diagrama.draw_circle(p, ancho / 2.0, color, true, -1.0, true)
+
+
+## Llena el tubo hasta `distancia` y encima dibuja ondas claras que avanzan con la corriente.
+func _dibujar_agua(id: String, distancia: float) -> void:
+	if distancia <= 0.0:
+		return
+	var puntos: Array = TUBOS[id]
+	var color: Color = flujo[id]
+	var claro := color.lightened(0.35)
+	var hecho := 0.0
+	diagrama.draw_circle(puntos[0], ANCHO_AGUA / 2.0, color, true, -1.0, true)
 	for i in puntos.size() - 1:
 		var p0: Vector2 = puntos[i]
 		var p1: Vector2 = puntos[i + 1]
 		var tramo := p0.distance_to(p1)
-		if falta <= 0.0:
+		var lleno := minf(distancia - hecho, tramo)
+		if lleno <= 0.0:
 			return
-		var fin := p0.lerp(p1, minf(falta / tramo, 1.0))
-		diagrama.draw_line(p0, fin, color, 16.0, true)
-		falta -= tramo
+		var fin := p0.lerp(p1, lleno / tramo)
+		diagrama.draw_line(p0, fin, color, ANCHO_AGUA, true)
+		diagrama.draw_circle(fin, ANCHO_AGUA / 2.0, color, true, -1.0, true)
+		# Las ondas usan la distancia desde la fábrica: así siguen de un tubo al otro sin saltos.
+		var direccion := (p1 - p0) / tramo
+		var desde := _inicio(id) + hecho
+		var onda := ONDA_CADA - fmod(desde - _fase + ONDA_CADA * 100.0, ONDA_CADA)
+		while onda < lleno:
+			var a := p0 + direccion * onda
+			var b := p0 + direccion * minf(onda + 12.0, lleno)
+			diagrama.draw_line(a, b, claro, 6.0, true)
+			onda += ONDA_CADA
+		hecho += tramo

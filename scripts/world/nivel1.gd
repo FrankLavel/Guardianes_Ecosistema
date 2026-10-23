@@ -118,8 +118,11 @@ func _al_cambiar_salud(basura: Basura = null) -> void:
 
 func _al_caer_al_rio(cuerpo: Guardian) -> void:
 	cuerpo.call_deferred("reaparecer")
-	if rio_limpio():
-		hud.mostrar_mensaje("¡Cuidado!", "El río no es lugar para nadar. Salta de orilla a orilla.", 4.0)
+	if rio_limpio() and not Juego.tiene_habilidad("nadar"):
+		hud.mostrar_mensaje("Aún no sabes nadar",
+			"Llega al árbol del final y aprenderás a nadar. Por ahora salta de orilla a orilla.", 4.0)
+	elif rio_limpio():
+		hud.mostrar_mensaje("¡Cuidado!", "Aquí no hay fondo para nadar. Salta de orilla a orilla.", 4.0)
 	else:
 		hud.mostrar_mensaje("¡Cuidado!", "El agua contaminada no es segura. Salta de orilla a orilla.", 4.0)
 

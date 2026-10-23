@@ -303,7 +303,6 @@ position = Vector2(770, 470)
 scale = Vector2(0.45, 0.45)
 texture = ExtResource("19_bpnlw")
 offset = Vector2(0, -100)
-flip_h = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Objetos/Tuberia4" unique_id=371127674]
 position = Vector2(0, -8)

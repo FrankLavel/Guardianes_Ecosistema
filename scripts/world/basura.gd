@@ -7,14 +7,15 @@ signal recogida(basura: Basura)
 ## Clave en data/basura.json y nombre del SVG en assets/objects/basura/.
 @export_enum("botella", "lata", "bolsa", "pila", "unicel") var tipo := "botella"
 
-## Tamaño en el mundo (lado más largo, en px) de cada basura. El personaje mide ~53 px,
-## así que una botella le llega a media pierna y una pila es pequeñita.
+## Tamaño en el mundo de cada basura (raíz del área, en px). El personaje mide ~53 px.
+## Se mide por área y no por el lado más largo: así una pila acostada no queda como una raya
+## y todas se ven más o menos del mismo tamaño.
 const TAMANO_EN_JUEGO := {
-	"botella": 28.0,
-	"lata": 20.0,
-	"bolsa": 26.0,
-	"pila": 15.0,
-	"unicel": 20.0,
+	"botella": 18.0,
+	"lata": 19.0,
+	"bolsa": 20.0,
+	"pila": 16.0,
+	"unicel": 19.0,
 }
 
 var fue_recogida := false
@@ -26,9 +27,8 @@ var fue_recogida := false
 func _ready() -> void:
 	add_to_group(&"basura")
 	_sprite.texture = load("res://assets/objects/basura/%s.png" % tipo)
-	# Se escala por el lado más largo: así un objeto acostado (la lata) no queda gigante.
-	var lado_mayor := maxf(_sprite.texture.get_width(), _sprite.texture.get_height())
-	var escala: float = TAMANO_EN_JUEGO.get(tipo, 24.0) / lado_mayor
+	var area := float(_sprite.texture.get_width() * _sprite.texture.get_height())
+	var escala: float = TAMANO_EN_JUEGO.get(tipo, 20.0) / sqrt(area)
 	_sprite.scale = Vector2(escala, escala)
 	_sprite.offset = Vector2(0, -_sprite.texture.get_height() / 2.0)
 	_aviso.visible = false

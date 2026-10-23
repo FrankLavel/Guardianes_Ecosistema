@@ -36,6 +36,7 @@ texture = SubResource("GradientTexture2D_brillo")
 [node name="Brote" type="Sprite2D" parent="."]
 z_index = -1
 texture_filter = 2
+position = Vector2(0, 6)
 scale = Vector2(0.2, 0.2)
 texture = ExtResource("2_brote")
 offset = Vector2(0, -100)

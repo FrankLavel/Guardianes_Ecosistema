@@ -24,14 +24,14 @@ texture = ExtResource("3_charco")
 
 [node name="Tuberia" type="Sprite2D" parent="."]
 texture_filter = 2
-position = Vector2(45, 0)
+position = Vector2(45, 4)
 scale = Vector2(0.14, 0.14)
 texture = ExtResource("2_tuberia")
 offset = Vector2(0, -231)
 
 [node name="Valvula" type="Sprite2D" parent="."]
 texture_filter = 2
-position = Vector2(-55, -2)
+position = Vector2(-30, 4)
 scale = Vector2(0.08, 0.08)
 texture = ExtResource("4_valvula")
 offset = Vector2(0, -266)

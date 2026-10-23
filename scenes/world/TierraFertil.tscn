@@ -19,7 +19,7 @@ script = ExtResource("3_enredadera")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 2
-position = Vector2(0, 4)
+position = Vector2(0, 13)
 scale = Vector2(0.26, 0.26)
 texture = ExtResource("2_tierra")
 offset = Vector2(0, -112)

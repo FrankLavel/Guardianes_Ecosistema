@@ -19,7 +19,7 @@ texto_aviso = "E  Plantar árboles"
 
 [node name="Letrero" type="Sprite2D" parent="."]
 texture_filter = 2
-position = Vector2(-56, 2)
+position = Vector2(-56, 8)
 scale = Vector2(0.24, 0.24)
 texture = ExtResource("3_letrero")
 offset = Vector2(0, -165)

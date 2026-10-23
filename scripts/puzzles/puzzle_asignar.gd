@@ -25,12 +25,33 @@ var _botones_destino: Dictionary = {}
 
 @onready var escenario: Control = %Escenario
 @onready var _fila_tarjetas: HBoxContainer = %Tarjetas
+## Donde cada puzzle dibuja su paisaje (debajo de los lugares). El escenario lo recorta con
+## esquinas redondas y encima lleva un marco de madera.
+var lienzo: Control
 
 
 func _ready() -> void:
 	_configurar()
 	super()
+	lienzo = Control.new()
+	lienzo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	escenario.add_child(lienzo)
+	lienzo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	escenario.clip_children = CanvasItem.CLIP_CHILDREN_AND_DRAW
+	var forma := StyleBoxFlat.new()
+	forma.set_corner_radius_all(26)
+	escenario.add_theme_stylebox_override("panel", forma)
 	_construir()
+	var marco := Panel.new()
+	marco.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var borde := StyleBoxFlat.new()
+	borde.bg_color = Color.TRANSPARENT
+	borde.border_color = Color(0.32, 0.2, 0.1)
+	borde.set_border_width_all(6)
+	borde.set_corner_radius_all(26)
+	marco.add_theme_stylebox_override("panel", borde)
+	escenario.add_child(marco)
+	marco.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 ## Cada puzzle llena opciones, destinos y textos.

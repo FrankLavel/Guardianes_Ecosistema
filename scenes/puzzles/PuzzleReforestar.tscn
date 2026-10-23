@@ -55,7 +55,7 @@ theme_override_constants/separation = 30
 [node name="Escenario" type="Panel" parent="Panel/VBox/Cuerpo"]
 unique_name_in_owner = true
 clip_contents = true
-custom_minimum_size = Vector2(720, 460)
+custom_minimum_size = Vector2(780, 560)
 layout_mode = 2
 theme_override_styles/panel = SubResource("Marco")
 

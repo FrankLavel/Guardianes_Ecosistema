@@ -44,7 +44,7 @@ texture = SubResource("GradientTexture2D_luz")
 
 [node name="Imagen" type="Sprite2D" parent="."]
 texture_filter = 2
-position = Vector2(0, 4)
+position = Vector2(0, 12)
 scale = Vector2(0.26, 0.26)
 texture = ExtResource("2_fogata")
 offset = Vector2(0, -182)

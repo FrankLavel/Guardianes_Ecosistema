@@ -55,7 +55,7 @@ func _initialize() -> void:
 		s.name = "Tocon%d" % x
 		s.texture = load("res://assets/maps/valle/objetos/tocon.png")
 		s.scale = Vector2(0.22, 0.22)
-		s.offset = Vector2(0, -s.texture.get_height() / 2.0 + 10)
+		s.offset = Vector2(0, -s.texture.get_height() / 2.0 + 40)  # hundido en el pasto
 		s.position = Vector2(x * T + 16, fila * T)
 		s.z_index = -1
 		_agregar(tocones, s)

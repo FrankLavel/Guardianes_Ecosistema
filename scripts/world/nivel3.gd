@@ -31,7 +31,8 @@ func _ready() -> void:
 	var muelle: Sprite2D = meta.get_node("Sprite2D")
 	muelle.texture = preload("res://assets/objects/zona3/muelle.png")
 	muelle.scale = Vector2(0.35, 0.35)
-	muelle.offset = Vector2(0, -muelle.texture.get_height() / 2.0 + 10)
+	# Las patas quedan hundidas en el pasto, no apoyadas encima.
+	muelle.offset = Vector2(0, -muelle.texture.get_height() / 2.0 + 45)
 	for lirio in lirios():
 		lirio.quitado.connect(_al_quitar_lirio)
 	for huevo in huevos():

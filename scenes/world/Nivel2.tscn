@@ -57,63 +57,63 @@ z_index = -1
 position = Vector2(272, 576)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="Tocon15" type="Sprite2D" parent="Tocones" unique_id=1969915933]
 z_index = -1
 position = Vector2(496, 576)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="Tocon29" type="Sprite2D" parent="Tocones" unique_id=1032031773]
 z_index = -1
 position = Vector2(944, 384)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="Tocon39" type="Sprite2D" parent="Tocones" unique_id=1811985889]
 z_index = -1
 position = Vector2(1264, 384)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="Tocon53" type="Sprite2D" parent="Tocones" unique_id=290180886]
 z_index = -1
 position = Vector2(1712, 384)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="Tocon66" type="Sprite2D" parent="Tocones" unique_id=275907982]
 z_index = -1
 position = Vector2(2128, 192)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="Tocon71" type="Sprite2D" parent="Tocones" unique_id=545733096]
 z_index = -1
 position = Vector2(2288, 192)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="Tocon84" type="Sprite2D" parent="Tocones" unique_id=1339197845]
 z_index = -1
 position = Vector2(2704, 192)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="Tocon90" type="Sprite2D" parent="Tocones" unique_id=2054435039]
 z_index = -1
 position = Vector2(2896, 192)
 scale = Vector2(0.22, 0.22)
 texture = ExtResource("8_bamfa")
-offset = Vector2(0, -57.5)
+offset = Vector2(0, -27.5)
 
 [node name="ArbolesNuevos" type="Node2D" parent="." unique_id=472042664]
 z_index = -1
