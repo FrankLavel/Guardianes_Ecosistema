@@ -195,3 +195,21 @@ evenly spaced, facing right.
 🟡 `zona3_residuos.png` — cáscara de plátano, hoja de papel arrugada, frasco de vidrio, y 5 contenedores de basura de colores (verde, amarillo, azul, gris, rojo).
 
 Todos con el **bloque de estilo** de la sección 2 y fondo magenta.
+
+## 9. Arte de "después del final" (integrado)
+
+| Archivo en `assets/fuente_ia/` | Qué es | Resultado en el juego |
+|---|---|---|
+| `valle_venado.jpg`, `valle_garza.jpg`, `valle_pato.jpg` | 2 filas: 4 cuadros caminando a la derecha; quieto, comiendo, descansando y la cría | `assets/characters/animales/valle/<especie>_frames.tres` |
+| `valle_monarca.jpg` | 8 cuadros volando | `assets/characters/animales/valle/monarca_frames.tres` |
+| `casa_interior.jpg` | cuarto vacío (vista 3/4) | `assets/maps/casa/interior.png` |
+| `casa_muebles.jpg` | cama, repisa (2 tablas), tablero, baúl, alfombra, lámpara, pecera, maceta | `assets/maps/casa/<mueble>.png` |
+
+Se procesan con `python tools/arte/procesar.py animales_valle casa`.
+
+### Pendiente (opcional)
+**`casa_cuadro.png`** — hoy el cuadro de la monarca es un marco dibujado con código. Pegar el bloque de estilo y:
+```
+Top-down 3/4 RPG view, a small wooden picture frame hanging on a wall with a painting of a monarch butterfly on an oyamel branch, alone and centered.
+```
+

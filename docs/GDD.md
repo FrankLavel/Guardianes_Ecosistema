@@ -117,6 +117,25 @@ Cajas de texto cortas (máx. 2 líneas, lenguaje de 8–9 años), retrato del pe
 ### Final — El Corazón del Valle
 Todas las zonas restauradas. El guardián o la guardiana lleva los huevos de achoque al lago limpio; secuencia final con el valle completamente vivo, resumen de lo aprendido y créditos.
 
+### Después del final — El valle sigue vivo
+Al terminar, el juego no se acaba: desde la pantalla final se puede **seguir explorando** el valle.
+
+- **Animales libres.** Venados, garzas, patos y mariposas monarca pasean por el valle. Cada especie aparece cuando su zona se restaura (garza → río; venado y monarca → bosque; pato → lago). Se puede hablar con ellos: cuentan un dato de su especie. Achi vive en un estanque junto al arco del lago.
+- **Pedidos de ayuda.** Cada 25–50 s un animal camina hacia el guardián con un **!** y explica su problema:
+  | Pedido | Quién lo pide | Qué se hace | Recompensa |
+  |---|---|---|---|
+  | Basura | venado, garza, pato | recoger 3 basuras cerca del animal | 5 hojas |
+  | Cría perdida | venado, pato | encontrar la cría, que te sigue hasta su mamá | 8 hojas |
+  | Arbolitos | venado, monarca | plantar 2 arbolitos | 6 hojas |
+  | Flores | monarca | plantar 3 flores con néctar | 6 hojas |
+
+  El pedido en curso se guarda en la partida. Los textos están en `data/pedidos.json`.
+- **La casa del guardián (base).** Se entra por la puerta de la casa de adobe:
+  - **Cama:** guarda la partida y cambia entre día y noche.
+  - **Repisa de trofeos:** zonas restauradas, especies de la bitácora e insignias por tipo de ayuda (Bronce 1, Plata 3, Oro 6).
+  - **Tablero:** el pedido en curso, su avance y su recompensa.
+  - **Baúl:** muebles que se compran con hojas (maceta, tule, alfombra, lámpara, cuadro de la monarca, pecera con achoque) y aparecen en el cuarto.
+
 ---
 
 ## 5. Contenido educativo (correspondencia con los objetivos)
@@ -126,7 +145,7 @@ Todas las zonas restauradas. El guardián o la guardiana lleva los huevos de ach
 | Comprender qué es un ecosistema y sus componentes | Puzzles 4 y 5, bitácora, pantalla final de cada zona |
 | Identificar cómo la contaminación del agua afecta a los seres vivos | Zona 1 completa, Zona 3 (lirio, basura) |
 | Reconocer la importancia de proteger los hábitats | Zonas 2 y 3, restauración visual del mapa |
-| Desarrollar conciencia ambiental y responsabilidad | Puzzle 6, mensajes de cierre, datos de basura |
+| Desarrollar conciencia ambiental y responsabilidad | Puzzle 6, mensajes de cierre, datos de basura, pedidos de ayuda de los animales después del final |
 
 Todos los textos educativos viven en `data/` (JSON) para que el equipo y docentes puedan revisarlos sin tocar código. **Cada dato debe validarse antes de la versión 1.0.**
 
