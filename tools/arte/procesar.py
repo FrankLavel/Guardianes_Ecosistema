@@ -624,7 +624,55 @@ def ui() -> None:
     guardar(recortar(rgba, logo), ASSETS / "ui" / "logo.png")
 
 
-GRUPOS = {"guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+# ---------------------------------------------------------------- Después del final
+def _por_filas(objetos: list[dict], alto_fila: int = 384) -> list[dict]:
+    """Ordena por fila (arriba/abajo) y luego de izquierda a derecha."""
+    return sorted(objetos, key=lambda o: ((o["caja"][1] + o["caja"][3]) // 2 // alto_fila, o["caja"][0]))
+
+
+def animales_valle() -> None:
+    """Animales vistos desde arriba que pasean por el valle.
+
+    Hojas con 2 filas: arriba 4 cuadros caminando a la derecha; abajo quieto, comiendo,
+    descansando y la cría. La monarca son 8 cuadros volando.
+    """
+    destino = ASSETS / "characters/animales/valle"
+    for especie in ["venado", "garza", "pato"]:
+        rgba = quitar_fondo(cargar(f"valle_{especie}.jpg"))
+        cuadros = [recortar(rgba, o) for o in _por_filas(separar_objetos(rgba))]
+        construir_atlas(
+            cuadros,
+            {"caminar": ([0, 1, 2, 3], 8.0, True), "idle": ([4], 1.0, True), "comer": ([5, 4], 1.2, True),
+             "descansar": ([6], 1.0, True), "cria": ([7], 1.0, True)},
+            (380, 340),
+            destino / f"{especie}_atlas.png", destino / f"{especie}_frames.tres",
+            f"res://assets/characters/animales/valle/{especie}_atlas.png",
+            por_fila=4,
+        )
+    rgba = quitar_fondo(cargar("valle_monarca.jpg"))
+    cuadros = [recortar(rgba, o) for o in _por_filas(separar_objetos(rgba))]
+    construir_atlas(
+        cuadros, {"volar": (list(range(8)), 12.0, True)}, (380, 340),
+        destino / "monarca_atlas.png", destino / "monarca_frames.tres",
+        "res://assets/characters/animales/valle/monarca_atlas.png", por_fila=4,
+    )
+
+
+def casa() -> None:
+    """Interior de la casa del guardián y sus muebles."""
+    rgba = quitar_fondo(cargar("casa_interior.jpg"))
+    guardar(recortar(rgba, separar_objetos(rgba)[0]), ASSETS / "maps/casa/interior.png")
+    # Orden: cama, tabla de arriba de la repisa, tablero, baúl, tabla de abajo, alfombra,
+    # lámpara, pecera, maceta. Las dos tablas son una sola repisa.
+    rgba = quitar_fondo(cargar("casa_muebles.jpg"))
+    o = separar_objetos(rgba)
+    piezas = {"cama": o[0], "repisa": unir(o[1], o[4]), "tablero": o[2], "baul": o[3], "alfombra": o[5],
+              "lampara": o[6], "pecera": o[7], "maceta": o[8]}
+    for nombre, obj in piezas.items():
+        guardar(recortar(rgba, obj), ASSETS / "maps/casa" / f"{nombre}.png")
+
+
+GRUPOS = {"animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

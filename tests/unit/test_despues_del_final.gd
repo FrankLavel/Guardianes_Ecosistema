@@ -141,3 +141,17 @@ func test_paneles_de_la_casa_se_abren_y_cierran() -> void:
 		casa.cerrar_panel()
 		await wait_process_frames(2)
 		assert_false(Juego.entrada_bloqueada)
+
+
+func test_se_puede_caminar_hasta_la_puerta_y_la_cama() -> void:
+	var casa = ESCENA_CASA.instantiate()
+	add_child_autofree(casa)
+	var gara: GaraAerea = casa.gara
+	gara.leer_entrada_del_jugador = false
+	gara.entrada_direccion = Vector2.DOWN
+	await wait_seconds(1.5)
+	assert_gt(gara.global_position.y, 950.0, "Llega a la puerta entre los postes")
+	gara.global_position = Vector2(600, 700)
+	gara.entrada_direccion = Vector2(-0.3, 1).normalized()
+	await wait_seconds(1.5)
+	assert_lt(gara.global_position.distance_to(casa.get_node("Objetos/Cama").global_position), 120.0, "Llega junto a la cama")

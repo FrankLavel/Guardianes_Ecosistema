@@ -13,24 +13,27 @@ const PUERTA_CASA := Vector2(1615, 905)
 const COLOR_NOCHE := Color(0.5, 0.56, 0.82)
 
 ## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
-## shortcut: usan el arte de perfil de los niveles hasta que haya sprites vistos desde arriba.
+const VENADO := "res://assets/characters/animales/valle/venado_frames.tres"
+const GARZA := "res://assets/characters/animales/valle/garza_frames.tres"
+const PATO := "res://assets/characters/animales/valle/pato_frames.tres"
+const MONARCA := "res://assets/characters/animales/valle/monarca_frames.tres"
 const ANIMALES := [
 	{"nombre": "Venado1", "especie": "venado", "zona": "bosque", "pos": Vector2(2050, 330), "paseo": Rect2(1900, 220, 380, 260),
-		"cuadros": "res://assets/characters/animales/venado_frames.tres", "quieto": &"idle", "caminar": &"correr", "escala": 0.28, "velocidad": 70.0},
+		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
 	{"nombre": "Venado2", "especie": "venado", "zona": "bosque", "pos": Vector2(1250, 1350), "paseo": Rect2(1050, 1250, 500, 300),
-		"cuadros": "res://assets/characters/animales/venado_frames.tres", "quieto": &"comer", "caminar": &"correr", "escala": 0.28, "velocidad": 70.0},
+		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
 	{"nombre": "Garza1", "especie": "garza", "zona": "rio", "pos": Vector2(850, 520), "paseo": Rect2(810, 420, 80, 460),
-		"cuadros": "res://assets/characters/animales/zona1_animales_frames.tres", "quieto": &"garza", "caminar": &"garza", "escala": 0.4, "velocidad": 40.0},
+		"cuadros": GARZA, "escala": 0.27, "velocidad": 40.0},
 	{"nombre": "Garza2", "especie": "garza", "zona": "rio", "pos": Vector2(800, 1250), "paseo": Rect2(770, 1150, 100, 250),
-		"cuadros": "res://assets/characters/animales/zona1_animales_frames.tres", "quieto": &"garza", "caminar": &"garza", "escala": 0.4, "velocidad": 40.0},
+		"cuadros": GARZA, "escala": 0.27, "velocidad": 40.0},
 	{"nombre": "Pato1", "especie": "pato_mexicano", "zona": "lago", "pos": Vector2(2050, 1400), "paseo": Rect2(1900, 1320, 300, 200),
-		"cuadros": "res://assets/characters/animales/zona3_animales_frames.tres", "quieto": &"pato", "caminar": &"pato", "escala": 0.3, "velocidad": 50.0, "mira_derecha": false},
-	{"nombre": "Pato2", "especie": "pato_mexicano", "zona": "lago", "pos": Vector2(1950, 1650), "paseo": Rect2(1850, 1590, 300, 110),
-		"cuadros": "res://assets/characters/animales/zona3_animales_frames.tres", "quieto": &"pato", "caminar": &"pato", "escala": 0.3, "velocidad": 50.0, "mira_derecha": false},
+		"cuadros": PATO, "escala": 0.22, "velocidad": 50.0},
+	{"nombre": "Pato2", "especie": "pato_mexicano", "zona": "lago", "pos": Vector2(1950, 1700), "paseo": Rect2(1850, 1690, 200, 70),
+		"cuadros": PATO, "escala": 0.22, "velocidad": 50.0},
 	{"nombre": "Monarca1", "especie": "monarca", "zona": "bosque", "pos": Vector2(1500, 450), "paseo": Rect2(1300, 300, 500, 300),
-		"cuadros": "res://assets/characters/mari/mari_frames.tres", "quieto": &"idle", "caminar": &"idle", "escala": 0.07, "velocidad": 60.0, "vuela": true},
+		"cuadros": MONARCA, "escala": 0.1, "velocidad": 60.0, "vuela": true},
 	{"nombre": "Monarca2", "especie": "monarca", "zona": "bosque", "pos": Vector2(2150, 800), "paseo": Rect2(2000, 700, 400, 300),
-		"cuadros": "res://assets/characters/mari/mari_frames.tres", "quieto": &"idle", "caminar": &"idle", "escala": 0.07, "velocidad": 60.0, "vuela": true},
+		"cuadros": MONARCA, "escala": 0.1, "velocidad": 60.0, "vuela": true},
 ]
 
 @onready var gara: GaraAerea = $Objetos/Gara
@@ -100,12 +103,16 @@ func _crear_animales() -> void:
 		animal.position = datos["pos"]
 		animal.zona_paseo = datos["paseo"]
 		animal.cuadros = load(datos["cuadros"])
-		animal.anim_quieto = datos["quieto"]
-		animal.anim_caminar = datos["caminar"]
+		if datos.get("vuela", false):
+			animal.anim_quieto = &"volar"
+			animal.anim_caminar = &"volar"
+		else:
+			animal.anim_quieto = &"idle"
+			animal.anim_caminar = &"caminar"
+			animal.anims_pausa.assign([&"comer", &"descansar"])
 		animal.escala = datos["escala"]
 		animal.velocidad = datos["velocidad"]
 		animal.vuela = datos.get("vuela", false)
-		animal.mira_derecha = datos.get("mira_derecha", true)
 		$Objetos.add_child(animal)
 		animales.append(animal)
 

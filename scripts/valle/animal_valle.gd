@@ -15,6 +15,8 @@ enum Estado { PASEO, VA_AL_JUGADOR, ESPERA, SIGUE }
 @export var cuadros: SpriteFrames
 @export var anim_quieto := &"idle"
 @export var anim_caminar := &"idle"
+## Otras poses para cuando se detiene a descansar (comer, echarse...). Se elige una al azar.
+@export var anims_pausa: Array[StringName] = []
 @export var escala := 0.3
 ## Rectángulo del valle por donde pasea.
 @export var zona_paseo := Rect2(1000, 1000, 400, 300)
@@ -31,6 +33,7 @@ var objetivo: Node2D
 var _destino := Vector2.ZERO
 var _pausa := 0.0
 var _hablando := false
+var _pose := &""
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var _sombra: Polygon2D = $Sombra
@@ -91,6 +94,7 @@ func _pasear(delta: float) -> Vector2:
 		return Vector2.ZERO
 	if global_position.distance_to(_destino) < 8.0:
 		_pausa = randf_range(1.5, 4.5)
+		_pose = ([anim_quieto] + anims_pausa).pick_random()
 		_destino = Vector2(randf_range(zona_paseo.position.x, zona_paseo.end.x),
 			randf_range(zona_paseo.position.y, zona_paseo.end.y))
 		return Vector2.ZERO
@@ -104,7 +108,8 @@ func _mover_hacia(punto: Vector2, rapidez: float, delta: float) -> Vector2:
 
 
 func _animar(paso: Vector2) -> void:
-	var anim := anim_caminar if paso.length() > 0.01 else anim_quieto
+	var quieto := _pose if estado == Estado.PASEO and not _pose.is_empty() else anim_quieto
+	var anim := anim_caminar if paso.length() > 0.01 else quieto
 	if sprite.animation != anim:
 		sprite.play(anim)
 	if absf(paso.x) > 0.01:

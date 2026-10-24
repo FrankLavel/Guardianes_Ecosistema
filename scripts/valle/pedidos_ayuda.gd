@@ -156,9 +156,15 @@ func _aparecer_cria(mama: AnimalValle) -> void:
 	cria.name = "Cria"
 	cria.especie = mama.especie
 	cria.cuadros = mama.cuadros
-	cria.anim_quieto = mama.anim_quieto
-	cria.anim_caminar = mama.anim_caminar
-	cria.escala = mama.escala * 0.6
+	# Si la hoja del animal trae su cría, se usa; si no, la mamá en chiquito.
+	if mama.cuadros.has_animation(&"cria"):
+		cria.anim_quieto = &"cria"
+		cria.anim_caminar = &"cria"
+		cria.escala = mama.escala
+	else:
+		cria.anim_quieto = mama.anim_quieto
+		cria.anim_caminar = mama.anim_caminar
+		cria.escala = mama.escala * 0.6
 	cria.mira_derecha = mama.mira_derecha
 	cria.velocidad = mama.velocidad
 	cria.texto_aviso = "E  Llamar a la cría"

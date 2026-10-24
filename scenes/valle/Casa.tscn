@@ -14,7 +14,7 @@ script = ExtResource("1_script")
 y_sort_enabled = true
 
 [node name="Gara" parent="Objetos" instance=ExtResource("2_gara")]
-position = Vector2(800, 780)
+position = Vector2(893, 690)
 collision_layer = 2
 motion_mode = 1
 
