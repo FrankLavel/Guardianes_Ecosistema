@@ -47,6 +47,7 @@ const ANIMALES := [
 var pedidos: PedidosAyuda
 var animales: Array[AnimalValle] = []
 var _noche: CanvasModulate
+var _luz_casa: PointLight2D
 
 
 func _ready() -> void:
@@ -71,6 +72,23 @@ func _ready() -> void:
 	_especies_de_zonas_terminadas()
 	_noche = CanvasModulate.new()
 	add_child(_noche)
+	# De noche las ventanas de la casa dan una luz cálida.
+	var degradado := Gradient.new()
+	degradado.set_color(0, Color(1, 0.8, 0.45, 1))
+	degradado.set_color(1, Color(1, 0.6, 0.25, 0))
+	var textura := GradientTexture2D.new()
+	textura.gradient = degradado
+	textura.fill = GradientTexture2D.FILL_RADIAL
+	textura.fill_from = Vector2(0.5, 0.5)
+	textura.fill_to = Vector2(1.0, 0.5)
+	textura.width = 256
+	textura.height = 256
+	_luz_casa = PointLight2D.new()
+	_luz_casa.texture = textura
+	_luz_casa.texture_scale = 1.6
+	_luz_casa.energy = 0.9
+	_luz_casa.position = PUERTA_CASA + Vector2(40, -90)
+	add_child(_luz_casa)
 	_crear_animales()
 	# Achi vive en un estanque (los achoques solo viven en el agua).
 	var estanque := Estanque.new()
@@ -197,6 +215,7 @@ func actualizar_mundo() -> void:
 	for animal in animales:
 		animal.actualizar_visibilidad()
 	_noche.color = COLOR_NOCHE if Juego.es_de_noche else Color.WHITE
+	_luz_casa.enabled = Juego.es_de_noche
 	hud.actualizar_progreso(Juego.zonas_completadas.size(), Juego.ZONAS.size(),
 		Juego.hojas if Juego.juego_terminado() else -1)
 

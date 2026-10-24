@@ -43,6 +43,7 @@ func configurar(lista: Array[AnimalValle], guardian: Node2D, interfaz: Node, nod
 	contenedor = nodo_objetos
 	for animal in animales:
 		animal.hablaron.connect(_al_hablar)
+		animal.llego_al_jugador.connect(_al_llegar)
 	_espera = randf_range(8.0, 15.0)
 	if not Juego.pedido.is_empty():
 		_reanudar()
@@ -96,6 +97,12 @@ func iniciar_pedido(tipo := "", animal: AnimalValle = null) -> bool:
 	elegido[1].ir_hacia(jugador)
 	pedido_cambio.emit()
 	return true
+
+
+func _al_llegar(animal: AnimalValle) -> void:
+	if Juego.pedido.get("animal") == animal.name and Juego.pedido.get("estado") == "aviso":
+		Sonido.efecto("punto_control")
+		hud.mostrar_objetivo("¡Un animal necesita tu ayuda! Habla con él (E).")
 
 
 func _al_hablar(animal: AnimalValle) -> void:

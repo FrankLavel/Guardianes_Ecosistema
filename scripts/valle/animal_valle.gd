@@ -34,6 +34,8 @@ var _destino := Vector2.ZERO
 var _pausa := 0.0
 var _hablando := false
 var _pose := &""
+var _alto_alerta := 0.0
+var _salto_alerta: Tween
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var _sombra: Polygon2D = $Sombra
@@ -48,7 +50,8 @@ func _ready() -> void:
 	var alto := cuadros.get_frame_texture(anim_quieto, 0).get_height()
 	sprite.offset = Vector2(0, -alto / 2.0)
 	_sombra.visible = not vuela
-	_alerta.position.y = -alto * escala - 60.0
+	_alto_alerta = -alto * escala - 60.0
+	_alerta.position.y = _alto_alerta
 	_alerta.visible = false
 	if vuela:
 		var flotar := create_tween().set_loops()
@@ -144,6 +147,14 @@ func volver_a_pasear() -> void:
 func mostrar_alerta(texto: String) -> void:
 	_alerta.text = texto
 	_alerta.visible = not texto.is_empty()
+	if _salto_alerta:
+		_salto_alerta.kill()
+	_alerta.position.y = _alto_alerta
+	# El "!" brinca para que se note desde lejos.
+	if texto == "!":
+		_salto_alerta = create_tween().set_loops()
+		_salto_alerta.tween_property(_alerta, "position:y", _alto_alerta - 14.0, 0.3).set_trans(Tween.TRANS_SINE)
+		_salto_alerta.tween_property(_alerta, "position:y", _alto_alerta, 0.3).set_trans(Tween.TRANS_SINE)
 
 
 func _al_interactuar(jugador: Node2D) -> void:
