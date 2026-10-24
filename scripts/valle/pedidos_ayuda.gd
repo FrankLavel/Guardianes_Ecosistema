@@ -144,6 +144,7 @@ func _aparecer_objetivos() -> void:
 	for i in faltan:
 		var objeto: ObjetoAyuda = ESCENA_OBJETO.instantiate()
 		objeto.tipo = tipo_objeto
+		objeto.planta = "flores" if Juego.pedido["tipo"] == "flores" else "arbolito"
 		objeto.position = _lugar_cerca(animal.global_position, usados)
 		usados.append(objeto.position)
 		objeto.usado.connect(func(_o): avanzar())

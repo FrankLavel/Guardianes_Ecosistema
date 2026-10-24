@@ -52,10 +52,25 @@ func construir() -> void:
 		var arriba := fila * tam.y - sobresale_pasto
 		_agregar_parche(textura_suelo, Rect2(x0, arriba, ancho, fondo_y - arriba + 4.0), borde_suelo, alto_pasto, 40)
 
-	# Paredes: columnas de tierra sin pasto encima (bordes del nivel).
+	# Paredes: columnas de tierra sin pasto encima (bordes del nivel). Solo la tierra de la
+	# textura, repetida a su tamaño: estirar la textura entera en una columna se veía a rayas.
+	var tierra := AtlasTexture.new()
+	tierra.atlas = textura_suelo
+	tierra.region = Rect2(borde_suelo, alto_pasto, textura_suelo.get_width() - borde_suelo * 2,
+		textura_suelo.get_height() - alto_pasto - 40)
 	for columna in columnas_de_tierra():
-		var rect := Rect2(columna.x * tam.x, columna.y * tam.y - sobresale_pasto, tam.x, fondo_y - columna.y * tam.y + sobresale_pasto)
-		_agregar_parche(textura_suelo, rect, 0, alto_pasto, 40)
+		var rect := Rect2(columna.x * tam.x, columna.y * tam.y, tam.x, fondo_y - columna.y * tam.y)
+		var pared := TextureRect.new()
+		pared.texture = tierra
+		pared.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		pared.stretch_mode = TextureRect.STRETCH_TILE
+		pared.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		pared.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pared.modulate = Color(0.82, 0.82, 0.82)
+		pared.position = rect.position
+		pared.scale = Vector2(escala_arte, escala_arte)
+		pared.size = rect.size / escala_arte
+		add_child(pared)
 
 	for tramo in tramos(TILE_PLATAFORMA):
 		var alto_tronco := textura_plataforma.get_height() * escala_arte

@@ -80,9 +80,11 @@ func obtener_limites_terreno() -> Rect2:
 func _ajustar_camara() -> void:
 	var limites := obtener_limites_terreno()
 	var camara := guardian.camara
-	camara.limit_left = int(limites.position.x)
+	# La primera y la última columna son las paredes del nivel: la cámara no las muestra.
+	var columna := limites.size.x / terreno.get_used_rect().size.x
+	camara.limit_left = int(limites.position.x + columna)
 	camara.limit_top = int(limites.position.y) - 400
-	camara.limit_right = int(limites.end.x)
+	camara.limit_right = int(limites.end.x - columna)
 	camara.limit_bottom = int(limites.end.y)
 	guardian.limite_caida = limites.end.y + MARGEN_CAIDA
 

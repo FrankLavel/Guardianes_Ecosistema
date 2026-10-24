@@ -22,7 +22,7 @@ const ANIMALES := [
 		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
 	{"nombre": "Venado2", "especie": "venado", "zona": "bosque", "pos": Vector2(1250, 1350), "paseo": Rect2(1050, 1250, 500, 300),
 		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
-	{"nombre": "Garza1", "especie": "garza", "zona": "rio", "pos": Vector2(850, 520), "paseo": Rect2(810, 420, 80, 460),
+	{"nombre": "Garza1", "especie": "garza", "zona": "rio", "pos": Vector2(850, 640), "paseo": Rect2(800, 560, 90, 360),
 		"cuadros": GARZA, "escala": 0.27, "velocidad": 40.0},
 	{"nombre": "Garza2", "especie": "garza", "zona": "rio", "pos": Vector2(800, 1250), "paseo": Rect2(770, 1150, 100, 250),
 		"cuadros": GARZA, "escala": 0.27, "velocidad": 40.0},

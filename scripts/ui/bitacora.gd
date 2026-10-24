@@ -11,10 +11,11 @@ signal especie_descubierta(id: String)
 const RUTA_DATOS := "res://data/especies.json"
 const RUTA_IMAGEN := "res://assets/ui/bitacora/%s.png"
 const ZONAS := {"rio": "Río", "bosque": "Bosque", "lago": "Lago"}
+## Colores oscuros: se leen sobre el papel claro de la página.
 const ESTADOS := {
-	"seguro": ["Sin peligro", Color(0.55, 0.85, 0.45)],
-	"cuidado": ["Necesita cuidado", Color(0.98, 0.8, 0.35)],
-	"peligro": ["En peligro", Color(1.0, 0.5, 0.42)],
+	"seguro": ["Sin peligro", Color(0.18, 0.48, 0.14)],
+	"cuidado": ["Necesita cuidado", Color(0.72, 0.42, 0.02)],
+	"peligro": ["En peligro", Color(0.72, 0.14, 0.1)],
 }
 
 var especies: Dictionary = {}
@@ -182,7 +183,7 @@ func mostrar_especie(id: String) -> void:
 	_cientifico.text = datos["cientifico"] if conocida else ""
 	var estado: Array = ESTADOS[datos["estado"]]
 	_estado.text = estado[0] if conocida else ""
-	_estado.modulate = estado[1]
+	_estado.add_theme_color_override("font_color", estado[1])
 	_dato.text = datos["dato"] if conocida else "Sigue explorando y ayudando al ecosistema para descubrir esta especie."
 
 

@@ -21,14 +21,20 @@
 		"basura": {
 			"recompensa": 5,
 			"meta": 3,
-			"animales": ["venado", "garza", "pato_mexicano"],
+			"animales": [
+				"venado",
+				"garza",
+				"pato_mexicano"
+			],
 			"objetivo": "Recoge la basura cerca {del_animal}",
 			"pedir": [
 				"¡{nombre}! Qué bueno que te encuentro.",
 				"Alguien tiró basura donde busco comida. Si me la como, me puedo enfermar.",
 				"¿Me ayudas a recogerla? Son 3 cosas, están aquí cerca."
 			],
-			"recordar": ["Todavía queda basura por aquí cerca. ¡Tú puedes!"],
+			"recordar": [
+				"Todavía queda basura por aquí cerca. ¡Tú puedes!"
+			],
 			"gracias": [
 				"¡Gracias, {guardian}! Ya puedo comer sin tragarme el plástico.",
 				"Toma estas hojas. Te las regalo para tu casa."
@@ -37,14 +43,19 @@
 		"cria": {
 			"recompensa": 8,
 			"meta": 1,
-			"animales": ["venado", "pato_mexicano"],
+			"animales": [
+				"venado",
+				"pato_mexicano"
+			],
 			"objetivo": "Busca a la cría {del_animal} y tráela",
 			"pedir": [
 				"¡{nombre}, ayúdame! ¡No encuentro a mi cría!",
 				"Se fue a explorar por el valle y no regresó.",
 				"Búscala, por favor. Cuando la encuentres, te seguirá hasta mí."
 			],
-			"recordar": ["Mi cría es pequeña y se asusta fácil. Búscala por todo el valle."],
+			"recordar": [
+				"Mi cría es pequeña y se asusta fácil. Búscala por todo el valle."
+			],
 			"gracias": [
 				"¡Mi cría! ¡Gracias, {guardian}!",
 				"Las crías se pierden cuando el ruido o la basura las asustan. Tú las cuidas.",
@@ -54,17 +65,43 @@
 		"plantar": {
 			"recompensa": 6,
 			"meta": 2,
-			"animales": ["venado", "monarca"],
+			"animales": [
+				"venado",
+				"monarca"
+			],
 			"objetivo": "Planta 2 arbolitos cerca {del_animal}",
 			"pedir": [
 				"Hola, {nombre}. Aquí hace mucho sol y casi no hay plantas.",
 				"Encontré tierra suelta para plantar. ¿Plantas 2 arbolitos?",
 				"Así habrá sombra y comida para todos."
 			],
-			"recordar": ["Todavía falta plantar. La tierra suelta está aquí cerca."],
+			"recordar": [
+				"Todavía falta plantar. La tierra suelta está aquí cerca."
+			],
 			"gracias": [
 				"¡Qué bonitos arbolitos! Cuando crezcan darán sombra y hogar.",
 				"Toma estas hojas para tu casa, {guardian}."
+			]
+		},
+		"flores": {
+			"recompensa": 6,
+			"meta": 3,
+			"animales": [
+				"monarca"
+			],
+			"objetivo": "Planta 3 flores cerca {del_animal}",
+			"pedir": [
+				"¡Hola, {nombre}! Pronto empieza mi viaje y necesito mucha energía.",
+				"Las mariposas tomamos néctar de las flores, pero aquí ya casi no hay.",
+				"¿Plantas 3 flores en la tierra suelta? ¡Así podré volar muy lejos!"
+			],
+			"recordar": [
+				"Todavía faltan flores. La tierra suelta está aquí cerca."
+			],
+			"gracias": [
+				"¡Qué ricas flores! Con su néctar tengo energía para mi viaje.",
+				"Las flores también ayudan a las abejas y a los colibríes. ¡Gracias, {guardian}!",
+				"Toma estas hojas para tu casa."
 			]
 		}
 	},

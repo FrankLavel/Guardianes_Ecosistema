@@ -8,9 +8,12 @@ signal usado(objeto: ObjetoAyuda)
 const BASURA := ["botella", "lata", "bolsa", "pila", "unicel"]
 const TIERRA := preload("res://assets/objects/zona2/tierra_fertil.png")
 const ARBOLITO := preload("res://assets/objects/zona1/brote_control.png")
+const FLORES := preload("res://assets/maps/valle/objetos/arbusto_flores.png")
 
 ## "basura" o "tierra".
 @export var tipo := "basura"
+## Lo que crece en la tierra: "arbolito" o "flores".
+@export var planta := "arbolito"
 
 var hecho := false
 
@@ -23,7 +26,7 @@ func _ready() -> void:
 		_poner(load("res://assets/objects/basura/%s.png" % BASURA.pick_random()), 46.0)
 		_sprite.rotation = randf_range(-0.5, 0.5)
 	else:
-		texto_aviso = "E  Plantar"
+		texto_aviso = "E  Plantar flores" if planta == "flores" else "E  Plantar"
 		_poner(TIERRA, 70.0)
 	super()
 
@@ -50,7 +53,10 @@ func _al_interactuar(jugador: Node2D) -> void:
 		salir.tween_callback(queue_free)
 	else:
 		Sonido.efecto("correcto")
-		_poner(ARBOLITO, 80.0)
+		if planta == "flores":
+			_poner(FLORES, 70.0)
+		else:
+			_poner(ARBOLITO, 80.0)
 		_sprite.rotation = 0.0
 		var crecer := create_tween()
 		_sprite.scale *= 0.3

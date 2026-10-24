@@ -28,7 +28,8 @@ const MUEBLES := {
 	"pecera": {"nombre": "Pecera con achoque", "costo": 12, "icono": "res://assets/maps/casa/pecera.png"},
 }
 ## Insignias por tipo de ayuda y cuántas ayudas pide cada nivel.
-const INSIGNIAS := {"basura": "Limpiador del valle", "cria": "Rescatista de crías", "plantar": "Sembrador"}
+const INSIGNIAS := {"basura": "Limpieza del valle", "cria": "Rescate de crías", "plantar": "Siembra de árboles",
+	"flores": "Jardín de mariposas"}
 const NIVELES := [[6, "Oro"], [3, "Plata"], [1, "Bronce"]]
 const ZONAS := {
 	"rio": ["Río Cupatitzio", "res://assets/maps/valle/entradas/entrada_rio.png"],
@@ -275,7 +276,8 @@ func _llenar_tablero() -> void:
 			_contenido.add_child(_texto("¡Ya terminaste! Regresa a hablar con el animal.", 28, Color(0.7, 1, 0.6)))
 		_contenido.add_child(_texto("Recompensa: %d hojas" % int(def.get("recompensa", 0)), 28, Color(0.8, 1, 0.7)))
 	_contenido.add_child(_texto("Los animales pueden pedirte:", 28, Color(0.99, 0.86, 0.45)))
-	for linea in ["•  Recoger basura donde buscan comida.", "•  Encontrar a una cría perdida y llevarla con su mamá.", "•  Plantar arbolitos para que haya sombra y comida."]:
+	for linea in ["•  Recoger basura donde buscan comida.", "•  Encontrar a una cría perdida y llevarla con su mamá.", "•  Plantar arbolitos para que haya sombra y comida.",
+			"•  Plantar flores con néctar para las mariposas."]:
 		_contenido.add_child(_texto(linea, 26))
 	_contenido.add_child(_texto("Ayudas completadas: %d" % Juego.total_ayudas(), 28, Color(0.8, 1, 0.7)))
 

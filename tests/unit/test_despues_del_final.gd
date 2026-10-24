@@ -155,3 +155,18 @@ func test_se_puede_caminar_hasta_la_puerta_y_la_cama() -> void:
 	gara.entrada_direccion = Vector2(-0.3, 1).normalized()
 	await wait_seconds(1.5)
 	assert_lt(gara.global_position.distance_to(casa.get_node("Objetos/Cama").global_position), 120.0, "Llega junto a la cama")
+
+
+func test_la_monarca_pide_flores() -> void:
+	_terminar_juego()
+	var valle = await _valle()
+	var pedidos: PedidosAyuda = valle.pedidos
+	var monarca: AnimalValle = valle.get_node("Objetos/Monarca1")
+	assert_true(pedidos.iniciar_pedido("flores", monarca))
+	pedidos._activar()
+	assert_eq(pedidos._objetos.size(), 3)
+	assert_eq(pedidos._objetos[0].planta, "flores")
+	for objeto in pedidos._objetos.duplicate():
+		objeto.interactuar(valle.gara)
+	pedidos._terminar()
+	assert_eq(int(Juego.ayudas["flores"]), 1)

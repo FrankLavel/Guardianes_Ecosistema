@@ -45,7 +45,9 @@ func test_tiene_terreno_y_guardian() -> void:
 
 func test_camara_limitada_al_ancho_del_nivel() -> void:
 	var limites: Rect2 = nivel.obtener_limites_terreno()
-	assert_eq(nivel.guardian.camara.limit_right, int(limites.end.x))
+	# La última columna es la pared del nivel: la cámara se detiene justo antes.
+	var columna: float = limites.size.x / nivel.terreno.get_used_rect().size.x
+	assert_eq(nivel.guardian.camara.limit_right, int(limites.end.x - columna))
 	assert_gt(limites.size.x, 1280.0, "El nivel es más ancho que la pantalla")
 
 
