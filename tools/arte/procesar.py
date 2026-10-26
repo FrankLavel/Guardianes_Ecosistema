@@ -674,6 +674,9 @@ def casa() -> None:
               "lampara": o[6], "pecera": o[7], "maceta": o[8]}
     for nombre, obj in piezas.items():
         guardar(recortar(rgba, obj), ASSETS / "maps/casa" / f"{nombre}.png")
+    # La cama y la pecera de la primera hoja venían en diagonal: se usan las de frente
+    # (la pecera ya trae al achoque adentro).
+    objetos("casa_muebles_frente.png", ["cama", "pecera"], "maps/casa")
 
 
 GRUPOS = {"animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}

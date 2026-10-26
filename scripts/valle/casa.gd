@@ -96,7 +96,7 @@ func _ready() -> void:
 	for parte in ["Sprite", "Sombra", "CollisionShape2D"]:
 		(gara.get_node(parte) as Node2D).scale *= ESCALA_GUARDIAN
 	_crear_paredes()
-	_crear_zona("Cama", Vector2(400, 950), "E  Descansar y guardar", func(_j): descansar())
+	_crear_zona("Cama", Vector2(500, 830), "E  Descansar y guardar", func(_j): descansar())
 	_crear_zona("Repisa", Vector2(880, 660), "E  Ver trofeos", func(_j): abrir_panel("trofeos"))
 	_crear_zona("Tablero", Vector2(1480, 660), "E  Tablero de pedidos", func(_j): abrir_panel("tablero"))
 	_crear_zona("Baul", Vector2(1480, 850), "E  Muebles", func(_j): abrir_panel("muebles"))
@@ -119,7 +119,7 @@ func _crear_paredes() -> void:
 		forma.polygon = PackedVector2Array(poligono)
 		paredes.add_child(forma)
 	# Cama y baúl (solo la base, por donde pisan).
-	for caja in [Rect2(235, 770, 260, 130), Rect2(1405, 700, 150, 60)]:
+	for caja in [Rect2(235, 700, 190, 220), Rect2(1405, 700, 150, 60)]:
 		var forma := CollisionShape2D.new()
 		var rect := RectangleShape2D.new()
 		rect.size = caja.size
@@ -136,9 +136,9 @@ func _crear_zona(nombre: String, lugar: Vector2, aviso: String, accion: Callable
 	zona.position = lugar
 	zona.activada.connect(accion)
 	$Objetos.add_child(zona)
-	# Encima de la cabeza del guardián (aquí se ve más grande) y siempre por delante de él.
+	# Bajo los pies del guardián (aquí se ve más grande): arriba tapaba la repisa y el tablero.
 	var etiqueta: Label = zona.get_node("Aviso")
-	etiqueta.position.y = -225.0
+	etiqueta.position.y = 25.0
 	etiqueta.z_index = 5
 
 
@@ -332,10 +332,10 @@ func _llenar_muebles() -> void:
 
 ## Muebles del piso: [imagen, pie (abajo al centro), ancho en el cuarto, mueble que hay que comprar].
 const EN_EL_PISO := [
-	["cama", Vector2(365, 900), 270.0, ""],
+	["cama", Vector2(330, 925), 200.0, ""],
 	["baul", Vector2(1480, 760), 150.0, ""],
 	["lampara", Vector2(570, 700), 64.0, "lampara"],
-	["pecera", Vector2(210, 1005), 170.0, "pecera"],
+	["pecera", Vector2(600, 985), 150.0, "pecera"],
 	["maceta", Vector2(650, 668), 66.0, "maceta"],
 	["maceta", Vector2(1610, 960), 70.0, "tule"],
 ]
@@ -356,20 +356,15 @@ func _poner_muebles() -> void:
 		mueble.position = datos[1]
 		$Objetos.add_child(mueble)
 		# Lo que lleva cada maceta y lo que nada en la pecera.
-		var dentro := {"maceta": "res://assets/objects/zona1/brote_control.png", "tule": "res://assets/objects/zona3/tule.png",
-			"pecera": "res://assets/objects/zona3/achoque.png"}
+		var dentro := {"maceta": "res://assets/objects/zona1/brote_control.png", "tule": "res://assets/objects/zona3/tule.png"}
 		if dentro.has(datos[3]):
 			var planta := Sprite2D.new()
 			planta.texture = load(dentro[datos[3]])
 			var alto_mueble: float = mueble.texture.get_height()
-			if datos[3] == "pecera":
-				planta.scale = Vector2.ONE * 0.45 * mueble.texture.get_width() / planta.texture.get_width()
-				planta.position = Vector2(0, -alto_mueble * 0.68)
-			else:
-				planta.scale = Vector2.ONE * 1.1 * mueble.texture.get_width() / planta.texture.get_width()
-				planta.position = Vector2(0, -alto_mueble * 0.75)
-				planta.offset = Vector2(0, -planta.texture.get_height() / 2.0)
-				planta.show_behind_parent = true
+			planta.scale = Vector2.ONE * 1.1 * mueble.texture.get_width() / planta.texture.get_width()
+			planta.position = Vector2(0, -alto_mueble * 0.75)
+			planta.offset = Vector2(0, -planta.texture.get_height() / 2.0)
+			planta.show_behind_parent = true
 			mueble.add_child(planta)
 
 

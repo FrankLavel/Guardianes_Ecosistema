@@ -151,10 +151,11 @@ func test_se_puede_caminar_hasta_la_puerta_y_la_cama() -> void:
 	gara.entrada_direccion = Vector2.DOWN
 	await wait_seconds(1.5)
 	assert_gt(gara.global_position.y, 950.0, "Llega a la puerta entre los postes")
-	gara.global_position = Vector2(600, 700)
-	gara.entrada_direccion = Vector2(-0.3, 1).normalized()
-	await wait_seconds(1.5)
-	assert_lt(gara.global_position.distance_to(casa.get_node("Objetos/Cama").global_position), 120.0, "Llega junto a la cama")
+	var cama: Node2D = casa.get_node("Objetos/Cama")
+	gara.global_position = Vector2(900, 700)
+	gara.entrada_direccion = gara.global_position.direction_to(cama.global_position)
+	await wait_until(func(): return gara.global_position.distance_to(cama.global_position) < 60.0, 3.0)
+	assert_lt(gara.global_position.distance_to(cama.global_position), 60.0, "Llega junto a la cama")
 
 
 func test_la_monarca_pide_flores() -> void:
