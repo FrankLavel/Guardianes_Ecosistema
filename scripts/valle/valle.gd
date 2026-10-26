@@ -52,7 +52,7 @@ var _luz_casa: PointLight2D
 
 func _ready() -> void:
 	add_to_group(&"jugable")
-	Sonido.musica("valle")
+	Sonido.musica("valle_noche" if Juego.es_de_noche else "valle")
 	var camara := gara.camara
 	camara.limit_left = 0
 	camara.limit_top = 0

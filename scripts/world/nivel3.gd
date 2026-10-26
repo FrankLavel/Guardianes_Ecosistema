@@ -25,7 +25,7 @@ var _basuras: Array = []
 func _ready() -> void:
 	add_to_group(&"jugable")
 	_basuras.assign(_hijos("BasuraLago"))
-	Sonido.musica("rio")
+	Sonido.musica("lago")
 	_ajustar_camara()
 	# La meta del lago es el muelle.
 	var muelle: Sprite2D = meta.get_node("Sprite2D")

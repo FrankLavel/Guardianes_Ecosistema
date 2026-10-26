@@ -10,4 +10,4 @@ Para reemplazar un sonido por uno definitivo (por ejemplo de una biblioteca CC0)
 | Archivo | Origen | Licencia |
 |---|---|---|
 | `sfx/*.wav` | Generado (tools/audio/generar_audio.py) | Propio del proyecto |
-| `musica/*.wav` | Generado (tools/audio/generar_audio.py) | Propio del proyecto |
+| `musica/*.wav` (ambientes de naturaleza: viento, agua, pájaros, grillos, ranas) | Generado (tools/audio/generar_audio.py) | Propio del proyecto |

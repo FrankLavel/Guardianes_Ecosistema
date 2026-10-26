@@ -105,7 +105,7 @@ value = 80.0
 
 [node name="LblMusica" type="Label" parent="Panel/VBox/Filas"]
 layout_mode = 2
-text = "Música"
+text = "Sonidos de la naturaleza"
 label_settings = SubResource("Fila")
 
 [node name="SliderMusica" type="HSlider" parent="Panel/VBox/Filas"]

@@ -1,5 +1,6 @@
 extends Node
-## Música y efectos de sonido (autoload "Sonido").
+## Sonido de ambiente de cada lugar (viento, agua, pájaros...) y efectos (autoload "Sonido").
+## El ambiente usa la función musica() y el bus "Musica" (nombres de antes de quitar la música).
 ##
 ##     Sonido.efecto("recoger")
 ##     Sonido.musica("valle")

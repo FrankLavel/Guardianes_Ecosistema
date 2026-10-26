@@ -7,7 +7,6 @@ signal resuelto
 signal cerrado
 
 var esta_resuelto := false
-var _musica_anterior := ""
 
 @onready var mensaje: Label = %Mensaje
 @onready var boton_cerrar: Button = %BtnCerrar
@@ -24,8 +23,6 @@ func abrir() -> void:
 	visible = true
 	get_tree().paused = true
 	Juego.entrada_bloqueada = true
-	_musica_anterior = Sonido.musica_actual
-	Sonido.musica("puzzle")
 	_al_abrir()
 
 
@@ -34,8 +31,6 @@ func cerrar() -> void:
 		return
 	visible = false
 	get_tree().paused = false
-	if _musica_anterior != "":
-		Sonido.musica(_musica_anterior)
 	# Un cuadro de espera para que la tecla que cerró el puzzle no active nada más.
 	await get_tree().process_frame
 	Juego.entrada_bloqueada = false

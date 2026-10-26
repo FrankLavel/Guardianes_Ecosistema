@@ -22,7 +22,7 @@ var nivel_terminado := false
 
 func _ready() -> void:
 	add_to_group(&"jugable")
-	Sonido.musica("rio")
+	Sonido.musica("bosque")
 	_ajustar_camara()
 	fogata.apagada.connect(_al_apagar_fogata)
 	venado.liberado.connect(_al_liberar_venado)

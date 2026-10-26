@@ -3,7 +3,7 @@ extends GutTest
 
 const EFECTOS := ["salto", "recoger", "boton", "dialogo", "correcto", "incorrecto", "valvula",
 	"chapoteo", "brazada", "zona_restaurada", "punto_control"]
-const MUSICAS := ["valle", "rio", "puzzle"]
+const MUSICAS := ["valle", "valle_noche", "rio", "bosque", "lago", "casa", "casa_noche"]
 
 
 func test_existen_los_buses_de_musica_y_efectos() -> void:
@@ -15,7 +15,7 @@ func test_existen_todos_los_sonidos() -> void:
 	for nombre in EFECTOS:
 		assert_true(ResourceLoader.exists(Sonido.CARPETA_SFX % nombre), "Falta efecto: %s" % nombre)
 	for nombre in MUSICAS:
-		assert_true(ResourceLoader.exists(Sonido.CARPETA_MUSICA % nombre), "Falta música: %s" % nombre)
+		assert_true(ResourceLoader.exists(Sonido.CARPETA_MUSICA % nombre), "Falta ambiente: %s" % nombre)
 
 
 func test_la_musica_se_repite_en_bucle() -> void:

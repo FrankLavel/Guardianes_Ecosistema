@@ -62,7 +62,7 @@ var _texturas: Dictionary = {}
 
 func _ready() -> void:
 	add_to_group(&"jugable")
-	Sonido.musica("valle")
+
 	_pedidos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_PEDIDOS))
 	_noche = CanvasModulate.new()
 	add_child(_noche)
@@ -144,6 +144,7 @@ func _crear_zona(nombre: String, lugar: Vector2, aviso: String, accion: Callable
 
 func _actualizar() -> void:
 	_noche.color = COLOR_NOCHE if Juego.es_de_noche else Color.WHITE
+	Sonido.musica("casa_noche" if Juego.es_de_noche else "casa")
 	_poner_muebles()
 	hud.actualizar_progreso(Juego.zonas_completadas.size(), Juego.ZONAS.size(), Juego.hojas)
 	queue_redraw()

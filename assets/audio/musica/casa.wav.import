@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://dt1ojm3yqre7c"
-path="res://.godot/imported/puzzle.wav-d6dcf82114497946e2cfa5948bea13dd.sample"
+uid="uid://cwsarkeny1xhr"
+path="res://.godot/imported/casa.wav-18eca42120db125e99cabdd2eac4baab.sample"
 
 [deps]
 
-source_file="res://assets/audio/musica/puzzle.wav"
-dest_files=["res://.godot/imported/puzzle.wav-d6dcf82114497946e2cfa5948bea13dd.sample"]
+source_file="res://assets/audio/musica/casa.wav"
+dest_files=["res://.godot/imported/casa.wav-18eca42120db125e99cabdd2eac4baab.sample"]
 
 [params]
 

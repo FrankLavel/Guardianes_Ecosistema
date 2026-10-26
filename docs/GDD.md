@@ -156,7 +156,7 @@ Todos los textos educativos viven en `data/` (JSON) para que el equipo y docente
 - **Estilo:** pixel art de alta definición, igual que los personajes (niño y niña) (contornos oscuros, sombreado suave, colores naturales vivos).
 - **Origen:** generado con IA por el equipo siguiendo `docs/arte/GUIA_ARTE.md`; integración y limpieza en el proyecto.
 - **Efectos en Godot (sin arte extra):** fondos con paralaje (profundidad), shader de agua con reflejos y ondas, partículas (hojas, polvo, chispas de restauración), iluminación 2D, transición gris → color al restaurar, temblores y "juice" en interacciones.
-- **Audio:** música por zona (tranquila / misterio / triunfo) y efectos (pasos, salto, agua, recoger, puzzle resuelto). Fuente: bibliotecas con licencia libre (CC0) — se documenta la licencia de cada archivo en `assets/audio/CREDITOS.md`.
+- **Audio:** en lugar de música, sonido de ambiente de naturaleza en cada lugar (valle con pájaros y viento, río con agua corriendo, bosque con viento entre los árboles y un pájaro carpintero, lago con olas y ranas, casa tranquila; grillos de noche) y efectos (pasos, salto, agua, recoger, puzzle resuelto). Fuente: bibliotecas con licencia libre (CC0) — se documenta la licencia de cada archivo en `assets/audio/CREDITOS.md`.
 
 ---
 
