@@ -23,8 +23,8 @@ from arte import RAIZ, cargar, construir_atlas, guardar, hacer_repetible, hacer_
 ASSETS = RAIZ / "assets"
 
 
-def objetos(fuente: str, nombres: list[str | None], destino: str, area_min: int = 400) -> dict[str, Image.Image]:
-    rgba = quitar_fondo(cargar(fuente))
+def objetos(fuente: str, nombres: list[str | None], destino: str, area_min: int = 400, huecos: bool = True) -> dict[str, Image.Image]:
+    rgba = quitar_fondo(cargar(fuente), huecos=huecos)
     encontrados = separar_objetos(rgba, area_min=area_min)
     if len(encontrados) != len(nombres):
         raise SystemExit(f"{fuente}: se esperaban {len(nombres)} objetos y se encontraron {len(encontrados)}")
@@ -676,7 +676,7 @@ def casa() -> None:
         guardar(recortar(rgba, obj), ASSETS / "maps/casa" / f"{nombre}.png")
     # La cama y la pecera de la primera hoja venían en diagonal: se usan las de frente
     # (la pecera ya trae al achoque adentro).
-    objetos("casa_muebles_frente.png", ["cama", "pecera"], "maps/casa")
+    objetos("casa_muebles_frente.png", ["cama", "pecera"], "maps/casa", huecos=False)
 
 
 GRUPOS = {"animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}

@@ -53,9 +53,15 @@ def _inundar(candidato: np.ndarray) -> np.ndarray:
     return visto
 
 
-def quitar_fondo(img: np.ndarray, quitar_sombras: bool = True) -> np.ndarray:
-    """Devuelve RGBA uint8 sin el fondo magenta (y sin las sombras magenta si se pide)."""
+def quitar_fondo(img: np.ndarray, quitar_sombras: bool = True, huecos: bool = True) -> np.ndarray:
+    """Devuelve RGBA uint8 sin el fondo magenta (y sin las sombras magenta si se pide).
+
+    `huecos=False`: solo se quita el fondo que toca la orilla de la imagen. Para dibujos con
+    partes rosas por dentro (el ajolote), que si no se volverían transparentes.
+    """
     fondo = _es_magenta(img, fuerte=True) | _parecido_al_borde(img)
+    if not huecos:
+        fondo = _inundar(fondo)
     if quitar_sombras:
         fondo |= _inundar(_es_magenta(img, fuerte=False)) | (_es_magenta(img, fuerte=False) & fondo_cerca(fondo, 3))
     alfa = np.where(fondo, 0, 255).astype(np.uint8)
