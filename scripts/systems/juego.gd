@@ -7,10 +7,20 @@ extends Node
 signal zona_completada(zona: String)
 signal partida_cargada
 signal hojas_cambiaron(total: int)
+## Cambia la hora entera (para el reloj de la interfaz) y cuando empieza o acaba la noche.
+signal hora_cambio(hora: int)
+signal noche_cambio(es_noche: bool)
 
 ## Orden de las zonas: cada una se desbloquea al completar la anterior.
 const ZONAS := ["rio", "bosque", "lago"]
-const VERSION_GUARDADO := 4
+const VERSION_GUARDADO := 5
+## Reloj del valle: un día completo dura 24 * SEGUNDOS_POR_HORA (unos 12 minutos).
+const SEGUNDOS_POR_HORA := 30.0
+const EMPIEZA_NOCHE := 20.0
+const EMPIEZA_DIA := 6.0
+const HORA_DESPERTAR := 7.0
+const COLOR_NOCHE := Color(0.5, 0.56, 0.82)
+const COLOR_ATARDECER := Color(1.0, 0.82, 0.68)
 ## Habilidad que se gana al restaurar cada zona.
 const HABILIDAD_POR_ZONA := {"rio": "nadar", "bosque": "enredaderas"}
 
@@ -63,7 +73,14 @@ var hojas := 0
 var ayudas: Dictionary = {}
 var muebles: Array[String] = []
 var pedido: Dictionary = {}
-var es_de_noche := false
+var dia := 1
+## De 0 a 24. Solo avanza en las escenas del grupo "con_reloj" (el valle y la casa).
+var hora := 8.0
+var es_de_noche: bool:
+	get:
+		return hora >= EMPIEZA_NOCHE or hora < EMPIEZA_DIA
+	set(valor):
+		hora = 22.0 if valor else 8.0
 
 ## Mientras haya un diálogo o menú abierto, los personajes no se mueven.
 var entrada_bloqueada := false
@@ -84,7 +101,8 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	ayudas.clear()
 	muebles.clear()
 	pedido.clear()
-	es_de_noche = false
+	dia = 1
+	hora = 8.0
 
 
 func datos_personaje() -> Dictionary:
@@ -125,6 +143,54 @@ func completar_zona(zona: String) -> void:
 		dar_habilidad(HABILIDAD_POR_ZONA[zona])
 	zona_completada.emit(zona)
 	guardar()
+
+
+func _process(delta: float) -> void:
+	var escena := get_tree().current_scene
+	if escena == null or not escena.is_in_group(&"con_reloj") or get_tree().paused or entrada_bloqueada:
+		return
+	avanzar_hora(delta / SEGUNDOS_POR_HORA)
+
+
+func avanzar_hora(horas: float) -> void:
+	var noche_antes := es_de_noche
+	var entera := int(hora)
+	hora = fmod(hora + horas, 24.0)
+	if int(hora) != entera:
+		hora_cambio.emit(int(hora))
+	if es_de_noche != noche_antes:
+		noche_cambio.emit(es_de_noche)
+
+
+## Dormir en la cama: empieza un día nuevo en la mañana.
+func pasar_la_noche() -> void:
+	dia += 1
+	hora = HORA_DESPERTAR
+	hora_cambio.emit(int(hora))
+	noche_cambio.emit(false)
+
+
+## "7 de la mañana", "12 del día", "3 de la tarde", "9 de la noche".
+func texto_hora() -> String:
+	var h := int(hora)
+	if h == 12:
+		return "12 del día"
+	var parte := "de la mañana" if h >= 6 and h < 12 else ("de la tarde" if h >= 12 and h < 19 else "de la noche")
+	var doce := h % 12
+	return "%d %s" % [12 if doce == 0 else doce, parte]
+
+
+## Color del mundo según la hora: día normal, atardecer naranja, noche azul y amanecer.
+func color_del_cielo() -> Color:
+	if hora >= 7.0 and hora < 17.0:
+		return Color.WHITE
+	if hora >= 17.0 and hora < 18.5:
+		return Color.WHITE.lerp(COLOR_ATARDECER, (hora - 17.0) / 1.5)
+	if hora >= 18.5 and hora < EMPIEZA_NOCHE:
+		return COLOR_ATARDECER.lerp(COLOR_NOCHE, (hora - 18.5) / (EMPIEZA_NOCHE - 18.5))
+	if hora >= 5.0 and hora < 7.0:
+		return COLOR_NOCHE.lerp(Color.WHITE, (hora - 5.0) / 2.0)
+	return COLOR_NOCHE
 
 
 ## Las tres zonas restauradas: empieza la parte libre (animales que piden ayuda, la casa).
@@ -215,7 +281,8 @@ func a_diccionario() -> Dictionary:
 		"ayudas": ayudas,
 		"muebles": muebles,
 		"pedido": pedido,
-		"es_de_noche": es_de_noche,
+		"dia": dia,
+		"hora": hora,
 	}
 
 
@@ -237,7 +304,8 @@ func desde_diccionario(datos: Dictionary) -> void:
 	ayudas = datos.get("ayudas", {}) if datos.get("ayudas") is Dictionary else {}
 	muebles.assign(datos.get("muebles", []))
 	pedido = datos.get("pedido", {}) if datos.get("pedido") is Dictionary else {}
-	es_de_noche = bool(datos.get("es_de_noche", false))
+	dia = int(datos.get("dia", 1))
+	hora = float(datos.get("hora", 22.0 if datos.get("es_de_noche", false) else 8.0))
 
 
 func guardar() -> bool:

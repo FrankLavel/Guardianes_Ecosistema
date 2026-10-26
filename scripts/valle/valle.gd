@@ -10,7 +10,6 @@ const ESCENA_ANIMAL := preload("res://scenes/valle/AnimalValle.tscn")
 const ESCENA_PUERTA := preload("res://scenes/valle/ZonaInteraccion.tscn")
 ## Frente a la puerta de la casa de adobe (dónde se entra y dónde se aparece al salir).
 const PUERTA_CASA := Vector2(1615, 905)
-const COLOR_NOCHE := Color(0.5, 0.56, 0.82)
 
 ## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
 const VENADO := "res://assets/characters/animales/valle/venado_frames.tres"
@@ -52,7 +51,10 @@ var _luz_casa: PointLight2D
 
 func _ready() -> void:
 	add_to_group(&"jugable")
-	Sonido.musica("valle_noche" if Juego.es_de_noche else "valle")
+	add_to_group(&"con_reloj")
+	_al_cambiar_noche(Juego.es_de_noche)
+	Juego.noche_cambio.connect(_al_cambiar_noche)
+	Juego.hora_cambio.connect(_al_cambiar_hora)
 	var camara := gara.camara
 	camara.limit_left = 0
 	camara.limit_top = 0
@@ -180,6 +182,20 @@ func objetivo_actual() -> String:
 	return "¡El valle está restaurado!"
 
 
+func _process(_delta: float) -> void:
+	_noche.color = Juego.color_del_cielo()
+	# La casa enciende su luz desde que empieza a oscurecer.
+	_luz_casa.enabled = Juego.hora >= 19.0 or Juego.hora < 6.0
+
+
+func _al_cambiar_noche(es_noche: bool) -> void:
+	Sonido.musica("valle_noche" if es_noche else "valle")
+
+
+func _al_cambiar_hora(_hora: int) -> void:
+	hud.actualizar_reloj()
+
+
 func _physics_process(_delta: float) -> void:
 	# Guardar dónde está Gara (para "Continuar" y para volver del menú de pausa).
 	if not Transicion.en_curso:
@@ -214,8 +230,7 @@ func actualizar_mundo() -> void:
 			nodo.collision_layer = 1 if nodo.visible else 0
 	for animal in animales:
 		animal.actualizar_visibilidad()
-	_noche.color = COLOR_NOCHE if Juego.es_de_noche else Color.WHITE
-	_luz_casa.enabled = Juego.es_de_noche
+	hud.actualizar_reloj()
 	hud.actualizar_progreso(Juego.zonas_completadas.size(), Juego.ZONAS.size(),
 		Juego.hojas if Juego.juego_terminado() else -1)
 

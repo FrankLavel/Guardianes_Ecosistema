@@ -53,6 +53,9 @@ func _process(delta: float) -> void:
 	if not Juego.juego_terminado() or Dialogo.activo or get_tree().paused:
 		return
 	if Juego.pedido.is_empty():
+		# De noche los animales duermen: no piden ayuda.
+		if Juego.es_de_noche:
+			return
 		_espera -= delta
 		if _espera <= 0.0:
 			iniciar_pedido()
@@ -107,7 +110,10 @@ func _al_llegar(animal: AnimalValle) -> void:
 
 func _al_hablar(animal: AnimalValle) -> void:
 	if Juego.pedido.is_empty() or Juego.pedido["animal"] != animal.name:
-		_hablar(animal, [datos["saludos"].get(animal.especie, ["..."]).pick_random()])
+		if Juego.es_de_noche:
+			_hablar(animal, ["Zzz... zzz... (Está dormido. Vuelve cuando amanezca.)"])
+		else:
+			_hablar(animal, [datos["saludos"].get(animal.especie, ["..."]).pick_random()])
 		return
 	var def := definicion()
 	if Juego.pedido["estado"] == "aviso":

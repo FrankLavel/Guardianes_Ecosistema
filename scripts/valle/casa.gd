@@ -23,7 +23,6 @@ const ESCALA_GUARDIAN := 1.7
 const MARGEN_ARRIBA := 150.0
 ## Salida: luz de la puerta a media orilla de abajo.
 const PUERTA := Vector2(893, 1034)
-const COLOR_NOCHE := Color(0.5, 0.55, 0.8)
 
 ## Muebles que se compran con hojas. Se dibujan en el cuarto cuando ya son tuyos.
 const MUEBLES := {
@@ -62,6 +61,9 @@ var _texturas: Dictionary = {}
 
 func _ready() -> void:
 	add_to_group(&"jugable")
+	add_to_group(&"con_reloj")
+	Juego.noche_cambio.connect(_al_cambiar_noche)
+	Juego.hora_cambio.connect(_al_cambiar_hora)
 
 	_pedidos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_PEDIDOS))
 	_noche = CanvasModulate.new()
@@ -143,11 +145,23 @@ func _crear_zona(nombre: String, lugar: Vector2, aviso: String, accion: Callable
 
 
 func _actualizar() -> void:
-	_noche.color = COLOR_NOCHE if Juego.es_de_noche else Color.WHITE
 	Sonido.musica("casa_noche" if Juego.es_de_noche else "casa")
+	hud.actualizar_reloj()
 	_poner_muebles()
 	hud.actualizar_progreso(Juego.zonas_completadas.size(), Juego.ZONAS.size(), Juego.hojas)
 	queue_redraw()
+
+
+func _process(_delta: float) -> void:
+	_noche.color = Juego.color_del_cielo()
+
+
+func _al_cambiar_noche(_es_noche: bool) -> void:
+	_actualizar()
+
+
+func _al_cambiar_hora(_hora: int) -> void:
+	hud.actualizar_reloj()
 
 
 func _unhandled_input(evento: InputEvent) -> void:
@@ -158,24 +172,35 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 # ---------------------------------------------------------------- Acciones
 
-## Duerme un rato: guarda la partida y cambia entre día y noche.
+## La cama: de día solo guarda (todavía no es hora de dormir); de noche se duerme hasta el día
+## siguiente.
 func descansar() -> void:
 	if Dialogo.activo:
 		return
-	await Dialogo.mostrar_lineas("_cama", [{"quien": "jugador", "texto": "Voy a descansar un rato..."}])
+	if not Juego.es_de_noche:
+		await Dialogo.mostrar_lineas("_cama", [{"quien": "jugador",
+			"texto": "Todavía es de día y no tengo sueño. Mejor sigo ayudando a los animales."}])
+		Juego.guardar()
+		hud.mostrar_objetivo("Partida guardada. Podrás dormir cuando oscurezca (desde las 8 de la noche).", 5.0)
+		return
+	await Dialogo.mostrar_lineas("_cama", [{"quien": "jugador", "texto": "¡Qué día tan largo! A dormir..."}])
+	await dormir()
+	hud.mostrar_objetivo("Día %d. ¡Buenos días! Los animales ya despertaron." % Juego.dia, 5.0)
+
+
+## Pantalla a negro, empieza el día siguiente en la mañana y se guarda.
+func dormir() -> void:
 	Juego.entrada_bloqueada = true
 	var fundido := create_tween()
-	fundido.tween_property(_negro, "modulate:a", 1.0, 0.6)
+	fundido.tween_property(_negro, "modulate:a", 1.0, 0.8)
 	await fundido.finished
-	Juego.es_de_noche = not Juego.es_de_noche
+	Juego.pasar_la_noche()
 	Juego.guardar()
-	_actualizar()
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(0.8).timeout
 	fundido = create_tween()
-	fundido.tween_property(_negro, "modulate:a", 0.0, 0.6)
+	fundido.tween_property(_negro, "modulate:a", 0.0, 0.8)
 	await fundido.finished
 	Juego.entrada_bloqueada = false
-	hud.mostrar_objetivo("Partida guardada. Ya es de %s." % ("noche" if Juego.es_de_noche else "día"), 4.0)
 
 
 func salir() -> void:

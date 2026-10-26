@@ -34,6 +34,7 @@ var _destino := Vector2.ZERO
 var _pausa := 0.0
 var _hablando := false
 var _pose := &""
+var _dormido := false
 var _alto_alerta := 0.0
 var _salto_alerta: Tween
 
@@ -73,6 +74,17 @@ func actualizar_visibilidad() -> void:
 func _physics_process(delta: float) -> void:
 	if _hablando or Juego.entrada_bloqueada:
 		_animar(Vector2.ZERO)
+		return
+	# De noche los que pasean se echan a dormir; las mariposas se van a descansar a los árboles.
+	var dormido := Juego.es_de_noche and estado == Estado.PASEO
+	if dormido != _dormido:
+		_dormido = dormido
+		sprite.visible = not (dormido and vuela)
+		monitoring = not (dormido and vuela)
+	if dormido:
+		var pose := &"descansar" if cuadros.has_animation(&"descansar") else anim_quieto
+		if sprite.animation != pose:
+			sprite.play(pose)
 		return
 	var paso := Vector2.ZERO
 	match estado:

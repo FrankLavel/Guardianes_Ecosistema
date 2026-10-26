@@ -171,3 +171,37 @@ func test_la_monarca_pide_flores() -> void:
 		objeto.interactuar(valle.gara)
 	pedidos._terminar()
 	assert_eq(int(Juego.ayudas["flores"]), 1)
+
+
+func test_el_reloj_avisa_cuando_anochece() -> void:
+	Juego.hora = 19.5
+	watch_signals(Juego)
+	Juego.avanzar_hora(1.0)
+	assert_true(Juego.es_de_noche)
+	assert_signal_emitted_with_parameters(Juego, "noche_cambio", [true])
+	assert_eq(Juego.texto_hora(), "8 de la noche")
+	assert_eq(Juego.color_del_cielo(), Juego.COLOR_NOCHE)
+
+
+func test_dormir_empieza_un_dia_nuevo() -> void:
+	var casa = ESCENA_CASA.instantiate()
+	add_child_autofree(casa)
+	await wait_process_frames(2)
+	Juego.hora = 22.0
+	await casa.dormir()
+	assert_eq(Juego.dia, 2)
+	assert_almost_eq(Juego.hora, Juego.HORA_DESPERTAR, 0.01)
+	assert_false(Juego.es_de_noche)
+	assert_false(Juego.entrada_bloqueada)
+
+
+func test_de_noche_los_animales_duermen_y_no_piden_ayuda() -> void:
+	_terminar_juego()
+	Juego.hora = 23.0
+	var valle = await _valle()
+	valle.pedidos._espera = 0.0
+	await wait_process_frames(3)
+	await wait_physics_frames(3)
+	assert_true(Juego.pedido.is_empty(), "De noche no hay pedidos")
+	assert_eq(valle.get_node("Objetos/Venado1").sprite.animation, &"descansar")
+	assert_false(valle.get_node("Objetos/Monarca1").sprite.visible, "Las mariposas se van a descansar")

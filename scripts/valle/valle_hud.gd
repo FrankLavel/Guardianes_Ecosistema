@@ -12,6 +12,10 @@ func _ready() -> void:
 	_panel_objetivo.visible = false
 
 
+func actualizar_reloj() -> void:
+	%Reloj.text = "Día %d · %s" % [Juego.dia, Juego.texto_hora()]
+
+
 ## `hojas` < 0: todavía no se muestran (se ganan después del final).
 func actualizar_progreso(restauradas: int, total: int, hojas := -1) -> void:
 	etiqueta_progreso.text = "Zonas restauradas: %d / %d" % [restauradas, total]
