@@ -11,6 +11,21 @@ const ESCENA_PUERTA := preload("res://scenes/valle/ZonaInteraccion.tscn")
 ## Frente a la puerta de la casa de adobe (dónde se entra y dónde se aparece al salir).
 const PUERTA_CASA := Vector2(1615, 905)
 
+## Granja (aparece cuando el río se restaura): milpa junto a la cerca de la casa, corral, muelle
+## para pescar y zona donde salen plantas silvestres y leña.
+const MILPA := Vector2(1830, 1130)
+const SEPARACION_MILPA := Vector2(115, 95)
+## Por donde caminan la gallina y la cabra (dentro de la cerca en forma de rombo).
+const CORRAL := Rect2(1300, 1150, 150, 90)
+const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
+const MUELLE := Vector2(800, 760)
+const AREA_SILVESTRES := Rect2(900, 300, 1700, 1300)
+## shortcut: la gallina y la cabra usan el arte del pato y del venado teñido hasta tener el suyo.
+const ANIMALES_CORRAL := [
+	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/pato_frames.tres", "escala": 0.16, "color": Color(1, 0.95, 0.85)},
+	{"nombre": "Cabra", "cuadros": "res://assets/characters/animales/valle/venado_frames.tres", "escala": 0.22, "color": Color(0.85, 0.85, 0.85)},
+]
+
 ## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
 const VENADO := "res://assets/characters/animales/valle/venado_frames.tres"
 const GARZA := "res://assets/characters/animales/valle/garza_frames.tres"
@@ -19,7 +34,7 @@ const MONARCA := "res://assets/characters/animales/valle/monarca_frames.tres"
 const ANIMALES := [
 	{"nombre": "Venado1", "especie": "venado", "zona": "bosque", "pos": Vector2(2050, 330), "paseo": Rect2(1900, 220, 380, 260),
 		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
-	{"nombre": "Venado2", "especie": "venado", "zona": "bosque", "pos": Vector2(1250, 1350), "paseo": Rect2(1050, 1250, 500, 300),
+	{"nombre": "Venado2", "especie": "venado", "zona": "bosque", "pos": Vector2(1100, 1450), "paseo": Rect2(950, 1350, 450, 250),
 		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
 	{"nombre": "Garza1", "especie": "garza", "zona": "rio", "pos": Vector2(850, 640), "paseo": Rect2(800, 560, 90, 360),
 		"cuadros": GARZA, "escala": 0.27, "velocidad": 40.0},
@@ -47,6 +62,7 @@ var pedidos: PedidosAyuda
 var animales: Array[AnimalValle] = []
 var _noche: CanvasModulate
 var _luz_casa: PointLight2D
+var _aviso_hambre := false
 
 
 func _ready() -> void:
@@ -107,11 +123,154 @@ func _ready() -> void:
 	pedidos.name = "Pedidos"
 	add_child(pedidos)
 	pedidos.configurar(animales, gara, hud, $Objetos)
+	_crear_granja()
 	pedidos.pedido_cambio.connect(func(): actualizar_mundo())
 	Juego.hojas_cambiaron.connect(func(_h): actualizar_mundo())
 	actualizar_mundo()
 	hud.mostrar_objetivo(objetivo_actual())
 	Dialogo.terminado.connect(_al_terminar_dialogo)
+
+
+func _crear_granja() -> void:
+	if not Juego.zona_esta_completa("rio"):
+		return
+	# Partidas de antes de la granja: se les dan las semillas de las zonas que ya restauraron.
+	for zona in Juego.zonas_completadas:
+		Granja.dar_semillas_de(zona)
+	for i in Granja.PARCELAS:
+		var parcela := Parcela.new()
+		parcela.name = "Parcela%d" % i
+		parcela.indice = i
+		parcela.position = MILPA + Vector2(i % 3, i / 3) * SEPARACION_MILPA
+		_zona_de(parcela, 55.0)
+		parcela.aviso.connect(avisar)
+		$Objetos.add_child(parcela)
+	# Cerca del corral: cuatro tramos de la cerca del valle formando un rombo.
+	var centro := CORRAL.get_center()
+	for tramo in [[Vector2(-92, -18), false], [Vector2(92, -18), true], [Vector2(-92, 112), true], [Vector2(92, 112), false]]:
+		var cerca := Sprite2D.new()
+		cerca.texture = CERCA
+		cerca.scale = Vector2(0.45, 0.45)
+		cerca.offset = Vector2(0, -CERCA.get_height() / 2.0)
+		cerca.flip_h = tramo[1]
+		cerca.position = centro + tramo[0]
+		$Objetos.add_child(cerca)
+	for datos in ANIMALES_CORRAL:
+		var animal: AnimalValle = ESCENA_ANIMAL.instantiate()
+		animal.name = datos["nombre"]
+		animal.especie = datos["nombre"].to_lower()
+		animal.cuadros = load(datos["cuadros"])
+		animal.anim_quieto = &"idle"
+		animal.anim_caminar = &"caminar"
+		animal.escala = datos["escala"]
+		animal.velocidad = 30.0
+		animal.zona_paseo = CORRAL
+		animal.position = CORRAL.get_center()
+		animal.texto_aviso = "E  " + datos["nombre"]
+		animal.hablaron.connect(_atender_corral)
+		$Objetos.add_child(animal)
+		animal.sprite.self_modulate = datos["color"]
+	var muelle: ZonaInteraccion = ESCENA_PUERTA.instantiate()
+	muelle.name = "Pescar"
+	muelle.texto_aviso = "E  Pescar"
+	muelle.position = MUELLE
+	muelle.activada.connect(func(_j): pescar())
+	$Objetos.add_child(muelle)
+	_poner_silvestres()
+	Juego.dia_cambio.connect(_al_cambiar_dia)
+
+
+## Las zonas de interacción de la granja son más chicas que la de una puerta.
+func _zona_de(nodo: Area2D, radio: float) -> void:
+	var forma := CollisionShape2D.new()
+	var circulo := CircleShape2D.new()
+	circulo.radius = radio
+	forma.shape = circulo
+	nodo.add_child(forma)
+	nodo.collision_layer = 0
+	nodo.collision_mask = 2
+	nodo.monitorable = false
+	var etiqueta := Label.new()
+	etiqueta.name = "Aviso"
+	etiqueta.add_theme_font_size_override("font_size", 24)
+	etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	etiqueta.position = Vector2(-120, 12)
+	etiqueta.size = Vector2(240, 36)
+	nodo.add_child(etiqueta)
+
+
+func _poner_silvestres() -> void:
+	for hijo in $Objetos.get_children():
+		if hijo.is_in_group(&"silvestre"):
+			hijo.queue_free()
+	for dato in Granja.silvestres_de_hoy(AREA_SILVESTRES):
+		var planta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
+		planta.add_to_group(&"silvestre")
+		planta.texto_aviso = "E  Recoger " + Granja.nombre(dato["tipo"]).to_lower()
+		planta.position = dato["pos"]
+		var imagen := Sprite2D.new()
+		imagen.texture = Granja.icono(dato["tipo"])
+		imagen.scale = Vector2(0.4, 0.4)
+		imagen.offset = Vector2(0, -imagen.texture.get_height() / 2.0)
+		planta.add_child(imagen)
+		planta.activada.connect(func(_j):
+			Granja.recolectar(dato)
+			avisar("Recogiste %s." % Granja.nombre(dato["tipo"]).to_lower())
+			planta.queue_free())
+		$Objetos.add_child(planta)
+
+
+func _al_cambiar_dia(_dia: int) -> void:
+	_poner_silvestres()
+	for i in Granja.PARCELAS:
+		$Objetos.get_node("Parcela%d" % i).actualizar()
+
+
+func _atender_corral(animal: AnimalValle) -> void:
+	avisar(Granja.atender(animal.especie))
+
+
+## Pesca responsable: se espera a que pique y se presiona E a tiempo. Las crías se regresan al agua
+## y solo se pueden sacar PESCA_POR_DIA peces al día.
+var _pescando := false
+var _jalo := false
+
+
+func pescar() -> void:
+	if _pescando:
+		return
+	if not Granja.puede_pescar():
+		avisar("Ya pescaste %d hoy. Si sacamos de más, los peces no alcanzan a tener crías." % Granja.PESCA_POR_DIA)
+		return
+	_pescando = true
+	Juego.entrada_bloqueada = true
+	avisar("Lanzaste el anzuelo... espera a que piquen.")
+	await get_tree().create_timer(randf_range(1.5, 3.5)).timeout
+	Sonido.efecto("chapoteo")
+	avisar("¡Picó! Presiona E")
+	_jalo = false
+	var limite := Time.get_ticks_msec() + 1200
+	while Time.get_ticks_msec() < limite and not _jalo:
+		await get_tree().process_frame
+	if not _jalo:
+		avisar("Se escapó. Puedes intentarlo otra vez.")
+	elif Granja.sacar_pez(randf() < Granja.PROB_CRIA) == "cria":
+		avisar("Era una cría: la regresaste al agua para que crezca.")
+	else:
+		avisar("¡Pescaste un pescado! (%d de %d hoy)" % [Granja.pescas_de_hoy(), Granja.PESCA_POR_DIA])
+	_pescando = false
+	await get_tree().process_frame
+	Juego.entrada_bloqueada = false
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	if _pescando and evento.is_action_pressed("interactuar"):
+		_jalo = true
+		get_viewport().set_input_as_handled()
+
+
+func avisar(texto: String) -> void:
+	hud.mostrar_objetivo(texto, 4.0)
 
 
 func _crear_animales() -> void:
@@ -184,6 +343,12 @@ func objetivo_actual() -> String:
 
 func _process(_delta: float) -> void:
 	_noche.color = Juego.color_del_cielo()
+	hud.actualizar_energia(Juego.energia)
+	if Juego.juego_terminado() and Juego.energia < 25.0 and not _aviso_hambre:
+		_aviso_hambre = true
+		avisar("Tienes hambre y caminas más despacio. Come algo de tu mochila (I).")
+	elif Juego.energia >= 25.0:
+		_aviso_hambre = false
 	# La casa enciende su luz desde que empieza a oscurecer.
 	_luz_casa.enabled = Juego.hora >= 19.0 or Juego.hora < 6.0
 

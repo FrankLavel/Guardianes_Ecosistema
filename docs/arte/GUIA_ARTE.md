@@ -213,3 +213,29 @@ Se procesan con `python tools/arte/procesar.py animales_valle casa`.
 Top-down 3/4 RPG view, a small wooden picture frame hanging on a wall with a painting of a monarch butterfly on an oyamel branch, alone and centered.
 ```
 
+## 10. Granja y cocina (arte provisional hecho con código)
+
+Hoy los íconos, las plantas de la milpa, el fogón, la gallina y la cabra son provisionales
+(`python tools/arte/iconos_granja.py`). Para cada hoja: pegar el bloque de estilo al inicio y
+adjuntar `valle_objetos.jpg` como referencia.
+
+**`granja_iconos.png`** — íconos de objetos
+```
+Inventory icons for a farming game, top-down 3/4 RPG style, each icon separate with plenty of space, same size, in 4 rows: ear of corn, three brown beans, orange pumpkin, white egg, small bottle of goat milk, gray fish, chamomile flower, mint sprig, nopal cactus pad, bundle of firewood, three small cloth seed bags (one with a corn kernel, one with a bean, one with a pumpkin seed).
+```
+
+**`granja_platillos.png`** — platillos michoacanos
+```
+Mexican food icons in clay plates and clay cups, each separate with plenty of space, same size: grilled corn on the cob, cup of atole, eggs with beans, three corundas (triangular Michoacán tamales), bowl of sopa tarasca (bean soup), candied pumpkin, grilled nopal pads, grilled fish with mint leaves, cup of chamomile tea.
+```
+
+**`granja_milpa.png`** — plantas en 4 etapas
+```
+Crop growth stages on small mounds of dark soil, top-down 3/4 RPG view, 3 rows of 4 stages each (seed just planted, small sprout, growing plant, ready to harvest): row 1 corn, row 2 bean plant climbing a stick, row 3 pumpkin vine with a ripe orange pumpkin at the last stage. Same scale.
+```
+
+**`granja_corral.png`** — gallina, cabra y fogón
+```
+Top-down 3/4 RPG view, each separate with plenty of space: 1) a hen walking to the RIGHT, 4 frames; 2) a white and brown goat walking to the RIGHT, 4 frames; 3) a traditional Mexican clay wood stove (fogón) with a round black comal on top and fire inside, seen from the front.
+```
+

@@ -31,7 +31,7 @@ func _physics_process(delta: float) -> void:
 		entrada_direccion = Vector2.ZERO
 		entrada_interactuar = false
 
-	velocity = velocity.move_toward(entrada_direccion * velocidad, aceleracion * delta)
+	velocity = velocity.move_toward(entrada_direccion * velocidad * Granja.factor_velocidad(), aceleracion * delta)
 	move_and_slide()
 	_animar()
 

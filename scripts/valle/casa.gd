@@ -21,6 +21,9 @@ const PISO_ABAJO := 1005.0
 const ESCALA_GUARDIAN := 1.7
 ## Franja oscura arriba del cuarto, para que la interfaz no tape las ventanas.
 const MARGEN_ARRIBA := 150.0
+## Fogón para cocinar (pie del fogón, junto a la pared).
+## shortcut: dibujado con código hasta tener su arte (prompt en docs/arte/GUIA_ARTE.md).
+const FOGON := Vector2(1200, 650)
 ## Salida: luz de la puerta a media orilla de abajo.
 const PUERTA := Vector2(893, 1034)
 
@@ -102,6 +105,7 @@ func _ready() -> void:
 	_crear_zona("Repisa", Vector2(880, 660), "E  Ver trofeos", func(_j): abrir_panel("trofeos"))
 	_crear_zona("Tablero", Vector2(1480, 660), "E  Tablero de pedidos", func(_j): abrir_panel("tablero"))
 	_crear_zona("Baul", Vector2(1480, 850), "E  Muebles", func(_j): abrir_panel("muebles"))
+	_crear_zona("Fogon", FOGON + Vector2(0, 40), "E  Cocinar", func(_j): Granja.abrir_cocina())
 	_crear_zona("Puerta", PUERTA + Vector2(0, -50), "E  Salir al valle", func(_j): salir())
 	hud.get_node("PanelLugar/HBox/VBox/Lugar").text = "Tu casa"
 	_actualizar()
@@ -431,9 +435,22 @@ func _draw() -> void:
 		var fuente := _titulo.get_theme_default_font()
 		draw_string_outline(fuente, Vector2(1532, 372), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 54, 12, Color(0.2, 0.12, 0.04))
 		draw_string(fuente, Vector2(1532, 372), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 54, Color(0.99, 0.86, 0.3))
+	_dibujar_fogon()
 	if "lampara" in Juego.muebles and Juego.es_de_noche:
 		for r in [180.0, 120.0, 70.0]:
 			draw_circle(Vector2(570, 640), r, Color(1, 0.8, 0.4, 0.1), true, -1.0, true)
+
+
+func _dibujar_fogon() -> void:
+	# Fogón de barro con su boca de fuego y un comal encima.
+	_sombra(FOGON, 110.0)
+	_caja(Rect2(FOGON + Vector2(-110, -130), Vector2(220, 130)), Color(0.62, 0.34, 0.2), 14)
+	_caja(Rect2(FOGON + Vector2(-110, -130), Vector2(220, 22)), Color(0.72, 0.42, 0.26), 10)
+	_caja(Rect2(FOGON + Vector2(-46, -80), Vector2(92, 70)), Color(0.14, 0.07, 0.03), 40)
+	for i in 3:
+		draw_circle(FOGON + Vector2(-20 + i * 20, -34), 14.0 - absf(i - 1) * 4.0, Color(1, 0.5 + i * 0.12, 0.12), true, -1.0, true)
+	draw_circle(FOGON + Vector2(0, -150), 52.0, Color(0.22, 0.22, 0.24), true, -1.0, true)
+	draw_circle(FOGON + Vector2(0, -150), 44.0, Color(0.32, 0.32, 0.34), true, -1.0, true)
 
 
 func _sombra(pie: Vector2, radio: float) -> void:

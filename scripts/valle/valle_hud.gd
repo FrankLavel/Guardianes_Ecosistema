@@ -12,6 +12,13 @@ func _ready() -> void:
 	_panel_objetivo.visible = false
 
 
+## Barra de energía del guardián (solo después del final).
+func actualizar_energia(valor: float) -> void:
+	%Energia.visible = Juego.juego_terminado()
+	%Energia.value = valor
+	%Energia.modulate = Color(1, 0.55, 0.45) if valor < 25.0 else Color(0.7, 1, 0.6)
+
+
 func actualizar_reloj() -> void:
 	%Reloj.text = "Día %d · %s" % [Juego.dia, Juego.texto_hora()]
 

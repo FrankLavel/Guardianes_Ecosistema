@@ -10,10 +10,13 @@ signal hojas_cambiaron(total: int)
 ## Cambia la hora entera (para el reloj de la interfaz) y cuando empieza o acaba la noche.
 signal hora_cambio(hora: int)
 signal noche_cambio(es_noche: bool)
+signal dia_cambio(dia: int)
 
 ## Orden de las zonas: cada una se desbloquea al completar la anterior.
 const ZONAS := ["rio", "bosque", "lago"]
-const VERSION_GUARDADO := 5
+const VERSION_GUARDADO := 6
+## La energía (0-100) se acaba en este número de horas del juego si no se come nada.
+const HORAS_DE_ENERGIA := 36.0
 ## Reloj del valle: un día completo dura 24 * SEGUNDOS_POR_HORA (unos 12 minutos).
 const SEGUNDOS_POR_HORA := 30.0
 const EMPIEZA_NOCHE := 20.0
@@ -74,6 +77,17 @@ var ayudas: Dictionary = {}
 var muebles: Array[String] = []
 var pedido: Dictionary = {}
 var dia := 1
+## Granja (ver granja.gd): objeto -> cantidad, parcelas de la milpa, energía del guardián,
+## platillos ya cocinados, corral (animal -> {"comio": día, "listo": bool}), pesca del día y
+## plantas silvestres que hay hoy en el valle ({"tipo", "pos"}).
+var inventario: Dictionary = {}
+var parcelas: Array = []
+var energia := 100.0
+var recetario: Array[String] = []
+var corral: Dictionary = {}
+var pesca: Dictionary = {"dia": 0, "veces": 0}
+var silvestres: Array = []
+var silvestres_dia := 0
 ## De 0 a 24. Solo avanza en las escenas del grupo "con_reloj" (el valle y la casa).
 var hora := 8.0
 var es_de_noche: bool:
@@ -103,6 +117,14 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	pedido.clear()
 	dia = 1
 	hora = 8.0
+	inventario.clear()
+	parcelas.clear()
+	energia = 100.0
+	recetario.clear()
+	corral.clear()
+	pesca = {"dia": 0, "veces": 0}
+	silvestres.clear()
+	silvestres_dia = 0
 
 
 func datos_personaje() -> Dictionary:
@@ -150,11 +172,17 @@ func _process(delta: float) -> void:
 	if escena == null or not escena.is_in_group(&"con_reloj") or get_tree().paused or entrada_bloqueada:
 		return
 	avanzar_hora(delta / SEGUNDOS_POR_HORA)
+	# Después del final el guardián se cansa poco a poco (comer recupera la energía).
+	if juego_terminado():
+		energia = maxf(energia - delta / SEGUNDOS_POR_HORA * 100.0 / HORAS_DE_ENERGIA, 0.0)
 
 
 func avanzar_hora(horas: float) -> void:
 	var noche_antes := es_de_noche
 	var entera := int(hora)
+	if hora + horas >= 24.0:
+		dia += 1
+		dia_cambio.emit(dia)
 	hora = fmod(hora + horas, 24.0)
 	if int(hora) != entera:
 		hora_cambio.emit(int(hora))
@@ -164,7 +192,10 @@ func avanzar_hora(horas: float) -> void:
 
 ## Dormir en la cama: empieza un día nuevo en la mañana.
 func pasar_la_noche() -> void:
-	dia += 1
+	# Si ya pasó la medianoche, el día ya cambió.
+	if hora >= EMPIEZA_NOCHE:
+		dia += 1
+		dia_cambio.emit(dia)
 	hora = HORA_DESPERTAR
 	hora_cambio.emit(int(hora))
 	noche_cambio.emit(false)
@@ -283,6 +314,14 @@ func a_diccionario() -> Dictionary:
 		"pedido": pedido,
 		"dia": dia,
 		"hora": hora,
+		"inventario": inventario,
+		"parcelas": parcelas,
+		"energia": energia,
+		"recetario": recetario,
+		"corral": corral,
+		"pesca": pesca,
+		"silvestres": silvestres.map(func(s): return {"tipo": s["tipo"], "pos": [s["pos"].x, s["pos"].y]}),
+		"silvestres_dia": silvestres_dia,
 	}
 
 
@@ -306,6 +345,17 @@ func desde_diccionario(datos: Dictionary) -> void:
 	pedido = datos.get("pedido", {}) if datos.get("pedido") is Dictionary else {}
 	dia = int(datos.get("dia", 1))
 	hora = float(datos.get("hora", 22.0 if datos.get("es_de_noche", false) else 8.0))
+	# Granja (partidas de antes de la versión 6 no la tienen). JSON guarda los números como float.
+	inventario = {}
+	for id in datos.get("inventario", {}):
+		inventario[id] = int(datos["inventario"][id])
+	parcelas = datos.get("parcelas", []).duplicate(true)
+	energia = float(datos.get("energia", 100.0))
+	recetario.assign(datos.get("recetario", []))
+	corral = datos.get("corral", {}) if datos.get("corral") is Dictionary else {}
+	pesca = datos.get("pesca", {"dia": 0, "veces": 0}) if datos.get("pesca") is Dictionary else {"dia": 0, "veces": 0}
+	silvestres = datos.get("silvestres", []).map(func(s): return {"tipo": s["tipo"], "pos": Vector2(s["pos"][0], s["pos"][1])})
+	silvestres_dia = int(datos.get("silvestres_dia", 0))
 
 
 func guardar() -> bool:

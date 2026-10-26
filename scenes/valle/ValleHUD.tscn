@@ -56,6 +56,14 @@ theme_override_colors/font_color = Color(0.8, 0.92, 1, 1)
 theme_override_font_sizes/font_size = 24
 text = "Día 1 · 8 de la mañana"
 
+[node name="Energia" type="ProgressBar" parent="PanelLugar/HBox/VBox"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+value = 100.0
+show_percentage = false
+
 [node name="PanelObjetivo" type="PanelContainer" parent="."]
 unique_name_in_owner = true
 anchors_preset = 1
@@ -86,4 +94,4 @@ offset_right = 1400.0
 offset_bottom = -24.0
 grow_vertical = 0
 theme_override_font_sizes/font_size = 26
-text = "Flechas / WASD: caminar     E: hablar y entrar     Tab: bitácora     Esc: pausa"
+text = "Flechas / WASD: caminar     E: hablar y entrar     Tab: bitácora     I: mochila     Esc: pausa"
