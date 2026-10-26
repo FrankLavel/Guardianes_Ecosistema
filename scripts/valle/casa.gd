@@ -12,10 +12,17 @@ const ESCENA_ZONA := preload("res://scenes/valle/ZonaInteraccion.tscn")
 const RUTA_PEDIDOS := "res://data/pedidos.json"
 const INTERIOR := preload("res://assets/maps/casa/interior.png")
 const ESCALA_CUARTO := 1.6
-const TAMANO := Vector2(1760, 1088)
+const TAMANO := Vector2(1760, 1034)
 ## Piso donde se puede caminar (trapecio de la imagen): arriba y abajo, con sus orillas.
 const PISO_ARRIBA := 630.0
-const PISO_ABAJO := 1020.0
+const PISO_ABAJO := 1005.0
+## Dentro de la casa el guardián se ve más grande: con el tamaño del valle quedaba diminuto
+## junto a los muebles.
+const ESCALA_GUARDIAN := 1.7
+## Franja oscura arriba del cuarto, para que la interfaz no tape las ventanas.
+const MARGEN_ARRIBA := 150.0
+## Salida: luz de la puerta a media orilla de abajo.
+const PUERTA := Vector2(893, 1034)
 const COLOR_NOCHE := Color(0.5, 0.55, 0.8)
 
 ## Muebles que se compran con hojas. Se dibujan en el cuarto cuando ya son tuyos.
@@ -70,23 +77,33 @@ func _ready() -> void:
 	for ruta in rutas:
 		if ResourceLoader.exists(ruta):
 			_texturas[ruta] = load(ruta)
+	# Las imágenes de la bitácora traen margen vacío: se recortan para que se apoyen en la repisa.
+	for id in Bitacora.especies:
+		var ruta: String = Bitacora.RUTA_IMAGEN % id
+		if _texturas.has(ruta):
+			var recorte := AtlasTexture.new()
+			recorte.atlas = _texturas[ruta]
+			recorte.region = Rect2(_texturas[ruta].get_image().get_used_rect())
+			_texturas[ruta] = recorte
 	_fondo_panel.visible = false
 	_negro.modulate.a = 0.0
 	%BtnCerrar.pressed.connect(cerrar_panel)
 	var camara := gara.camara
 	camara.limit_left = 0
-	camara.limit_top = 0
+	camara.limit_top = int(-MARGEN_ARRIBA)
 	camara.limit_right = int(TAMANO.x)
 	camara.limit_bottom = int(TAMANO.y)
+	for parte in ["Sprite", "Sombra", "CollisionShape2D"]:
+		(gara.get_node(parte) as Node2D).scale *= ESCALA_GUARDIAN
 	_crear_paredes()
 	_crear_zona("Cama", Vector2(400, 950), "E  Descansar y guardar", func(_j): descansar())
 	_crear_zona("Repisa", Vector2(880, 660), "E  Ver trofeos", func(_j): abrir_panel("trofeos"))
 	_crear_zona("Tablero", Vector2(1480, 660), "E  Tablero de pedidos", func(_j): abrir_panel("tablero"))
 	_crear_zona("Baul", Vector2(1480, 850), "E  Muebles", func(_j): abrir_panel("muebles"))
-	_crear_zona("Puerta", Vector2(893, 1000), "E  Salir al valle", func(_j): salir())
+	_crear_zona("Puerta", PUERTA + Vector2(0, -50), "E  Salir al valle", func(_j): salir())
 	hud.get_node("PanelLugar/HBox/VBox/Lugar").text = "Tu casa"
 	_actualizar()
-	hud.mostrar_objetivo("Esta es tu casa. Descansa en la cama, mira tus trofeos o compra muebles.")
+	hud.mostrar_objetivo("Esta es tu casa. Descansa en la cama, mira tus trofeos o compra muebles.", 6.0)
 
 
 func _crear_paredes() -> void:
@@ -101,8 +118,8 @@ func _crear_paredes() -> void:
 		var forma := CollisionPolygon2D.new()
 		forma.polygon = PackedVector2Array(poligono)
 		paredes.add_child(forma)
-	# Postes de la puerta, cama y baúl (solo la base, por donde pisan).
-	for caja in [Rect2(736, 760, 80, 330), Rect2(966, 760, 60, 330), Rect2(220, 760, 290, 140), Rect2(1400, 700, 160, 60)]:
+	# Cama y baúl (solo la base, por donde pisan).
+	for caja in [Rect2(235, 770, 260, 130), Rect2(1405, 700, 150, 60)]:
 		var forma := CollisionShape2D.new()
 		var rect := RectangleShape2D.new()
 		rect.size = caja.size
@@ -119,6 +136,10 @@ func _crear_zona(nombre: String, lugar: Vector2, aviso: String, accion: Callable
 	zona.position = lugar
 	zona.activada.connect(accion)
 	$Objetos.add_child(zona)
+	# Encima de la cabeza del guardián (aquí se ve más grande) y siempre por delante de él.
+	var etiqueta: Label = zona.get_node("Aviso")
+	etiqueta.position.y = -225.0
+	etiqueta.z_index = 5
 
 
 func _actualizar() -> void:
@@ -153,7 +174,7 @@ func descansar() -> void:
 	fundido.tween_property(_negro, "modulate:a", 0.0, 0.6)
 	await fundido.finished
 	Juego.entrada_bloqueada = false
-	hud.mostrar_objetivo("Partida guardada. Ya es de %s." % ("noche" if Juego.es_de_noche else "día"))
+	hud.mostrar_objetivo("Partida guardada. Ya es de %s." % ("noche" if Juego.es_de_noche else "día"), 4.0)
 
 
 func salir() -> void:
@@ -311,8 +332,8 @@ func _llenar_muebles() -> void:
 
 ## Muebles del piso: [imagen, pie (abajo al centro), ancho en el cuarto, mueble que hay que comprar].
 const EN_EL_PISO := [
-	["cama", Vector2(365, 900), 300.0, ""],
-	["baul", Vector2(1480, 760), 165.0, ""],
+	["cama", Vector2(365, 900), 270.0, ""],
+	["baul", Vector2(1480, 760), 150.0, ""],
 	["lampara", Vector2(570, 700), 64.0, "lampara"],
 	["pecera", Vector2(210, 1005), 170.0, "pecera"],
 	["maceta", Vector2(650, 668), 66.0, "maceta"],
@@ -353,14 +374,26 @@ func _poner_muebles() -> void:
 
 
 func _draw() -> void:
+	draw_rect(Rect2(-100, -MARGEN_ARRIBA - 100, TAMANO.x + 200, MARGEN_ARRIBA + 100), Color(0.17, 0.1, 0.05))
 	draw_texture_rect(INTERIOR, Rect2(Vector2.ZERO, INTERIOR.get_size() * ESCALA_CUARTO), false)
+	# Luz de día (o de noche, más tenue) que entra por la puerta de abajo.
+	var luz := Color(1, 0.93, 0.7, 0.16 if Juego.es_de_noche else 0.3)
+	draw_polygon(PackedVector2Array([PUERTA + Vector2(-85, 0), PUERTA + Vector2(85, 0), PUERTA + Vector2(130, -170), PUERTA + Vector2(-130, -170)]),
+		PackedColorArray([luz, luz, Color(luz, 0.0), Color(luz, 0.0)]))
 	if "alfombra" in Juego.muebles:
 		_textura("res://assets/maps/casa/alfombra.png", Rect2(1040, 690, 330, 220))
+	# Sombras bajo los muebles del piso, para que se vean apoyados.
+	for datos in EN_EL_PISO:
+		if datos[3].is_empty() or datos[3] in Juego.muebles:
+			_sombra(datos[1], datos[2] * 0.5)
 	# Cuadro sobre la cama, repisa de trofeos entre las ventanas y tablero junto a la ventana.
 	if "cuadro" in Juego.muebles:
-		_caja(Rect2(210, 330, 140, 160), Color(0.36, 0.22, 0.1), 6)
-		_caja(Rect2(222, 342, 116, 136), Color(0.92, 0.88, 0.76), 4)
-		_textura("res://assets/ui/bitacora/monarca.png", Rect2(226, 350, 108, 120))
+		var marco := StyleBoxTexture.new()
+		marco.texture = _texturas["res://assets/maps/casa/tablero.png"]
+		marco.set_texture_margin_all(16)
+		draw_style_box(marco, Rect2(206, 326, 148, 168))
+		draw_rect(Rect2(226, 346, 108, 128), Color(0.93, 0.89, 0.77))
+		_textura("res://assets/ui/bitacora/monarca.png", Rect2(232, 360, 96, 100))
 	_textura("res://assets/maps/casa/repisa.png", Rect2(742, 330, 276, 226))
 	var x := 768.0
 	for zona in ZONAS:
@@ -370,15 +403,24 @@ func _draw() -> void:
 	var en_repisa := 0
 	for id in Bitacora.especies:
 		if id in Juego.especies_descubiertas and en_repisa < 5:
-			_textura(Bitacora.RUTA_IMAGEN % id, Rect2(760 + en_repisa * 48, 418, 48, 56))
+			_textura(Bitacora.RUTA_IMAGEN % id, Rect2(758 + en_repisa * 50, 430, 46, 42))
 			en_repisa += 1
 	_textura("res://assets/maps/casa/tablero.png", Rect2(1390, 330, 170, 130))
 	if not Juego.pedido.is_empty():
-		_caja(Rect2(1508, 318, 44, 48), Color(0.98, 0.85, 0.3), 4)
-		draw_string(ThemeDB.fallback_font, Vector2(1521, 356), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 36, Color(0.6, 0.15, 0.1))
+		var fuente := _titulo.get_theme_default_font()
+		draw_string_outline(fuente, Vector2(1532, 372), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 54, 12, Color(0.2, 0.12, 0.04))
+		draw_string(fuente, Vector2(1532, 372), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 54, Color(0.99, 0.86, 0.3))
 	if "lampara" in Juego.muebles and Juego.es_de_noche:
 		for r in [180.0, 120.0, 70.0]:
 			draw_circle(Vector2(570, 640), r, Color(1, 0.8, 0.4, 0.1), true, -1.0, true)
+
+
+func _sombra(pie: Vector2, radio: float) -> void:
+	var puntos := PackedVector2Array()
+	for i in 24:
+		var a := TAU * i / 24.0
+		puntos.append(pie + Vector2(cos(a) * radio, sin(a) * radio * 0.18))
+	draw_colored_polygon(puntos, Color(0.1, 0.05, 0.02, 0.35))
 
 
 func _caja(rect: Rect2, color: Color, radio: int) -> void:

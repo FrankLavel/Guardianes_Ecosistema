@@ -661,7 +661,11 @@ def animales_valle() -> None:
 def casa() -> None:
     """Interior de la casa del guardián y sus muebles."""
     rgba = quitar_fondo(cargar("casa_interior.jpg"))
-    guardar(recortar(rgba, separar_objetos(rgba)[0]), ASSETS / "maps/casa/interior.png")
+    cuarto = recortar(rgba, separar_objetos(rgba)[0])
+    # La IA dibujó la puerta como un marco suelto a mitad del piso: se tapa con el piso de al lado
+    # (las tablas son horizontales y empatan) y se corta lo que queda debajo del piso.
+    cuarto.paste(cuarto.crop((650, 440, 840, 646)), (455, 440))
+    guardar(cuarto.crop((0, 0, cuarto.width, 646)), ASSETS / "maps/casa/interior.png")
     # Orden: cama, tabla de arriba de la repisa, tablero, baúl, tabla de abajo, alfombra,
     # lámpara, pecera, maceta. Las dos tablas son una sola repisa.
     rgba = quitar_fondo(cargar("casa_muebles.jpg"))
