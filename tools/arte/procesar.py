@@ -704,6 +704,30 @@ def sin_marco(img: Image.Image) -> Image.Image:
     return limpio.crop(limpio.getbbox())
 
 
+def sin_tierra(img: Image.Image) -> Image.Image:
+    """Quita el montón de tierra de abajo de una planta (en el juego la tierra la pone el surco).
+
+    Solo se borran los renglones de abajo donde la mayoría es tierra (café oscuro o contorno negro),
+    así que las hojas y el tallo de arriba se quedan.
+    """
+    px = np.asarray(img.convert("RGBA")).copy()
+    r, g, b, a = (px[..., i].astype(int) for i in range(4))
+    # Café de la tierra, o contorno casi negro (a veces con tinte morado por el fondo magenta).
+    tierra = (a > 0) & (((r >= g) & (g >= b - 6) & (r < 120) & (r + g + b < 300)) | (r + g + b < 70))
+    y = px.shape[0] - 1
+    while y >= 0 and (a[y] > 0).any() and tierra[y].sum() >= 0.5 * (a[y] > 0).sum():
+        px[y, tierra[y], 3] = 0
+        y -= 1
+    # Puntitos sueltos que quedan abajo (harían que la planta flote sobre el surco).
+    filas = (px[..., 3] > 0).sum(axis=1)
+    for y in range(px.shape[0] - 1, -1, -1):
+        if filas[y] >= 4:
+            break
+        px[y, :, 3] = 0
+    limpio = Image.fromarray(px.astype(np.uint8))
+    return limpio.crop(limpio.getbbox())
+
+
 def granja() -> None:
     """Íconos, platillos, plantas de la milpa, gallina, cabra y fogón (reemplazan los provisionales)."""
     iconos = ASSETS / "ui/granja"
@@ -719,7 +743,8 @@ def granja() -> None:
     # Milpa: orden en que salen las piezas -> cultivo_etapa (0 sembrado ... 3 listo).
     nombres = ["maiz_2", "maiz_3", "maiz_0", "maiz_1", "frijol_3", "frijol_1", "frijol_2", "frijol_0",
                "calabaza_2", "calabaza_3", "calabaza_0", "calabaza_1"]
-    objetos("granja_milpa.jpg", nombres, "objects/granja")
+    for nombre, planta in objetos("granja_milpa.jpg", nombres, "objects/granja").items():
+        guardar(sin_tierra(planta), ASSETS / "objects/granja" / f"{nombre}.png")
     rgba = quitar_fondo(cargar("granja_corral.jpg"))
     cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
     destino = ASSETS / "characters/animales/valle"

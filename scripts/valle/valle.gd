@@ -13,9 +13,9 @@ const PUERTA_CASA := Vector2(1615, 905)
 
 ## Granja (aparece cuando el río se restaura): milpa junto a la cerca de la casa, corral, muelle
 ## para pescar y zona donde salen plantas silvestres y leña.
-const MILPA := Vector2(1880, 960)
+const MILPA := Vector2(1880, 925)
 const COLUMNAS_MILPA := 4
-const SEPARACION_MILPA := Vector2(150, 110)
+const SEPARACION_MILPA := Vector2(146, 102)
 ## Por donde caminan la gallina y la cabra (dentro de la cerca en forma de rombo).
 const CORRAL := Rect2(1300, 1150, 150, 90)
 const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
@@ -66,6 +66,7 @@ var animales: Array[AnimalValle] = []
 var _noche: CanvasModulate
 var _luz_casa: PointLight2D
 var _aviso_hambre := false
+var _suelo_milpa: MilpaSuelo
 
 
 func _ready() -> void:
@@ -198,6 +199,15 @@ func _crear_granja() -> void:
 
 ## Surcos de la milpa que ya se desbloquearon (COLUMNAS_MILPA por fila).
 func _poner_parcelas() -> void:
+	if _suelo_milpa == null:
+		_suelo_milpa = MilpaSuelo.new()
+		_suelo_milpa.name = "SueloMilpa"
+		add_child(_suelo_milpa)
+		move_child(_suelo_milpa, $Objetos.get_index())
+	_suelo_milpa.posiciones.clear()
+	for i in Granja.surcos():
+		_suelo_milpa.posiciones.append(MILPA + Vector2(i % COLUMNAS_MILPA, i / COLUMNAS_MILPA) * SEPARACION_MILPA)
+	_suelo_milpa.queue_redraw()
 	for i in Granja.surcos():
 		if $Objetos.has_node("Parcela%d" % i):
 			continue

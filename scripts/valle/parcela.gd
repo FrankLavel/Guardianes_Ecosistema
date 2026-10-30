@@ -4,33 +4,26 @@ extends ZonaInteraccion
 
 signal aviso(texto: String)
 
-const TIERRA := preload("res://assets/objects/zona2/tierra_fertil.png")
+## Las plantas van en hilera sobre el surco de en medio (la tierra la dibuja MilpaSuelo).
+const ESCALA_PLANTA := 0.24
+const HILERA := [-40.0, 0.0, 40.0]
+const HILERA_CALABAZA := [-28.0, 28.0]
 
 @export var indice := 0
 
-var _tierra: Sprite2D
-var _planta: Sprite2D
-
-
-## Todas las plantas se escalan igual: el montón de tierra de cada imagen mide lo mismo.
-const ESCALA_PLANTA := 0.38
+var _plantas: Array[Sprite2D] = []
+var _reloj := 0.0
 
 
 func _ready() -> void:
-	_tierra = Sprite2D.new()
-	_tierra.texture = TIERRA
-	_tierra.scale = Vector2.ONE * 80.0 / TIERRA.get_width()
-	_tierra.offset = Vector2(0, -TIERRA.get_height() / 2.0 + 30)
-	add_child(_tierra)
-	_planta = Sprite2D.new()
-	_planta.scale = Vector2.ONE * ESCALA_PLANTA
-	add_child(_planta)
+	for x in HILERA:
+		var planta := Sprite2D.new()
+		planta.scale = Vector2.ONE * ESCALA_PLANTA
+		add_child(planta)
+		_plantas.append(planta)
 	super()
 	actualizar()
 	Granja.parcelas_cambio.connect(actualizar)
-
-
-var _reloj := 0.0
 
 
 ## El aviso dice cuánto falta mientras crece.
@@ -43,15 +36,16 @@ func _process(delta: float) -> void:
 
 func actualizar() -> void:
 	var p := Granja.parcela(indice)
-	_planta.texture = Granja.textura_planta(indice)
-	# La imagen de la planta ya trae su montón de tierra.
-	_tierra.visible = _planta.texture == null
-	if _planta.texture:
-		_planta.offset = Vector2(0, -_planta.texture.get_height() / 2.0 + 10.0 / ESCALA_PLANTA)
-	# Regada: la tierra (y la planta) se ve más oscura, como mojada.
-	var mojada := Color(0.78, 0.78, 0.88)
-	_tierra.modulate = mojada if p["regada"] else Color.WHITE
-	_planta.modulate = mojada if p["regada"] else Color.WHITE
+	var textura := Granja.textura_planta(indice)
+	# La calabaza se extiende: van dos matas en lugar de tres.
+	var hilera: Array = HILERA_CALABAZA if p["cultivo"] == "calabaza" else HILERA
+	for k in _plantas.size():
+		var planta := _plantas[k]
+		planta.visible = textura != null and k < hilera.size()
+		if planta.visible:
+			planta.texture = textura
+			planta.offset = Vector2(0, -textura.get_height() / 2.0)
+			planta.position = Vector2(hilera[k], 12.0)
 	var texto := "E  Sembrar"
 	if not p["cultivo"].is_empty():
 		if int(p["etapa"]) >= Granja.LISTO:
