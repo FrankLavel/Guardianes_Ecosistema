@@ -207,14 +207,18 @@ func sacar_pez(es_cria: bool) -> String:
 
 # ---------------------------------------------------------------- Recolección
 
-## Plantas silvestres y leña de hoy (posiciones dentro de `area`); cambian cada día.
-func silvestres_de_hoy(area: Rect2) -> Array:
+## Plantas silvestres y leña de hoy (dentro de `area`, fuera de `prohibido`); cambian cada día.
+func silvestres_de_hoy(area: Rect2, prohibido: Array[Rect2] = []) -> Array:
 	if Juego.silvestres_dia != Juego.dia:
 		Juego.silvestres_dia = Juego.dia
 		Juego.silvestres.clear()
 		for i in SILVESTRES_POR_DIA:
-			Juego.silvestres.append({"tipo": datos["silvestres"].pick_random(),
-				"pos": Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))})
+			var pos := Vector2.ZERO
+			for intento in 20:
+				pos = Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
+				if not prohibido.any(func(r: Rect2): return r.has_point(pos)):
+					break
+			Juego.silvestres.append({"tipo": datos["silvestres"].pick_random(), "pos": pos})
 	return Juego.silvestres
 
 

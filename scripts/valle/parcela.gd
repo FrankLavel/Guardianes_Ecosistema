@@ -12,14 +12,18 @@ var _tierra: Sprite2D
 var _planta: Sprite2D
 
 
+## Todas las plantas se escalan igual: el montón de tierra de cada imagen mide lo mismo.
+const ESCALA_PLANTA := 0.38
+
+
 func _ready() -> void:
 	_tierra = Sprite2D.new()
 	_tierra.texture = TIERRA
-	_tierra.scale = Vector2.ONE * 90.0 / TIERRA.get_width()
+	_tierra.scale = Vector2.ONE * 80.0 / TIERRA.get_width()
 	_tierra.offset = Vector2(0, -TIERRA.get_height() / 2.0 + 30)
 	add_child(_tierra)
 	_planta = Sprite2D.new()
-	_planta.scale = Vector2(0.55, 0.55)
+	_planta.scale = Vector2.ONE * ESCALA_PLANTA
 	add_child(_planta)
 	super()
 	actualizar()
@@ -28,10 +32,14 @@ func _ready() -> void:
 func actualizar() -> void:
 	var p := Granja.parcela(indice)
 	_planta.texture = Granja.textura_planta(indice)
+	# La imagen de la planta ya trae su montón de tierra.
+	_tierra.visible = _planta.texture == null
 	if _planta.texture:
-		_planta.offset = Vector2(0, -_planta.texture.get_height() / 2.0)
-	# Tierra mojada: más oscura.
-	_tierra.modulate = Color(0.7, 0.7, 0.8) if p["regada"] else Color.WHITE
+		_planta.offset = Vector2(0, -_planta.texture.get_height() / 2.0 + 10.0 / ESCALA_PLANTA)
+	# Regada: la tierra (y la planta) se ve más oscura, como mojada.
+	var mojada := Color(0.78, 0.78, 0.88)
+	_tierra.modulate = mojada if p["regada"] else Color.WHITE
+	_planta.modulate = mojada if p["regada"] else Color.WHITE
 	var texto := "E  Sembrar"
 	if not p["cultivo"].is_empty():
 		texto = "E  Cosechar" if int(p["etapa"]) >= Granja.LISTO else ("E  Regar" if not p["regada"] else "Regada")

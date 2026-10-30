@@ -22,7 +22,6 @@ const ESCALA_GUARDIAN := 1.7
 ## Franja oscura arriba del cuarto, para que la interfaz no tape las ventanas.
 const MARGEN_ARRIBA := 150.0
 ## Fogón para cocinar (pie del fogón, junto a la pared).
-## shortcut: dibujado con código hasta tener su arte (prompt en docs/arte/GUIA_ARTE.md).
 const FOGON := Vector2(1200, 650)
 ## Salida: luz de la puerta a media orilla de abajo.
 const PUERTA := Vector2(893, 1034)
@@ -73,7 +72,7 @@ func _ready() -> void:
 	add_child(_noche)
 	var rutas := ["res://assets/ui/bitacora/monarca.png", "res://assets/objects/zona1/brote_control.png",
 		"res://assets/objects/zona3/tule.png", "res://assets/objects/zona3/achoque.png"]
-	for mueble in ["repisa", "tablero", "alfombra"]:
+	for mueble in ["repisa", "tablero", "alfombra", "fogon"]:
 		rutas.append("res://assets/maps/casa/%s.png" % mueble)
 	for zona in ZONAS:
 		rutas.append(ZONAS[zona][1])
@@ -125,7 +124,7 @@ func _crear_paredes() -> void:
 		forma.polygon = PackedVector2Array(poligono)
 		paredes.add_child(forma)
 	# Cama y baúl (solo la base, por donde pisan).
-	for caja in [Rect2(235, 700, 190, 220), Rect2(1405, 700, 150, 60)]:
+	for caja in [Rect2(235, 700, 190, 220), Rect2(1405, 700, 150, 60), Rect2(FOGON.x - 115, FOGON.y - 60, 230, 60)]:
 		var forma := CollisionShape2D.new()
 		var rect := RectangleShape2D.new()
 		rect.size = caja.size
@@ -442,15 +441,8 @@ func _draw() -> void:
 
 
 func _dibujar_fogon() -> void:
-	# Fogón de barro con su boca de fuego y un comal encima.
-	_sombra(FOGON, 110.0)
-	_caja(Rect2(FOGON + Vector2(-110, -130), Vector2(220, 130)), Color(0.62, 0.34, 0.2), 14)
-	_caja(Rect2(FOGON + Vector2(-110, -130), Vector2(220, 22)), Color(0.72, 0.42, 0.26), 10)
-	_caja(Rect2(FOGON + Vector2(-46, -80), Vector2(92, 70)), Color(0.14, 0.07, 0.03), 40)
-	for i in 3:
-		draw_circle(FOGON + Vector2(-20 + i * 20, -34), 14.0 - absf(i - 1) * 4.0, Color(1, 0.5 + i * 0.12, 0.12), true, -1.0, true)
-	draw_circle(FOGON + Vector2(0, -150), 52.0, Color(0.22, 0.22, 0.24), true, -1.0, true)
-	draw_circle(FOGON + Vector2(0, -150), 44.0, Color(0.32, 0.32, 0.34), true, -1.0, true)
+	_sombra(FOGON, 120.0)
+	_textura("res://assets/maps/casa/fogon.png", Rect2(FOGON + Vector2(-125, -215), Vector2(250, 215)))
 
 
 func _sombra(pie: Vector2, radio: float) -> void:

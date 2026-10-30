@@ -18,7 +18,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 import arte
-from arte import RAIZ, cargar, construir_atlas, guardar, hacer_repetible, hacer_repetible_h, quitar_fondo, recortar, separar_objetos
+from arte import RAIZ, cargar, fondo_cerca, construir_atlas, guardar, hacer_repetible, hacer_repetible_h, quitar_fondo, recortar, separar_objetos
 
 ASSETS = RAIZ / "assets"
 
@@ -679,7 +679,60 @@ def casa() -> None:
     objetos("casa_muebles_frente.png", ["cama", "pecera"], "maps/casa", huecos=False)
 
 
-GRUPOS = {"animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+# ---------------------------------------------------------------- Granja
+def sin_marco(img: Image.Image) -> Image.Image:
+    """Quita el recuadro morado oscuro que la IA dibujó alrededor de cada ícono.
+
+    Se borran solo las líneas rectas largas (más de la mitad del ícono) de color morado oscuro;
+    los contornos del dibujo son cortos o curvos y se quedan.
+    """
+    px = np.asarray(img.convert("RGBA")).copy()
+    r, g, b, a = (px[..., i].astype(int) for i in range(4))
+    morado = (a > 0) & (r + g + b < 260) & (b > g + 12) & (b >= r - 5)
+    h, w = morado.shape
+    borrar = np.zeros_like(morado)
+    for y in range(h):
+        if morado[y].sum() > w * 0.5:
+            borrar[y] = morado[y]
+    for x in range(w):
+        if morado[:, x].sum() > h * 0.5:
+            borrar[:, x] |= morado[:, x]
+    # Lo que queda del borde (esquinas y el antialias del marco) también se quita.
+    borrar = fondo_cerca(borrar, 3) & morado
+    px[..., 3] = np.where(borrar, 0, px[..., 3])
+    limpio = Image.fromarray(px.astype(np.uint8))
+    return limpio.crop(limpio.getbbox())
+
+
+def granja() -> None:
+    """Íconos, platillos, plantas de la milpa, gallina, cabra y fogón (reemplazan los provisionales)."""
+    iconos = ASSETS / "ui/granja"
+    # Orden en la hoja; None = repetido o sobrante. El huevo sale separado de su marco (índice 3).
+    nombres = ["maiz", "frijol", "calabaza", None, "huevo", "leche", "pescado", "manzanilla", "hierbabuena", None,
+               "nopal", "lena", "semilla_maiz", "semilla_frijol", "semilla_calabaza", None]
+    for nombre, pieza in objetos("granja_iconos.jpg", nombres, "ui/granja").items():
+        guardar(sin_marco(pieza), iconos / f"{nombre}.png")
+    nombres = ["elote_asado", "atole", "huevos_frijoles", None, "corundas", "sopa_tarasca", "calabaza_tacha", None,
+               "nopales_asados", "pescado_asado", "te_manzanilla"]
+    for nombre, pieza in objetos("granja_platillos.jpg", nombres, "ui/granja").items():
+        guardar(sin_marco(pieza), iconos / f"{nombre}.png")
+    # Milpa: orden en que salen las piezas -> cultivo_etapa (0 sembrado ... 3 listo).
+    nombres = ["maiz_2", "maiz_3", "maiz_0", "maiz_1", "frijol_3", "frijol_1", "frijol_2", "frijol_0",
+               "calabaza_2", "calabaza_3", "calabaza_0", "calabaza_1"]
+    objetos("granja_milpa.jpg", nombres, "objects/granja")
+    rgba = quitar_fondo(cargar("granja_corral.jpg"))
+    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    destino = ASSETS / "characters/animales/valle"
+    for nombre, indices in [("gallina", [0, 1, 2, 3]), ("cabra", [4, 5, 6])]:
+        construir_atlas(
+            [cuadros[i] for i in indices], {"idle": ([0], 1.0, True), "caminar": (list(range(len(indices))), 7.0, True)},
+            (360, 260), destino / f"{nombre}_atlas.png", destino / f"{nombre}_frames.tres",
+            f"res://assets/characters/animales/valle/{nombre}_atlas.png", por_fila=4,
+        )
+    guardar(cuadros[7], ASSETS / "maps/casa/fogon.png")
+
+
+GRUPOS = {"granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

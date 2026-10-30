@@ -14,16 +14,15 @@ const PUERTA_CASA := Vector2(1615, 905)
 ## Granja (aparece cuando el río se restaura): milpa junto a la cerca de la casa, corral, muelle
 ## para pescar y zona donde salen plantas silvestres y leña.
 const MILPA := Vector2(1830, 1130)
-const SEPARACION_MILPA := Vector2(115, 95)
+const SEPARACION_MILPA := Vector2(150, 110)
 ## Por donde caminan la gallina y la cabra (dentro de la cerca en forma de rombo).
 const CORRAL := Rect2(1300, 1150, 150, 90)
 const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
 const MUELLE := Vector2(800, 760)
 const AREA_SILVESTRES := Rect2(900, 300, 1700, 1300)
-## shortcut: la gallina y la cabra usan el arte del pato y del venado teñido hasta tener el suyo.
 const ANIMALES_CORRAL := [
-	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/pato_frames.tres", "escala": 0.16, "color": Color(1, 0.95, 0.85)},
-	{"nombre": "Cabra", "cuadros": "res://assets/characters/animales/valle/venado_frames.tres", "escala": 0.22, "color": Color(0.85, 0.85, 0.85)},
+	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/gallina_frames.tres", "escala": 0.2},
+	{"nombre": "Cabra", "cuadros": "res://assets/characters/animales/valle/cabra_frames.tres", "escala": 0.3},
 ]
 
 ## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
@@ -145,8 +144,12 @@ func _crear_granja() -> void:
 		_zona_de(parcela, 55.0)
 		parcela.aviso.connect(avisar)
 		$Objetos.add_child(parcela)
-	# Cerca del corral: cuatro tramos de la cerca del valle formando un rombo.
+	# Cerca del corral: cuatro tramos de la cerca del valle formando un rombo. Los adornos del valle
+	# que quedan adentro (un arbusto) se quitan.
 	var centro := CORRAL.get_center()
+	for nodo in $Objetos.get_children():
+		if nodo is StaticBody2D and CORRAL.grow(70).has_point(nodo.position):
+			nodo.queue_free()
 	for tramo in [[Vector2(-92, -18), false], [Vector2(92, -18), true], [Vector2(-92, 112), true], [Vector2(92, 112), false]]:
 		var cerca := Sprite2D.new()
 		cerca.texture = CERCA
@@ -165,11 +168,11 @@ func _crear_granja() -> void:
 		animal.escala = datos["escala"]
 		animal.velocidad = 30.0
 		animal.zona_paseo = CORRAL
-		animal.position = CORRAL.get_center()
+		# Cada uno empieza en un lado del corral para que no se encimen.
+		animal.position = CORRAL.get_center() + Vector2(-50 if datos["nombre"] == "Gallina" else 50, 0)
 		animal.texto_aviso = "E  " + datos["nombre"]
 		animal.hablaron.connect(_atender_corral)
 		$Objetos.add_child(animal)
-		animal.sprite.self_modulate = datos["color"]
 	var muelle: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 	muelle.name = "Pescar"
 	muelle.texto_aviso = "E  Pescar"
@@ -203,7 +206,9 @@ func _poner_silvestres() -> void:
 	for hijo in $Objetos.get_children():
 		if hijo.is_in_group(&"silvestre"):
 			hijo.queue_free()
-	for dato in Granja.silvestres_de_hoy(AREA_SILVESTRES):
+	var ocupado: Array[Rect2] = [CORRAL.grow(110), Rect2(MILPA, SEPARACION_MILPA * Vector2(3, 2)).grow(80),
+		Rect2($Objetos/Achi.position - Vector2(220, 160), Vector2(440, 280)), Rect2(PUERTA_CASA - Vector2(150, 250), Vector2(300, 300))]
+	for dato in Granja.silvestres_de_hoy(AREA_SILVESTRES, ocupado):
 		var planta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 		planta.add_to_group(&"silvestre")
 		planta.texto_aviso = "E  Recoger " + Granja.nombre(dato["tipo"]).to_lower()

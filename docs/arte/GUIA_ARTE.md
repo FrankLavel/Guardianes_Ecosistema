@@ -213,11 +213,11 @@ Se procesan con `python tools/arte/procesar.py animales_valle casa`.
 Top-down 3/4 RPG view, a small wooden picture frame hanging on a wall with a painting of a monarch butterfly on an oyamel branch, alone and centered.
 ```
 
-## 10. Granja y cocina (arte provisional hecho con código)
+## 10. Granja y cocina (integrado)
 
-Hoy los íconos, las plantas de la milpa, el fogón, la gallina y la cabra son provisionales
-(`python tools/arte/iconos_granja.py`). Para cada hoja: pegar el bloque de estilo al inicio y
-adjuntar `valle_objetos.jpg` como referencia.
+Se procesan con `python tools/arte/procesar.py granja`. La IA dibujó un recuadro morado alrededor
+de íconos y platillos; `sin_marco()` lo quita. Si se regenera una hoja, revisar el orden de las
+piezas en `granja()`. Prompts usados (pegar el bloque de estilo y adjuntar `valle_objetos.jpg`):
 
 **`granja_iconos.png`** — íconos de objetos
 ```
