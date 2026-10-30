@@ -4,7 +4,7 @@ extends ZonaInteraccion
 
 signal aviso(texto: String)
 
-## Las plantas van en hilera sobre el surco de en medio (la tierra la dibuja MilpaSuelo).
+## Las plantas van en hilera sobre el lomo de en medio (la tierra la dibuja MilpaSuelo).
 const ESCALA_PLANTA := 0.24
 const HILERA := [-40.0, 0.0, 40.0]
 const HILERA_CALABAZA := [-28.0, 28.0]
@@ -45,7 +45,7 @@ func actualizar() -> void:
 		if planta.visible:
 			planta.texture = textura
 			planta.offset = Vector2(0, -textura.get_height() / 2.0)
-			planta.position = Vector2(hilera[k], 12.0)
+			planta.position = Vector2(hilera[k], 6.0)
 	var texto := "E  Sembrar"
 	if not p["cultivo"].is_empty():
 		if int(p["etapa"]) >= Granja.LISTO:

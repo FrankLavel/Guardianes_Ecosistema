@@ -762,6 +762,10 @@ def granja() -> None:
         (360, 300), destino / "cabra_atlas.png", destino / "cabra_frames.tres",
         "res://assets/characters/animales/valle/cabra_atlas.png", por_fila=4,
     )
+    # Tierra arada repetible: seis lomos en 192 px, así cada surco (96 px de alto) lleva tres.
+    tierra = Image.open(arte.FUENTE / "granja_tierra.png").convert("RGBA")
+    tierra = hacer_repetible(tierra, 40).resize((192, 192), Image.Resampling.LANCZOS)
+    guardar(tierra, ASSETS / "maps/valle/texturas/tierra_arada.png")
     # Puesto del tianguis.
     objetos("granja_tianguis.jpg", ["tianguis"], "maps/valle/objetos")
 
