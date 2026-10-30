@@ -766,6 +766,13 @@ def granja() -> None:
     tierra = Image.open(arte.FUENTE / "granja_tierra.png").convert("RGBA")
     tierra = hacer_repetible(tierra, 40).resize((192, 192), Image.Resampling.LANCZOS)
     guardar(tierra, ASSETS / "maps/valle/texturas/tierra_arada.png")
+    # Fase 2: masa, queso, miel y sus platillos; y los tres talleres, cortados por columnas
+    # (la quesería y la colmena traen mesa, botes, flores y abejas sueltas que van con ellas).
+    objetos("granja_iconos2.png", ["miel", "masa", "queso", "tortillas", "quesadillas", "chongos_zamoranos"], "ui/granja")
+    talleres = quitar_fondo(cargar("granja_talleres.jpg"))
+    for nombre, (x0, x1) in {"molino": (0, 490), "queseria": (490, 960), "colmena": (960, talleres.shape[1])}.items():
+        pieza = Image.fromarray(talleres[:, x0:x1].copy())
+        guardar(pieza.crop(pieza.getbbox()), ASSETS / f"maps/valle/objetos/{nombre}.png")
     # Puesto del tianguis.
     objetos("granja_tianguis.jpg", ["tianguis"], "maps/valle/objetos")
 

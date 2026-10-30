@@ -6,12 +6,13 @@ extends ZonaInteraccion
 const DIBUJO := "res://assets/maps/valle/objetos/%s.png"
 
 @export var id := "molino"
-@export var escala := 0.22
+@export var escala := 0.5
 
 var _reloj := 0.0
 
 
 func _ready() -> void:
+	var ancho := 150.0
 	var ruta := DIBUJO % id
 	if ResourceLoader.exists(ruta):
 		var textura: Texture2D = load(ruta)
@@ -20,13 +21,14 @@ func _ready() -> void:
 		dibujo.scale = Vector2.ONE * escala
 		dibujo.offset = Vector2(0, -textura.get_height() / 2.0 + 20)
 		add_child(dibujo)
+		ancho = textura.get_width() * escala * 0.8
 	# El edificio no se atraviesa.
 	var cuerpo := StaticBody2D.new()
 	var forma := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
-	rect.size = Vector2(150, 40)
+	rect.size = Vector2(ancho, 50)
 	forma.shape = rect
-	forma.position = Vector2(0, -24)
+	forma.position = Vector2(0, -30)
 	cuerpo.add_child(forma)
 	add_child(cuerpo)
 	super()

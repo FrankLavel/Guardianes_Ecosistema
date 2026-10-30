@@ -25,7 +25,7 @@ const TIANGUIS := Vector2(1690, 1075)
 const PUESTO := preload("res://assets/maps/valle/objetos/tianguis.png")
 const AREA_SILVESTRES := Rect2(900, 300, 1700, 1300)
 ## Talleres de la granja (se ven desde el principio; cada uno se abre en su nivel).
-const TALLERES := {"molino": Vector2(1330, 330), "queseria": Vector2(1330, 560), "colmena": Vector2(2130, 800)}
+const TALLERES := {"molino": Vector2(1250, 330), "queseria": Vector2(1250, 610), "colmena": Vector2(2150, 420)}
 const ANIMALES_CORRAL := [
 	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/gallina_frames.tres", "escala": 0.2},
 	{"nombre": "Cabra", "cuadros": "res://assets/characters/animales/valle/cabra_frames.tres", "escala": 0.3},
@@ -37,7 +37,7 @@ const GARZA := "res://assets/characters/animales/valle/garza_frames.tres"
 const PATO := "res://assets/characters/animales/valle/pato_frames.tres"
 const MONARCA := "res://assets/characters/animales/valle/monarca_frames.tres"
 const ANIMALES := [
-	{"nombre": "Venado1", "especie": "venado", "zona": "bosque", "pos": Vector2(2150, 300), "paseo": Rect2(2070, 180, 260, 220),
+	{"nombre": "Venado1", "especie": "venado", "zona": "bosque", "pos": Vector2(2300, 250), "paseo": Rect2(2240, 160, 140, 180),
 		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
 	{"nombre": "Venado2", "especie": "venado", "zona": "bosque", "pos": Vector2(1100, 1450), "paseo": Rect2(950, 1350, 450, 250),
 		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
@@ -402,6 +402,8 @@ func _crear_animales() -> void:
 		if Juego.zona_esta_completa("rio"):
 			animal.prohibido.append(Rect2(MILPA - SEPARACION_MILPA / 2.0,
 				SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, Granja.PARCELAS_MAX / COLUMNAS_MILPA)).grow(16))
+			for id in TALLERES:
+				animal.prohibido.append(Rect2(TALLERES[id] - Vector2(130, 140), Vector2(260, 170)))
 		$Objetos.add_child(animal)
 		animales.append(animal)
 
