@@ -15,7 +15,7 @@ const PUERTA_CASA := Vector2(1615, 905)
 ## para pescar y zona donde salen plantas silvestres y leña.
 const MILPA := Vector2(1880, 925)
 const COLUMNAS_MILPA := 4
-const SEPARACION_MILPA := Vector2(146, 102)
+const SEPARACION_MILPA := Vector2(136, 96)
 ## Por donde caminan la gallina y la cabra (dentro de la cerca en forma de rombo).
 const CORRAL := Rect2(1300, 1150, 150, 90)
 const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
@@ -142,7 +142,7 @@ func _crear_granja() -> void:
 	for zona in Juego.zonas_completadas:
 		Granja.dar_semillas_de(zona)
 	# Los adornos del valle que caen donde va la milpa completa (12 surcos) se quitan.
-	var milpa := Rect2(MILPA, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA - 1, Granja.PARCELAS_MAX / COLUMNAS_MILPA - 1)).grow(115)
+	var milpa := Rect2(MILPA, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA - 1, Granja.PARCELAS_MAX / COLUMNAS_MILPA - 1)).grow(140)
 	for nodo in $Objetos.get_children():
 		if nodo is StaticBody2D and milpa.has_point(nodo.position):
 			nodo.queue_free()
@@ -204,8 +204,10 @@ func _poner_parcelas() -> void:
 		_suelo_milpa.name = "SueloMilpa"
 		add_child(_suelo_milpa)
 		move_child(_suelo_milpa, $Objetos.get_index())
+	_suelo_milpa.tam = SEPARACION_MILPA
+	_suelo_milpa.abiertos = Granja.surcos()
 	_suelo_milpa.posiciones.clear()
-	for i in Granja.surcos():
+	for i in Granja.PARCELAS_MAX:
 		_suelo_milpa.posiciones.append(MILPA + Vector2(i % COLUMNAS_MILPA, i / COLUMNAS_MILPA) * SEPARACION_MILPA)
 	_suelo_milpa.queue_redraw()
 	for i in Granja.surcos():
