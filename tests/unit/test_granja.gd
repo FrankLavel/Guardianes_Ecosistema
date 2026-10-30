@@ -26,21 +26,25 @@ func test_cada_zona_regala_sus_semillas_una_vez() -> void:
 	assert_eq(Granja.cantidad("semilla_frijol"), 4, "No se regalan dos veces")
 
 
-func test_la_milpa_crece_solo_si_se_riega() -> void:
+func test_la_milpa_crece_en_minutos_si_se_riega() -> void:
 	Granja.dar("semilla_maiz")
 	assert_true(Granja.plantar(0, "maiz"))
 	assert_eq(Granja.cantidad("semilla_maiz"), 0)
-	_dia_siguiente()
+	Granja.crecer(20.0)
 	assert_eq(int(Granja.parcela(0)["etapa"]), 0, "Sin regar no crece")
-	for i in Granja.LISTO:
-		assert_true(Granja.regar(0))
-		assert_false(Granja.regar(0), "Solo se riega una vez al día")
-		_dia_siguiente()
+	assert_true(Granja.regar(0))
+	assert_false(Granja.regar(0), "Solo se riega una vez")
+	var horas: float = float(Granja.datos["cultivos"]["maiz"]["horas"])
+	assert_eq(Granja.minutos_restantes(0), ceili(horas * Juego.SEGUNDOS_POR_HORA / 60.0))
+	Granja.crecer(horas / 2.0)
+	assert_between(int(Granja.parcela(0)["etapa"]), 1, Granja.LISTO - 1, "A medio camino va creciendo")
+	Granja.crecer(horas / 2.0)
 	assert_eq(int(Granja.parcela(0)["etapa"]), Granja.LISTO)
 	var cosecha := Granja.cosechar(0)
 	assert_eq(int(cosecha["maiz"]), 3)
 	assert_eq(Granja.cantidad("semilla_maiz"), 1, "La cosecha devuelve una semilla")
 	assert_true(Granja.parcela(0)["cultivo"].is_empty())
+	assert_gt(Juego.xp, 0, "Cosechar da experiencia")
 
 
 func test_sin_semilla_no_se_siembra() -> void:
@@ -117,3 +121,60 @@ func test_la_milpa_aparece_al_restaurar_el_rio() -> void:
 	assert_not_null(valle.get_node_or_null("Objetos/Gallina"))
 	assert_not_null(valle.get_node_or_null("Objetos/Pescar"))
 	assert_gt(get_tree().get_nodes_in_group(&"silvestre").size(), 0)
+
+
+func test_subir_de_nivel_desbloquea_cosas() -> void:
+	assert_eq(Granja.nivel(), 1)
+	assert_eq(Granja.surcos(), 6)
+	assert_false(Granja.desbloqueado("cabra", false))
+	watch_signals(Granja)
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][2]))
+	assert_eq(Granja.nivel(), 3)
+	assert_signal_emit_count(Granja, "nivel_subio", 2, "Avisa de cada nivel que sube")
+	assert_eq(Granja.surcos(), 9)
+	assert_true(Granja.desbloqueado("cabra", false))
+
+
+func test_las_recetas_avanzadas_piden_nivel() -> void:
+	for id in ["frijol", "frijol", "calabaza", "lena"]:
+		Granja.dar(id)
+	assert_false(Granja.cocinar("sopa_tarasca"), "La sopa tarasca es del nivel 4")
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][3]))
+	assert_true(Granja.cocinar("sopa_tarasca"))
+
+
+func test_entregar_un_pedido_del_tianguis() -> void:
+	Juego.completar_zona("rio")
+	var pedidos := Granja.pedidos_tianguis()
+	assert_eq(pedidos.size(), 3)
+	var pedido: Dictionary = pedidos[0]
+	assert_false(Granja.entregar(0), "Sin lo que piden no se entrega")
+	for id in pedido["cosas"]:
+		Granja.dar(id, int(pedido["cosas"][id]))
+	var xp_antes := Juego.xp
+	assert_true(Granja.entregar(0))
+	assert_eq(Juego.hojas, int(pedido["hojas"]))
+	assert_eq(Juego.xp, xp_antes + int(pedido["xp"]))
+	assert_ne(Granja.pedidos_tianguis()[0], pedido, "Llega un pedido nuevo")
+	for id in pedido["cosas"]:
+		assert_eq(Granja.cantidad(id), 0)
+
+
+func test_comprar_semillas_con_hojas() -> void:
+	assert_false(Granja.comprar_semilla("semilla_maiz"))
+	Juego.dar_hojas(5)
+	assert_true(Granja.comprar_semilla("semilla_maiz"))
+	assert_eq(Granja.cantidad("semilla_maiz"), 1)
+	assert_eq(Juego.hojas, 5 - int(Granja.datos["semillas_tianguis"]["semilla_maiz"]))
+
+
+func test_tianguis_y_nivel_se_guardan() -> void:
+	Juego.completar_zona("rio")
+	Granja.dar_xp(30)
+	var pedidos := Granja.pedidos_tianguis().duplicate(true)
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_eq(Juego.xp, 30)
+	assert_eq(Granja.pedidos_tianguis().size(), pedidos.size())
+	assert_eq(Granja.pedidos_tianguis()[0]["hojas"], pedidos[0]["hojas"])

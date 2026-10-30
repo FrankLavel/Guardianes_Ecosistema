@@ -234,6 +234,7 @@ func avanzar() -> void:
 func _terminar() -> void:
 	var def := definicion()
 	Juego.dar_hojas(int(def["recompensa"]))
+	Granja.dar_xp(int(Granja.datos["xp"]["ayudar_animal"]))
 	Juego.contar_ayuda(Juego.pedido["tipo"])
 	var animal := animal_del_pedido()
 	animal.volver_a_pasear()

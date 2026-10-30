@@ -1,53 +1,310 @@
 {
 	"objetos": {
-		"semilla_maiz": {"nombre": "Semilla de maíz", "icono": "semilla_maiz"},
-		"semilla_frijol": {"nombre": "Semilla de frijol", "icono": "semilla_frijol"},
-		"semilla_calabaza": {"nombre": "Semilla de calabaza", "icono": "semilla_calabaza"},
-		"maiz": {"nombre": "Maíz", "icono": "maiz", "energia": 8},
-		"frijol": {"nombre": "Frijol", "icono": "frijol"},
-		"calabaza": {"nombre": "Calabaza", "icono": "calabaza"},
-		"huevo": {"nombre": "Huevo", "icono": "huevo"},
-		"leche": {"nombre": "Leche de cabra", "icono": "leche", "energia": 8},
-		"pescado": {"nombre": "Pescado", "icono": "pescado"},
-		"manzanilla": {"nombre": "Manzanilla", "icono": "manzanilla"},
-		"hierbabuena": {"nombre": "Hierbabuena", "icono": "hierbabuena"},
-		"nopal": {"nombre": "Nopal", "icono": "nopal"},
-		"lena": {"nombre": "Leña", "icono": "lena"},
-		"elote_asado": {"nombre": "Elote asado", "icono": "elote_asado", "energia": 20},
-		"atole": {"nombre": "Atole de maíz", "icono": "atole", "energia": 30},
-		"huevos_frijoles": {"nombre": "Huevos con frijoles", "icono": "huevos_frijoles", "energia": 40},
-		"corundas": {"nombre": "Corundas", "icono": "corundas", "energia": 45},
-		"sopa_tarasca": {"nombre": "Sopa tarasca", "icono": "sopa_tarasca", "energia": 45},
-		"calabaza_tacha": {"nombre": "Calabaza en tacha", "icono": "calabaza_tacha", "energia": 25},
-		"nopales_asados": {"nombre": "Nopales asados", "icono": "nopales_asados", "energia": 20},
-		"pescado_asado": {"nombre": "Pescado asado con hierbabuena", "icono": "pescado_asado", "energia": 50},
-		"te_manzanilla": {"nombre": "Té de manzanilla", "icono": "te_manzanilla", "energia": 15}
+		"semilla_maiz": {
+			"nombre": "Semilla de maíz",
+			"icono": "semilla_maiz"
+		},
+		"semilla_frijol": {
+			"nombre": "Semilla de frijol",
+			"icono": "semilla_frijol"
+		},
+		"semilla_calabaza": {
+			"nombre": "Semilla de calabaza",
+			"icono": "semilla_calabaza"
+		},
+		"maiz": {
+			"nombre": "Maíz",
+			"icono": "maiz",
+			"energia": 8,
+			"valor": 1
+		},
+		"frijol": {
+			"nombre": "Frijol",
+			"icono": "frijol",
+			"valor": 1
+		},
+		"calabaza": {
+			"nombre": "Calabaza",
+			"icono": "calabaza",
+			"valor": 2
+		},
+		"huevo": {
+			"nombre": "Huevo",
+			"icono": "huevo",
+			"valor": 1
+		},
+		"leche": {
+			"nombre": "Leche de cabra",
+			"icono": "leche",
+			"energia": 8,
+			"valor": 2
+		},
+		"pescado": {
+			"nombre": "Pescado",
+			"icono": "pescado",
+			"valor": 2
+		},
+		"manzanilla": {
+			"nombre": "Manzanilla",
+			"icono": "manzanilla"
+		},
+		"hierbabuena": {
+			"nombre": "Hierbabuena",
+			"icono": "hierbabuena"
+		},
+		"nopal": {
+			"nombre": "Nopal",
+			"icono": "nopal"
+		},
+		"lena": {
+			"nombre": "Leña",
+			"icono": "lena"
+		},
+		"elote_asado": {
+			"nombre": "Elote asado",
+			"icono": "elote_asado",
+			"energia": 20,
+			"valor": 3
+		},
+		"atole": {
+			"nombre": "Atole de maíz",
+			"icono": "atole",
+			"energia": 30,
+			"valor": 4
+		},
+		"huevos_frijoles": {
+			"nombre": "Huevos con frijoles",
+			"icono": "huevos_frijoles",
+			"energia": 40,
+			"valor": 4
+		},
+		"corundas": {
+			"nombre": "Corundas",
+			"icono": "corundas",
+			"energia": 45,
+			"valor": 6
+		},
+		"sopa_tarasca": {
+			"nombre": "Sopa tarasca",
+			"icono": "sopa_tarasca",
+			"energia": 45,
+			"valor": 6
+		},
+		"calabaza_tacha": {
+			"nombre": "Calabaza en tacha",
+			"icono": "calabaza_tacha",
+			"energia": 25,
+			"valor": 3
+		},
+		"nopales_asados": {
+			"nombre": "Nopales asados",
+			"icono": "nopales_asados",
+			"energia": 20,
+			"valor": 3
+		},
+		"pescado_asado": {
+			"nombre": "Pescado asado con hierbabuena",
+			"icono": "pescado_asado",
+			"energia": 50,
+			"valor": 6
+		},
+		"te_manzanilla": {
+			"nombre": "Té de manzanilla",
+			"icono": "te_manzanilla",
+			"energia": 15,
+			"valor": 2
+		}
 	},
 	"zonas_semillas": {
-		"rio": {"semilla_frijol": 4},
-		"bosque": {"semilla_maiz": 4},
-		"lago": {"semilla_calabaza": 4}
+		"rio": {
+			"semilla_frijol": 4
+		},
+		"bosque": {
+			"semilla_maiz": 4
+		},
+		"lago": {
+			"semilla_calabaza": 4
+		}
 	},
 	"cultivos": {
-		"maiz": {"semilla": "semilla_maiz", "cosecha": {"maiz": 3, "semilla_maiz": 1}, "dias": 3},
-		"frijol": {"semilla": "semilla_frijol", "cosecha": {"frijol": 3, "semilla_frijol": 1}, "dias": 2},
-		"calabaza": {"semilla": "semilla_calabaza", "cosecha": {"calabaza": 2, "semilla_calabaza": 1}, "dias": 3}
+		"maiz": {
+			"semilla": "semilla_maiz",
+			"cosecha": {
+				"maiz": 3,
+				"semilla_maiz": 1
+			},
+			"horas": 6
+		},
+		"frijol": {
+			"semilla": "semilla_frijol",
+			"cosecha": {
+				"frijol": 3,
+				"semilla_frijol": 1
+			},
+			"horas": 4
+		},
+		"calabaza": {
+			"semilla": "semilla_calabaza",
+			"cosecha": {
+				"calabaza": 2,
+				"semilla_calabaza": 1
+			},
+			"horas": 8
+		}
 	},
 	"milpa": "En la milpa se siembran juntos maíz, frijol y calabaza: el maíz sostiene al frijol, el frijol alimenta la tierra y las hojas de la calabaza la protegen del sol.",
 	"recetas": [
-		{"id": "elote_asado", "ingredientes": {"maiz": 1, "lena": 1}, "dato": "El maíz se cultiva en México desde hace más de 7000 años."},
-		{"id": "atole", "ingredientes": {"maiz": 1, "leche": 1, "lena": 1}, "dato": "El atole calientito se toma desde antes de la llegada de los españoles."},
-		{"id": "huevos_frijoles", "ingredientes": {"huevo": 1, "frijol": 1, "lena": 1}, "dato": "El frijol tiene mucha proteína y es parte de la comida diaria en México."},
-		{"id": "corundas", "ingredientes": {"maiz": 2, "leche": 1, "lena": 1}, "dato": "Las corundas son tamales michoacanos en forma de estrella, envueltos en hoja de milpa."},
-		{"id": "sopa_tarasca", "ingredientes": {"frijol": 2, "calabaza": 1, "lena": 1}, "dato": "La sopa tarasca es un platillo de la región purépecha, hecho con frijol."},
-		{"id": "calabaza_tacha", "ingredientes": {"calabaza": 1, "lena": 1}, "dato": "La calabaza en tacha es un dulce tradicional del Día de Muertos."},
-		{"id": "nopales_asados", "ingredientes": {"nopal": 2, "lena": 1}, "dato": "El nopal tiene mucha fibra y crece aunque llueva poco."},
-		{"id": "pescado_asado", "ingredientes": {"pescado": 1, "hierbabuena": 1, "lena": 1}, "dato": "Pescar solo lo necesario y soltar a las crías ayuda a que el lago siga teniendo peces."},
-		{"id": "te_manzanilla", "ingredientes": {"manzanilla": 1, "lena": 1}, "dato": "La manzanilla es una planta medicinal: su té calma el dolor de panza."}
+		{
+			"id": "elote_asado",
+			"ingredientes": {
+				"maiz": 1,
+				"lena": 1
+			},
+			"dato": "El maíz se cultiva en México desde hace más de 7000 años.",
+			"nivel": 1
+		},
+		{
+			"id": "atole",
+			"ingredientes": {
+				"maiz": 1,
+				"leche": 1,
+				"lena": 1
+			},
+			"dato": "El atole calientito se toma desde antes de la llegada de los españoles.",
+			"nivel": 1
+		},
+		{
+			"id": "huevos_frijoles",
+			"ingredientes": {
+				"huevo": 1,
+				"frijol": 1,
+				"lena": 1
+			},
+			"dato": "El frijol tiene mucha proteína y es parte de la comida diaria en México.",
+			"nivel": 1
+		},
+		{
+			"id": "corundas",
+			"ingredientes": {
+				"maiz": 2,
+				"leche": 1,
+				"lena": 1
+			},
+			"dato": "Las corundas son tamales michoacanos en forma de estrella, envueltos en hoja de milpa.",
+			"nivel": 5
+		},
+		{
+			"id": "sopa_tarasca",
+			"ingredientes": {
+				"frijol": 2,
+				"calabaza": 1,
+				"lena": 1
+			},
+			"dato": "La sopa tarasca es un platillo de la región purépecha, hecho con frijol.",
+			"nivel": 4
+		},
+		{
+			"id": "calabaza_tacha",
+			"ingredientes": {
+				"calabaza": 1,
+				"lena": 1
+			},
+			"dato": "La calabaza en tacha es un dulce tradicional del Día de Muertos.",
+			"nivel": 1
+		},
+		{
+			"id": "nopales_asados",
+			"ingredientes": {
+				"nopal": 2,
+				"lena": 1
+			},
+			"dato": "El nopal tiene mucha fibra y crece aunque llueva poco.",
+			"nivel": 1
+		},
+		{
+			"id": "pescado_asado",
+			"ingredientes": {
+				"pescado": 1,
+				"hierbabuena": 1,
+				"lena": 1
+			},
+			"dato": "Pescar solo lo necesario y soltar a las crías ayuda a que el lago siga teniendo peces.",
+			"nivel": 3
+		},
+		{
+			"id": "te_manzanilla",
+			"ingredientes": {
+				"manzanilla": 1,
+				"lena": 1
+			},
+			"dato": "La manzanilla es una planta medicinal: su té calma el dolor de panza.",
+			"nivel": 1
+		}
 	],
-	"silvestres": ["manzanilla", "hierbabuena", "nopal", "lena", "lena"],
+	"silvestres": [
+		"manzanilla",
+		"hierbabuena",
+		"nopal",
+		"lena",
+		"lena"
+	],
 	"corral": {
-		"gallina": {"nombre": "Gallina", "producto": "huevo"},
-		"cabra": {"nombre": "Cabra", "producto": "leche"}
+		"gallina": {
+			"nombre": "Gallina",
+			"producto": "huevo"
+		},
+		"cabra": {
+			"nombre": "Cabra",
+			"producto": "leche"
+		}
+	},
+	"semillas_tianguis": {
+		"semilla_frijol": 2,
+		"semilla_maiz": 3,
+		"semilla_calabaza": 4
+	},
+	"niveles": {
+		"xp": [
+			0,
+			15,
+			40,
+			80,
+			140,
+			220,
+			320,
+			450,
+			600,
+			800
+		],
+		"desbloqueos": {
+			"2": {
+				"surcos": 9,
+				"texto": "3 surcos más en tu milpa"
+			},
+			"3": {
+				"cabra": true,
+				"texto": "La cabra llega a tu corral y la receta de pescado asado"
+			},
+			"4": {
+				"surcos": 12,
+				"texto": "3 surcos más en tu milpa y la receta de sopa tarasca"
+			},
+			"5": {
+				"pedidos": 4,
+				"texto": "Un pedido más en el tianguis y la receta de corundas"
+			},
+			"7": {
+				"pedidos": 5,
+				"texto": "Un pedido más en el tianguis"
+			}
+		}
+	},
+	"xp": {
+		"cosechar": 3,
+		"cocinar": 5,
+		"corral": 1,
+		"pescar": 2,
+		"recolectar": 1,
+		"ayudar_animal": 10
 	}
 }

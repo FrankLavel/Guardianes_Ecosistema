@@ -56,6 +56,14 @@ theme_override_colors/font_color = Color(0.8, 0.92, 1, 1)
 theme_override_font_sizes/font_size = 24
 text = "Día 1 · 8 de la mañana"
 
+[node name="Nivel" type="Label" parent="PanelLugar/HBox/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 24
+text = "Nivel 1"
+
 [node name="Energia" type="ProgressBar" parent="PanelLugar/HBox/VBox"]
 unique_name_in_owner = true
 visible = false

@@ -27,6 +27,18 @@ func _ready() -> void:
 	add_child(_planta)
 	super()
 	actualizar()
+	Granja.parcelas_cambio.connect(actualizar)
+
+
+var _reloj := 0.0
+
+
+## El aviso dice cuánto falta mientras crece.
+func _process(delta: float) -> void:
+	_reloj += delta
+	if _reloj >= 1.0:
+		_reloj = 0.0
+		actualizar()
 
 
 func actualizar() -> void:
@@ -42,7 +54,12 @@ func actualizar() -> void:
 	_planta.modulate = mojada if p["regada"] else Color.WHITE
 	var texto := "E  Sembrar"
 	if not p["cultivo"].is_empty():
-		texto = "E  Cosechar" if int(p["etapa"]) >= Granja.LISTO else ("E  Regar" if not p["regada"] else "Regada")
+		if int(p["etapa"]) >= Granja.LISTO:
+			texto = "E  Cosechar"
+		elif not p["regada"]:
+			texto = "E  Regar"
+		else:
+			texto = "Creciendo · %d min" % Granja.minutos_restantes(indice)
 	_aviso.text = texto
 
 
@@ -57,7 +74,7 @@ func _al_interactuar(_jugador: Node2D) -> void:
 			partes.append("%d %s" % [int(cosecha[id]), Granja.nombre(id).to_lower()])
 		aviso.emit("¡Cosechaste %s!" % ", ".join(partes))
 	elif Granja.regar(indice):
-		aviso.emit("La regaste. Mañana crecerá un poco más.")
+		aviso.emit("¡La regaste! Estará lista en unos %d minutos." % Granja.minutos_restantes(indice))
 	else:
-		aviso.emit("Ya la regaste hoy. Mañana crecerá.")
+		aviso.emit("Está creciendo. Faltan unos %d minutos." % Granja.minutos_restantes(indice))
 	actualizar()

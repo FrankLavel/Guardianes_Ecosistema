@@ -19,6 +19,13 @@ func actualizar_energia(valor: float) -> void:
 	%Energia.modulate = Color(1, 0.55, 0.45) if valor < 25.0 else Color(0.7, 1, 0.6)
 
 
+## Nivel de la granja (aparece cuando la granja existe, al restaurar el río).
+func actualizar_nivel() -> void:
+	%Nivel.visible = Juego.zona_esta_completa("rio")
+	var avance: Array = Granja.progreso_nivel()
+	%Nivel.text = "Nivel %d  ·  %d / %d exp." % [Granja.nivel(), avance[0], avance[1]]
+
+
 func actualizar_reloj() -> void:
 	%Reloj.text = "Día %d · %s" % [Juego.dia, Juego.texto_hora()]
 

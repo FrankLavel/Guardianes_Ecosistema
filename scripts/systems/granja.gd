@@ -5,15 +5,21 @@ extends CanvasLayer
 ##
 ##     Granja.dar("maiz", 2)       Granja.plantar(0, "maiz")      Granja.cocinar("atole")
 ##
-## También es el menú de la mochila (tecla I) y de la cocina.
+## También es el menú de la mochila (tecla I), de la cocina y del tianguis.
+##
+## Niveles: todo lo que se hace en la granja da experiencia (datos["xp"]); al subir de nivel se
+## desbloquean surcos, la cabra, recetas y más pedidos del tianguis (datos["niveles"]).
 
 signal inventario_cambio
 signal energia_cambio(valor: float)
+signal nivel_subio(nivel: int, texto: String)
+signal parcelas_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
 const PLANTA := "res://assets/objects/granja/%s_%d.png"
-const PARCELAS := 6
+## Surcos de la milpa: se empieza con 6 y se desbloquean más al subir de nivel.
+const PARCELAS_MAX := 12
 ## Etapa final de un cultivo (0 sembrado, 1 y 2 creciendo, 3 listo para cosechar).
 const LISTO := 3
 const PESCA_POR_DIA := 3
@@ -37,6 +43,11 @@ func _ready() -> void:
 	_construir_panel()
 	Juego.dia_cambio.connect(func(_d): nuevo_dia())
 	Juego.zona_completada.connect(_al_completar_zona)
+
+
+func _process(delta: float) -> void:
+	if Juego.reloj_corre():
+		crecer(delta / Juego.SEGUNDOS_POR_HORA)
 
 
 # ---------------------------------------------------------------- Inventario
@@ -107,9 +118,13 @@ func comer(id: String) -> bool:
 # ---------------------------------------------------------------- Milpa
 
 func parcela(i: int) -> Dictionary:
-	while Juego.parcelas.size() < PARCELAS:
-		Juego.parcelas.append({"cultivo": "", "etapa": 0, "regada": false})
+	while Juego.parcelas.size() < PARCELAS_MAX:
+		Juego.parcelas.append({"cultivo": "", "etapa": 0, "regada": false, "horas": 0.0})
 	return Juego.parcelas[i]
+
+
+func surcos() -> int:
+	return int(desbloqueado("surcos", 6))
 
 
 func plantar(i: int, cultivo: String) -> bool:
@@ -119,7 +134,9 @@ func plantar(i: int, cultivo: String) -> bool:
 	p["cultivo"] = cultivo
 	p["etapa"] = 0
 	p["regada"] = false
+	p["horas"] = 0.0
 	Sonido.efecto("correcto")
+	parcelas_cambio.emit()
 	return true
 
 
@@ -129,7 +146,32 @@ func regar(i: int) -> bool:
 		return false
 	p["regada"] = true
 	Sonido.efecto("chapoteo")
+	parcelas_cambio.emit()
 	return true
+
+
+## Lo que se sembró y se regó crece con el tiempo (en horas del juego: 1 hora = 30 s).
+func crecer(horas: float) -> void:
+	var cambio := false
+	for p in Juego.parcelas:
+		if p["cultivo"].is_empty() or not p["regada"] or int(p["etapa"]) >= LISTO:
+			continue
+		p["horas"] = float(p.get("horas", 0.0)) + horas
+		var etapa := mini(int(p["horas"] * LISTO / float(datos["cultivos"][p["cultivo"]]["horas"])), LISTO)
+		if etapa != int(p["etapa"]):
+			p["etapa"] = etapa
+			cambio = true
+	if cambio:
+		parcelas_cambio.emit()
+
+
+## Minutos reales que faltan para cosechar la parcela `i` (0 si no está creciendo).
+func minutos_restantes(i: int) -> int:
+	var p := parcela(i)
+	if p["cultivo"].is_empty() or not p["regada"]:
+		return 0
+	var falta: float = float(datos["cultivos"][p["cultivo"]]["horas"]) - float(p.get("horas", 0.0))
+	return maxi(ceili(falta * Juego.SEGUNDOS_POR_HORA / 60.0), 0)
 
 
 ## Devuelve lo que se cosechó ({objeto: cantidad}) o {} si aún no está lista.
@@ -143,7 +185,10 @@ func cosechar(i: int) -> Dictionary:
 	p["cultivo"] = ""
 	p["etapa"] = 0
 	p["regada"] = false
+	p["horas"] = 0.0
 	Sonido.efecto("recoger")
+	dar_xp(int(datos["xp"]["cosechar"]))
+	parcelas_cambio.emit()
 	return cosecha
 
 
@@ -154,13 +199,8 @@ func textura_planta(i: int) -> Texture2D:
 	return load(PLANTA % [p["cultivo"], int(p["etapa"])])
 
 
-## Cada mañana: lo regado crece una etapa, el corral da huevos y leche y salen plantas silvestres.
+## Cada mañana el corral da huevos y leche (las plantas silvestres cambian solas al pedirlas).
 func nuevo_dia() -> void:
-	for i in PARCELAS:
-		var p := parcela(i)
-		if not p["cultivo"].is_empty() and p["regada"]:
-			p["etapa"] = mini(int(p["etapa"]) + 1, LISTO)
-			p["regada"] = false
 	for animal in Juego.corral:
 		if int(Juego.corral[animal].get("comio", -1)) == Juego.dia - 1:
 			Juego.corral[animal]["listo"] = true
@@ -178,6 +218,7 @@ func atender(animal: String) -> String:
 		estado["listo"] = false
 		dar(producto)
 		Sonido.efecto("recoger")
+		dar_xp(int(datos["xp"]["corral"]))
 		return "¡Recogiste %s!" % nombre(producto).to_lower()
 	if int(estado["comio"]) == Juego.dia:
 		return "Ya comió hoy. Mañana tendrá %s." % nombre(producto).to_lower()
@@ -202,6 +243,7 @@ func sacar_pez(es_cria: bool) -> String:
 		return "cria"
 	Juego.pesca = {"dia": Juego.dia, "veces": pescas_de_hoy() + 1}
 	dar("pescado")
+	dar_xp(int(datos["xp"]["pescar"]))
 	return "pescado"
 
 
@@ -226,11 +268,14 @@ func recolectar(dato: Dictionary) -> void:
 	Juego.silvestres.erase(dato)
 	dar(dato["tipo"])
 	Sonido.efecto("recoger")
+	dar_xp(int(datos["xp"]["recolectar"]))
 
 
 # ---------------------------------------------------------------- Cocina
 
 func puede_cocinar(receta: Dictionary) -> bool:
+	if nivel() < int(receta.get("nivel", 1)):
+		return false
 	for id in receta["ingredientes"]:
 		if cantidad(id) < int(receta["ingredientes"][id]):
 			return false
@@ -250,6 +295,109 @@ func cocinar(id_receta: String) -> bool:
 	if id_receta not in Juego.recetario:
 		Juego.recetario.append(id_receta)
 	Sonido.efecto("zona_restaurada")
+	dar_xp(int(datos["xp"]["cocinar"]))
+	return true
+
+
+# ---------------------------------------------------------------- Niveles
+
+func nivel() -> int:
+	var n := 0
+	for minimo in datos["niveles"]["xp"]:
+		if Juego.xp >= int(minimo):
+			n += 1
+	return n
+
+
+## Experiencia que falta para el siguiente nivel ([actual dentro del nivel, total del nivel]).
+func progreso_nivel() -> Array:
+	var tabla: Array = datos["niveles"]["xp"]
+	var n := nivel()
+	if n >= tabla.size():
+		return [1, 1]
+	var desde := int(tabla[n - 1])
+	return [Juego.xp - desde, int(tabla[n]) - desde]
+
+
+func dar_xp(n: int) -> void:
+	var antes := nivel()
+	Juego.xp += n
+	for nuevo in range(antes + 1, nivel() + 1):
+		var desbloqueo: Dictionary = datos["niveles"]["desbloqueos"].get(str(nuevo), {})
+		Sonido.efecto("zona_restaurada")
+		nivel_subio.emit(nuevo, desbloqueo.get("texto", ""))
+
+
+## Valor de `clave` según lo que ya se desbloqueó (el del nivel más alto alcanzado).
+func desbloqueado(clave: String, por_omision: Variant) -> Variant:
+	var valor: Variant = por_omision
+	for n in range(2, nivel() + 1):
+		var desbloqueo: Dictionary = datos["niveles"]["desbloqueos"].get(str(n), {})
+		if desbloqueo.has(clave):
+			valor = desbloqueo[clave]
+	return valor
+
+
+# ---------------------------------------------------------------- Tianguis
+
+## Pedidos que se pueden entregar en el tianguis; siempre hay tantos como permite el nivel.
+func pedidos_tianguis() -> Array:
+	while Juego.tianguis.size() < int(desbloqueado("pedidos", 3)):
+		Juego.tianguis.append(nuevo_pedido())
+	return Juego.tianguis
+
+
+## Pide de 1 a 2 cosas que el guardián ya puede conseguir.
+func nuevo_pedido() -> Dictionary:
+	var posibles := ["huevo", "pescado"]
+	for zona_cultivo in [["rio", "frijol"], ["bosque", "maiz"], ["lago", "calabaza"]]:
+		if Juego.zona_esta_completa(zona_cultivo[0]):
+			posibles.append(zona_cultivo[1])
+	if desbloqueado("cabra", false):
+		posibles.append("leche")
+	for receta in Juego.recetario:
+		posibles.append(receta)
+	posibles.shuffle()
+	var cosas := {}
+	var valor := 0
+	for id in posibles.slice(0, randi_range(1, 2)):
+		var es_platillo: bool = id in Juego.recetario
+		var n := randi_range(1, 2) if es_platillo else randi_range(1, 3)
+		cosas[id] = n
+		valor += n * int(datos["objetos"][id].get("valor", 1))
+	return {"cosas": cosas, "hojas": valor + 1, "xp": valor * 3}
+
+
+func puede_entregar(pedido: Dictionary) -> bool:
+	for id in pedido["cosas"]:
+		if cantidad(id) < int(pedido["cosas"][id]):
+			return false
+	return true
+
+
+func entregar(i: int) -> bool:
+	var pedido: Dictionary = pedidos_tianguis()[i]
+	if not puede_entregar(pedido):
+		return false
+	for id in pedido["cosas"]:
+		quitar(id, int(pedido["cosas"][id]))
+	Juego.dar_hojas(int(pedido["hojas"]))
+	Juego.tianguis[i] = nuevo_pedido()
+	Sonido.efecto("correcto")
+	dar_xp(int(pedido["xp"]))
+	return true
+
+
+## Cambia un pedido difícil por otro (gratis: solo es para no atorarse).
+func cambiar_pedido(i: int) -> void:
+	pedidos_tianguis()[i] = nuevo_pedido()
+
+
+func comprar_semilla(id: String) -> bool:
+	if not Juego.gastar_hojas(int(datos["semillas_tianguis"][id])):
+		return false
+	dar(id)
+	Sonido.efecto("recoger")
 	return true
 
 
@@ -316,12 +464,64 @@ func abrir_cocina() -> void:
 		for id in receta["ingredientes"]:
 			partes.append("%d %s" % [int(receta["ingredientes"][id]), nombre(id).to_lower()])
 		var conocida: bool = receta["id"] in Juego.recetario
-		var texto := "%s%s\n%s" % [nombre(receta["id"]), "  ★" if conocida else "", ", ".join(partes)]
+		var bloqueada := nivel() < int(receta.get("nivel", 1))
+		var texto := "%s%s\n%s" % [nombre(receta["id"]), "  ★" if conocida else "",
+			"Se desbloquea en el nivel %d" % int(receta["nivel"]) if bloqueada else ", ".join(partes)]
 		var boton := "COCINAR" if puede_cocinar(receta) else ""
 		_contenido.add_child(_fila(receta["id"], texto, boton, func():
 			if cocinar(receta["id"]):
 				abrir_cocina()
 				_contenido.add_child(_texto("¡Cocinaste %s! %s" % [nombre(receta["id"]).to_lower(), receta["dato"]], 24, Color(0.99, 0.86, 0.45)))))
+
+
+func abrir_tianguis() -> void:
+	_abrir("tianguis", "Tianguis del valle")
+	var avance := progreso_nivel()
+	_contenido.add_child(_texto("Nivel %d  ·  %d / %d de experiencia  ·  Tienes %d hojas" % [nivel(), avance[0], avance[1], Juego.hojas],
+		26, Color(0.8, 1, 0.7)))
+	_contenido.add_child(_texto("Pedidos de la gente del valle:", 28, Color(0.99, 0.86, 0.45)))
+	var pedidos := pedidos_tianguis()
+	for i in pedidos.size():
+		_contenido.add_child(_fila_pedido(i, pedidos[i]))
+	_contenido.add_child(_texto("Semillas:", 28, Color(0.99, 0.86, 0.45)))
+	for id in datos["semillas_tianguis"]:
+		var precio := int(datos["semillas_tianguis"][id])
+		_contenido.add_child(_fila(id, "%s  (tienes %d)" % [nombre(id), cantidad(id)],
+			"COMPRAR (%d hojas)" % precio if Juego.hojas >= precio else "", func(): comprar_semilla(id); abrir_tianguis()))
+
+
+func _fila_pedido(i: int, pedido: Dictionary) -> HBoxContainer:
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 10)
+	for id in pedido["cosas"]:
+		var imagen := TextureRect.new()
+		imagen.custom_minimum_size = Vector2(52, 52)
+		imagen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		imagen.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		imagen.texture = icono(id)
+		fila.add_child(imagen)
+		var falta := cantidad(id) < int(pedido["cosas"][id])
+		var cuenta := _texto("%d/%d" % [mini(cantidad(id), int(pedido["cosas"][id])), int(pedido["cosas"][id])], 26,
+			Color(1, 0.7, 0.6) if falta else Color(0.7, 1, 0.6))
+		cuenta.autowrap_mode = TextServer.AUTOWRAP_OFF
+		cuenta.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		fila.add_child(cuenta)
+	var premio := _texto("→  %d hojas, %d exp." % [int(pedido["hojas"]), int(pedido["xp"])], 24)
+	premio.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	premio.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fila.add_child(premio)
+	var boton := Button.new()
+	boton.custom_minimum_size = Vector2(200, 52)
+	boton.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if puede_entregar(pedido):
+		boton.text = "ENTREGAR"
+		boton.pressed.connect(func(): entregar(i); abrir_tianguis())
+	else:
+		boton.text = "CAMBIAR"
+		boton.tooltip_text = "Cambiar por otro pedido"
+		boton.pressed.connect(func(): cambiar_pedido(i); abrir_tianguis())
+	fila.add_child(boton)
+	return fila
 
 
 func cerrar() -> void:

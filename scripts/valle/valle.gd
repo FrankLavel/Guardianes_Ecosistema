@@ -13,12 +13,16 @@ const PUERTA_CASA := Vector2(1615, 905)
 
 ## Granja (aparece cuando el río se restaura): milpa junto a la cerca de la casa, corral, muelle
 ## para pescar y zona donde salen plantas silvestres y leña.
-const MILPA := Vector2(1830, 1130)
+const MILPA := Vector2(1880, 960)
+const COLUMNAS_MILPA := 4
 const SEPARACION_MILPA := Vector2(150, 110)
 ## Por donde caminan la gallina y la cabra (dentro de la cerca en forma de rombo).
 const CORRAL := Rect2(1300, 1150, 150, 90)
 const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
 const MUELLE := Vector2(800, 760)
+## El letrero del cruce de caminos hace de tianguis.
+## shortcut: hasta tener el arte de un puesto (prompt en la guía de arte).
+const TIANGUIS := Vector2(1540, 1080)
 const AREA_SILVESTRES := Rect2(900, 300, 1700, 1300)
 const ANIMALES_CORRAL := [
 	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/gallina_frames.tres", "escala": 0.2},
@@ -136,14 +140,12 @@ func _crear_granja() -> void:
 	# Partidas de antes de la granja: se les dan las semillas de las zonas que ya restauraron.
 	for zona in Juego.zonas_completadas:
 		Granja.dar_semillas_de(zona)
-	for i in Granja.PARCELAS:
-		var parcela := Parcela.new()
-		parcela.name = "Parcela%d" % i
-		parcela.indice = i
-		parcela.position = MILPA + Vector2(i % 3, i / 3) * SEPARACION_MILPA
-		_zona_de(parcela, 55.0)
-		parcela.aviso.connect(avisar)
-		$Objetos.add_child(parcela)
+	# Los adornos del valle que caen donde va la milpa completa (12 surcos) se quitan.
+	var milpa := Rect2(MILPA, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA - 1, Granja.PARCELAS_MAX / COLUMNAS_MILPA - 1)).grow(115)
+	for nodo in $Objetos.get_children():
+		if nodo is StaticBody2D and milpa.has_point(nodo.position):
+			nodo.queue_free()
+	_poner_parcelas()
 	# Cerca del corral: cuatro tramos de la cerca del valle formando un rombo. Los adornos del valle
 	# que quedan adentro (un arbusto) se quitan.
 	var centro := CORRAL.get_center()
@@ -158,7 +160,44 @@ func _crear_granja() -> void:
 		cerca.flip_h = tramo[1]
 		cerca.position = centro + tramo[0]
 		$Objetos.add_child(cerca)
+	_poner_corral()
+	var muelle: ZonaInteraccion = ESCENA_PUERTA.instantiate()
+	muelle.name = "Pescar"
+	muelle.texto_aviso = "E  Pescar"
+	muelle.position = MUELLE
+	muelle.activada.connect(func(_j): pescar())
+	$Objetos.add_child(muelle)
+	# Tianguis: pedidos de la gente del valle y venta de semillas.
+	var tianguis: ZonaInteraccion = ESCENA_PUERTA.instantiate()
+	tianguis.name = "Tianguis"
+	tianguis.texto_aviso = "E  Tianguis"
+	tianguis.position = TIANGUIS
+	tianguis.activada.connect(func(_j): Granja.abrir_tianguis())
+	$Objetos.add_child(tianguis)
+	_poner_silvestres()
+	Juego.dia_cambio.connect(_al_cambiar_dia)
+	Granja.nivel_subio.connect(_al_subir_nivel)
+
+
+## Surcos de la milpa que ya se desbloquearon (COLUMNAS_MILPA por fila).
+func _poner_parcelas() -> void:
+	for i in Granja.surcos():
+		if $Objetos.has_node("Parcela%d" % i):
+			continue
+		var parcela := Parcela.new()
+		parcela.name = "Parcela%d" % i
+		parcela.indice = i
+		parcela.position = MILPA + Vector2(i % COLUMNAS_MILPA, i / COLUMNAS_MILPA) * SEPARACION_MILPA
+		_zona_de(parcela, 55.0)
+		parcela.aviso.connect(avisar)
+		$Objetos.add_child(parcela)
+
+
+## La gallina está desde el principio; la cabra llega en el nivel 3.
+func _poner_corral() -> void:
 	for datos in ANIMALES_CORRAL:
+		if $Objetos.has_node(datos["nombre"]) or (datos["nombre"] == "Cabra" and not Granja.desbloqueado("cabra", false)):
+			continue
 		var animal: AnimalValle = ESCENA_ANIMAL.instantiate()
 		animal.name = datos["nombre"]
 		animal.especie = datos["nombre"].to_lower()
@@ -173,14 +212,12 @@ func _crear_granja() -> void:
 		animal.texto_aviso = "E  " + datos["nombre"]
 		animal.hablaron.connect(_atender_corral)
 		$Objetos.add_child(animal)
-	var muelle: ZonaInteraccion = ESCENA_PUERTA.instantiate()
-	muelle.name = "Pescar"
-	muelle.texto_aviso = "E  Pescar"
-	muelle.position = MUELLE
-	muelle.activada.connect(func(_j): pescar())
-	$Objetos.add_child(muelle)
-	_poner_silvestres()
-	Juego.dia_cambio.connect(_al_cambiar_dia)
+
+
+func _al_subir_nivel(nivel: int, texto: String) -> void:
+	_poner_parcelas()
+	_poner_corral()
+	hud.mostrar_objetivo("¡Subiste al nivel %d!%s" % [nivel, "  Desbloqueaste: " + texto if not texto.is_empty() else ""], 7.0)
 
 
 ## Las zonas de interacción de la granja son más chicas que la de una puerta.
@@ -206,7 +243,7 @@ func _poner_silvestres() -> void:
 	for hijo in $Objetos.get_children():
 		if hijo.is_in_group(&"silvestre"):
 			hijo.queue_free()
-	var ocupado: Array[Rect2] = [CORRAL.grow(110), Rect2(MILPA, SEPARACION_MILPA * Vector2(3, 2)).grow(80),
+	var ocupado: Array[Rect2] = [CORRAL.grow(110), Rect2(MILPA, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, 3)).grow(80),
 		Rect2($Objetos/Achi.position - Vector2(220, 160), Vector2(440, 280)), Rect2(PUERTA_CASA - Vector2(150, 250), Vector2(300, 300))]
 	for dato in Granja.silvestres_de_hoy(AREA_SILVESTRES, ocupado):
 		var planta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
@@ -227,8 +264,6 @@ func _poner_silvestres() -> void:
 
 func _al_cambiar_dia(_dia: int) -> void:
 	_poner_silvestres()
-	for i in Granja.PARCELAS:
-		$Objetos.get_node("Parcela%d" % i).actualizar()
 
 
 func _atender_corral(animal: AnimalValle) -> void:
@@ -349,6 +384,7 @@ func objetivo_actual() -> String:
 func _process(_delta: float) -> void:
 	_noche.color = Juego.color_del_cielo()
 	hud.actualizar_energia(Juego.energia)
+	hud.actualizar_nivel()
 	if Juego.juego_terminado() and Juego.energia < 25.0 and not _aviso_hambre:
 		_aviso_hambre = true
 		avisar("Tienes hambre y caminas más despacio. Come algo de tu mochila (I).")

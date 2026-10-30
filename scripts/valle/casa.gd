@@ -66,6 +66,8 @@ func _ready() -> void:
 	add_to_group(&"con_reloj")
 	Juego.noche_cambio.connect(_al_cambiar_noche)
 	Juego.hora_cambio.connect(_al_cambiar_hora)
+	Granja.nivel_subio.connect(func(n, texto):
+		hud.mostrar_objetivo("¡Subiste al nivel %d!%s" % [n, "  Desbloqueaste: " + texto if not texto.is_empty() else ""], 7.0))
 
 	_pedidos = JSON.parse_string(FileAccess.get_file_as_string(RUTA_PEDIDOS))
 	_noche = CanvasModulate.new()
@@ -157,6 +159,7 @@ func _actualizar() -> void:
 
 func _process(_delta: float) -> void:
 	_noche.color = Juego.color_del_cielo()
+	hud.actualizar_nivel()
 
 
 func _al_cambiar_noche(_es_noche: bool) -> void:

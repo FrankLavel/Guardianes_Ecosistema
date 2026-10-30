@@ -239,3 +239,8 @@ Crop growth stages on small mounds of dark soil, top-down 3/4 RPG view, 3 rows o
 Top-down 3/4 RPG view, each separate with plenty of space: 1) a hen walking to the RIGHT, 4 frames; 2) a white and brown goat walking to the RIGHT, 4 frames; 3) a traditional Mexican clay wood stove (fogón) with a round black comal on top and fire inside, seen from the front.
 ```
 
+**`granja_tianguis.png`** — puesto del tianguis (hoy lo hace un letrero del valle)
+```
+Top-down 3/4 RPG view, a small traditional Mexican market stall (tianguis) alone and centered: wooden table with a colorful striped canopy (pink, orange and green), baskets of corn, beans and pumpkins on the table, a small chalkboard sign.
+```
+

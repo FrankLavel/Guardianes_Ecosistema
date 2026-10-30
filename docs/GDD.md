@@ -130,6 +130,7 @@ Al terminar, el juego no se acaba: desde la pantalla final se puede **seguir exp
   | Flores | monarca | plantar 3 flores con néctar | 6 hojas |
 
   El pedido en curso se guarda en la partida. Los textos están en `data/pedidos.json`.
+- **Granja (fase 1, inspirada en Green Farm 3).** Milpa que crece en minutos después de regarla, niveles con experiencia (cosechar, cocinar, pescar, recolectar, ayudar animales y entregar pedidos) que desbloquean surcos (6 → 9 → 12), la cabra, recetas y más pedidos, y un **tianguis** con pedidos de la gente del valle y venta de semillas. Datos en `data/granja.json`.
 - **La casa del guardián (base).** Se entra por la puerta de la casa de adobe:
   - **Cama:** guarda la partida y cambia entre día y noche.
   - **Repisa de trofeos:** zonas restauradas, especies de la bitácora e insignias por tipo de ayuda (Bronce 1, Plata 3, Oro 6).

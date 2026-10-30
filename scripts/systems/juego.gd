@@ -14,7 +14,7 @@ signal dia_cambio(dia: int)
 
 ## Orden de las zonas: cada una se desbloquea al completar la anterior.
 const ZONAS := ["rio", "bosque", "lago"]
-const VERSION_GUARDADO := 6
+const VERSION_GUARDADO := 7
 ## La energía (0-100) se acaba en este número de horas del juego si no se come nada.
 const HORAS_DE_ENERGIA := 36.0
 ## Reloj del valle: un día completo dura 24 * SEGUNDOS_POR_HORA (unos 12 minutos).
@@ -88,6 +88,9 @@ var corral: Dictionary = {}
 var pesca: Dictionary = {"dia": 0, "veces": 0}
 var silvestres: Array = []
 var silvestres_dia := 0
+## Experiencia de la granja (el nivel se calcula con Granja.nivel()) y pedidos del tianguis.
+var xp := 0
+var tianguis: Array = []
 ## De 0 a 24. Solo avanza en las escenas del grupo "con_reloj" (el valle y la casa).
 var hora := 8.0
 var es_de_noche: bool:
@@ -125,6 +128,8 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	pesca = {"dia": 0, "veces": 0}
 	silvestres.clear()
 	silvestres_dia = 0
+	xp = 0
+	tianguis.clear()
 
 
 func datos_personaje() -> Dictionary:
@@ -167,9 +172,14 @@ func completar_zona(zona: String) -> void:
 	guardar()
 
 
-func _process(delta: float) -> void:
+## El tiempo solo corre en el valle y la casa, y no con un menú o diálogo abierto.
+func reloj_corre() -> bool:
 	var escena := get_tree().current_scene
-	if escena == null or not escena.is_in_group(&"con_reloj") or get_tree().paused or entrada_bloqueada:
+	return escena != null and escena.is_in_group(&"con_reloj") and not get_tree().paused and not entrada_bloqueada
+
+
+func _process(delta: float) -> void:
+	if not reloj_corre():
 		return
 	avanzar_hora(delta / SEGUNDOS_POR_HORA)
 	# Después del final el guardián se cansa poco a poco (comer recupera la energía).
@@ -322,6 +332,8 @@ func a_diccionario() -> Dictionary:
 		"pesca": pesca,
 		"silvestres": silvestres.map(func(s): return {"tipo": s["tipo"], "pos": [s["pos"].x, s["pos"].y]}),
 		"silvestres_dia": silvestres_dia,
+		"xp": xp,
+		"tianguis": tianguis,
 	}
 
 
@@ -356,6 +368,8 @@ func desde_diccionario(datos: Dictionary) -> void:
 	pesca = datos.get("pesca", {"dia": 0, "veces": 0}) if datos.get("pesca") is Dictionary else {"dia": 0, "veces": 0}
 	silvestres = datos.get("silvestres", []).map(func(s): return {"tipo": s["tipo"], "pos": Vector2(s["pos"][0], s["pos"][1])})
 	silvestres_dia = int(datos.get("silvestres_dia", 0))
+	xp = int(datos.get("xp", 0))
+	tianguis = datos.get("tianguis", []).duplicate(true)
 
 
 func guardar() -> bool:
