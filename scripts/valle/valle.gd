@@ -24,6 +24,8 @@ const MUELLE := Vector2(800, 760)
 const TIANGUIS := Vector2(1690, 1075)
 const PUESTO := preload("res://assets/maps/valle/objetos/tianguis.png")
 const AREA_SILVESTRES := Rect2(900, 300, 1700, 1300)
+## Talleres de la granja (se ven desde el principio; cada uno se abre en su nivel).
+const TALLERES := {"molino": Vector2(1330, 330), "queseria": Vector2(1330, 560), "colmena": Vector2(2130, 800)}
 const ANIMALES_CORRAL := [
 	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/gallina_frames.tres", "escala": 0.2},
 	{"nombre": "Cabra", "cuadros": "res://assets/characters/animales/valle/cabra_frames.tres", "escala": 0.3},
@@ -35,7 +37,7 @@ const GARZA := "res://assets/characters/animales/valle/garza_frames.tres"
 const PATO := "res://assets/characters/animales/valle/pato_frames.tres"
 const MONARCA := "res://assets/characters/animales/valle/monarca_frames.tres"
 const ANIMALES := [
-	{"nombre": "Venado1", "especie": "venado", "zona": "bosque", "pos": Vector2(2050, 330), "paseo": Rect2(1900, 220, 380, 260),
+	{"nombre": "Venado1", "especie": "venado", "zona": "bosque", "pos": Vector2(2150, 300), "paseo": Rect2(2070, 180, 260, 220),
 		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
 	{"nombre": "Venado2", "especie": "venado", "zona": "bosque", "pos": Vector2(1100, 1450), "paseo": Rect2(950, 1350, 450, 250),
 		"cuadros": VENADO, "escala": 0.3, "velocidad": 70.0},
@@ -192,6 +194,16 @@ func _crear_granja() -> void:
 	mesa.add_child(forma)
 	tianguis.add_child(mesa)
 	$Objetos.add_child(tianguis)
+	for id in TALLERES:
+		for nodo in $Objetos.get_children():
+			if nodo is StaticBody2D and Rect2(TALLERES[id] - Vector2(150, 200), Vector2(300, 260)).has_point(nodo.position):
+				nodo.queue_free()
+		var taller := Taller.new()
+		taller.name = "Taller_" + id
+		taller.id = id
+		taller.position = TALLERES[id]
+		_zona_de(taller, 95.0)
+		$Objetos.add_child(taller)
 	_poner_silvestres()
 	Juego.dia_cambio.connect(_al_cambiar_dia)
 	Granja.nivel_subio.connect(_al_subir_nivel)
@@ -272,8 +284,10 @@ func _poner_silvestres() -> void:
 	for hijo in $Objetos.get_children():
 		if hijo.is_in_group(&"silvestre"):
 			hijo.queue_free()
-	var ocupado: Array[Rect2] = [CORRAL.grow(110), Rect2(MILPA, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, 3)).grow(80),
+	var ocupado: Array[Rect2] = [CORRAL.grow(110), Rect2(MILPA - SEPARACION_MILPA / 2.0, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, 3)).grow(60),
 		Rect2($Objetos/Achi.position - Vector2(220, 160), Vector2(440, 280)), Rect2(PUERTA_CASA - Vector2(150, 250), Vector2(300, 300))]
+	for id in TALLERES:
+		ocupado.append(Rect2(TALLERES[id] - Vector2(180, 220), Vector2(360, 320)))
 	for dato in Granja.silvestres_de_hoy(AREA_SILVESTRES, ocupado):
 		var planta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 		planta.add_to_group(&"silvestre")

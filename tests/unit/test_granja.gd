@@ -195,3 +195,38 @@ func test_los_animales_no_pisan_la_milpa() -> void:
 		animal._mover_hacia(Vector2(300, 50), 70.0, 0.1)
 	assert_eq(animal.position, Vector2(300, 50), "Las mariposas pasan volando")
 	animal.free()
+
+
+func test_el_molino_hace_masa_desde_el_nivel_2() -> void:
+	Granja.dar("maiz", 2)
+	assert_false(Granja.trabajar("molino"), "Antes del nivel 2 está cerrado")
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][1]))
+	assert_true(Granja.trabajar("molino"))
+	assert_eq(Granja.cantidad("maiz"), 0)
+	assert_false(Granja.trabajar("molino"), "Una tanda a la vez")
+	Granja.avanzar_talleres(float(Granja.datos["talleres"]["molino"]["horas"]))
+	assert_eq(Granja.recoger_taller("molino"), {"masa": 2})
+	assert_eq(Granja.cantidad("masa"), 2)
+	assert_eq(Granja.recoger_taller("molino"), {}, "Ya no queda nada")
+
+
+func test_la_colmena_trabaja_sola_y_se_llena() -> void:
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][5]))
+	var horas := float(Granja.datos["talleres"]["colmena"]["horas"])
+	for i in 5:
+		Granja.avanzar_talleres(horas)
+	assert_eq(int(Granja.taller("colmena")["listo"]), Granja.TANDAS_MAX, "Se llena y se para")
+	assert_false(Granja.taller("colmena")["trabajando"])
+	assert_eq(Granja.recoger_taller("colmena"), {"miel": Granja.TANDAS_MAX})
+	assert_true(Granja.taller("colmena")["trabajando"], "Al recoger vuelve a trabajar")
+
+
+func test_los_talleres_se_guardan() -> void:
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][2]))
+	Granja.dar("leche", 2)
+	Granja.trabajar("queseria")
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_true(Granja.taller("queseria")["trabajando"])
+	assert_eq(Granja.cantidad("leche"), 0)

@@ -113,6 +113,40 @@
 			"icono": "te_manzanilla",
 			"energia": 15,
 			"valor": 2
+		},
+		"masa": {
+			"nombre": "Masa de nixtamal",
+			"icono": "masa",
+			"valor": 2
+		},
+		"queso": {
+			"nombre": "Queso Cotija",
+			"icono": "queso",
+			"valor": 4
+		},
+		"miel": {
+			"nombre": "Miel de melipona",
+			"icono": "miel",
+			"energia": 10,
+			"valor": 4
+		},
+		"tortillas": {
+			"nombre": "Tortillas a mano",
+			"icono": "tortillas",
+			"energia": 25,
+			"valor": 4
+		},
+		"quesadillas": {
+			"nombre": "Quesadillas",
+			"icono": "quesadillas",
+			"energia": 40,
+			"valor": 7
+		},
+		"chongos_zamoranos": {
+			"nombre": "Chongos zamoranos",
+			"icono": "chongos_zamoranos",
+			"energia": 35,
+			"valor": 8
 		}
 	},
 	"zonas_semillas": {
@@ -186,7 +220,7 @@
 		{
 			"id": "corundas",
 			"ingredientes": {
-				"maiz": 2,
+				"masa": 1,
 				"leche": 1,
 				"lena": 1
 			},
@@ -239,6 +273,35 @@
 			},
 			"dato": "La manzanilla es una planta medicinal: su té calma el dolor de panza.",
 			"nivel": 1
+		},
+		{
+			"id": "tortillas",
+			"ingredientes": {
+				"masa": 1,
+				"lena": 1
+			},
+			"dato": "Para hacer masa, el maíz se cuece con cal (nixtamal): así es más nutritivo y fácil de moler.",
+			"nivel": 2
+		},
+		{
+			"id": "quesadillas",
+			"ingredientes": {
+				"masa": 1,
+				"queso": 1,
+				"lena": 1
+			},
+			"dato": "El queso Cotija lleva el nombre de un pueblo de Michoacán, donde se hace desde hace siglos.",
+			"nivel": 3
+		},
+		{
+			"id": "chongos_zamoranos",
+			"ingredientes": {
+				"leche": 1,
+				"miel": 1,
+				"lena": 1
+			},
+			"dato": "Los chongos zamoranos son un dulce de leche que nació en Zamora, Michoacán.",
+			"nivel": 6
 		}
 	],
 	"silvestres": [
@@ -279,11 +342,11 @@
 		"desbloqueos": {
 			"2": {
 				"surcos": 9,
-				"texto": "3 surcos más en tu milpa"
+				"texto": "3 surcos más en tu milpa, el molino de nixtamal y las tortillas"
 			},
 			"3": {
 				"cabra": true,
-				"texto": "La cabra llega a tu corral y la receta de pescado asado"
+				"texto": "La cabra, la quesería, las quesadillas y el pescado asado"
 			},
 			"4": {
 				"surcos": 12,
@@ -292,6 +355,9 @@
 			"5": {
 				"pedidos": 4,
 				"texto": "Un pedido más en el tianguis y la receta de corundas"
+			},
+			"6": {
+				"texto": "La colmena de abejas meliponas y los chongos zamoranos"
 			},
 			"7": {
 				"pedidos": 5,
@@ -305,6 +371,46 @@
 		"corral": 1,
 		"pescar": 2,
 		"recolectar": 1,
-		"ayudar_animal": 10
+		"ayudar_animal": 10,
+		"taller": 2
+	},
+	"talleres": {
+		"molino": {
+			"nombre": "Molino de nixtamal",
+			"accion": "MOLER",
+			"entrada": {
+				"maiz": 2
+			},
+			"salida": {
+				"masa": 2
+			},
+			"horas": 3,
+			"nivel": 2,
+			"dato": "El maíz se cuece con cal y agua (nixtamal) y luego se muele para hacer masa."
+		},
+		"queseria": {
+			"nombre": "Quesería",
+			"accion": "HACER QUESO",
+			"entrada": {
+				"leche": 2
+			},
+			"salida": {
+				"queso": 1
+			},
+			"horas": 5,
+			"nivel": 3,
+			"dato": "Con la leche de cabra se hace queso; así la leche dura muchos días sin echarse a perder."
+		},
+		"colmena": {
+			"nombre": "Colmena de meliponas",
+			"accion": "",
+			"entrada": {},
+			"salida": {
+				"miel": 1
+			},
+			"horas": 8,
+			"nivel": 6,
+			"dato": "Las abejas meliponas no tienen aguijón. Al buscar néctar polinizan las flores y la milpa."
+		}
 	}
 }

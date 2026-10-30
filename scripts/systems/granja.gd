@@ -14,6 +14,7 @@ signal inventario_cambio
 signal energia_cambio(valor: float)
 signal nivel_subio(nivel: int, texto: String)
 signal parcelas_cambio
+signal talleres_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
@@ -26,6 +27,8 @@ const PESCA_POR_DIA := 3
 ## Probabilidad de que lo que pica sea una cría (se regresa al agua).
 const PROB_CRIA := 0.3
 const SILVESTRES_POR_DIA := 6
+## Tandas que un taller guarda listas antes de pararse (la colmena deja de hacer miel si no la recoges).
+const TANDAS_MAX := 3
 
 var datos: Dictionary = {}
 var abierto := ""
@@ -54,6 +57,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if Juego.reloj_corre():
 		crecer(delta / Juego.SEGUNDOS_POR_HORA)
+		avanzar_talleres(delta / Juego.SEGUNDOS_POR_HORA)
 
 
 # ---------------------------------------------------------------- Inventario
@@ -351,6 +355,89 @@ func cocinar(id_receta: String) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- Talleres
+
+## Estado del taller: {"horas": avance de la tanda, "trabajando": bool, "listo": tandas por recoger}.
+## La colmena no necesita nada: trabaja sola.
+func taller(id: String) -> Dictionary:
+	if not Juego.talleres.has(id):
+		Juego.talleres[id] = {"horas": 0.0, "trabajando": datos["talleres"][id]["entrada"].is_empty(), "listo": 0}
+	return Juego.talleres[id]
+
+
+func taller_abierto(id: String) -> bool:
+	return nivel() >= int(datos["talleres"][id]["nivel"])
+
+
+func puede_trabajar(id: String) -> bool:
+	var t := taller(id)
+	if not taller_abierto(id) or t["trabajando"] or int(t["listo"]) > 0:
+		return false
+	var entrada: Dictionary = datos["talleres"][id]["entrada"]
+	for ingrediente in entrada:
+		if cantidad(ingrediente) < int(entrada[ingrediente]):
+			return false
+	return true
+
+
+func trabajar(id: String) -> bool:
+	if not puede_trabajar(id):
+		return false
+	var entrada: Dictionary = datos["talleres"][id]["entrada"]
+	for ingrediente in entrada:
+		quitar(ingrediente, int(entrada[ingrediente]))
+	var t := taller(id)
+	t["trabajando"] = true
+	t["horas"] = 0.0
+	Sonido.efecto("correcto")
+	talleres_cambio.emit()
+	return true
+
+
+func avanzar_talleres(horas: float) -> void:
+	for id in datos["talleres"]:
+		if not taller_abierto(id):
+			continue
+		var t := taller(id)
+		if not t["trabajando"]:
+			continue
+		t["horas"] = float(t["horas"]) + horas
+		if t["horas"] < float(datos["talleres"][id]["horas"]):
+			continue
+		t["horas"] = 0.0
+		t["listo"] = mini(int(t["listo"]) + 1, TANDAS_MAX)
+		t["trabajando"] = datos["talleres"][id]["entrada"].is_empty() and int(t["listo"]) < TANDAS_MAX
+		talleres_cambio.emit()
+
+
+## Minutos reales que faltan para la tanda que se está haciendo (0 si no trabaja).
+func minutos_taller(id: String) -> int:
+	var t := taller(id)
+	if not t["trabajando"]:
+		return 0
+	var falta := float(datos["talleres"][id]["horas"]) - float(t["horas"])
+	return maxi(ceili(falta * Juego.SEGUNDOS_POR_HORA / 60.0), 1)
+
+
+## Recoge lo que está listo ({objeto: cantidad}, vacío si no hay nada).
+func recoger_taller(id: String) -> Dictionary:
+	var t := taller(id)
+	var tandas := int(t["listo"])
+	if tandas == 0:
+		return {}
+	var recogido := {}
+	var salida: Dictionary = datos["talleres"][id]["salida"]
+	for producto in salida:
+		recogido[producto] = int(salida[producto]) * tandas
+		dar(producto, recogido[producto])
+	t["listo"] = 0
+	t["trabajando"] = datos["talleres"][id]["entrada"].is_empty()
+	Sonido.efecto("recoger")
+	dar_xp(int(datos["xp"]["taller"]) * tandas)
+	talleres_cambio.emit()
+	return recogido
+
+
 # ---------------------------------------------------------------- Niveles
 
 func nivel() -> int:
@@ -407,6 +494,9 @@ func nuevo_pedido() -> Dictionary:
 			posibles.append(zona_cultivo[1])
 	if desbloqueado("cabra", false):
 		posibles.append("leche")
+	for id in datos["talleres"]:
+		if taller_abierto(id):
+			posibles.append_array(datos["talleres"][id]["salida"].keys())
 	for receta in Juego.recetario:
 		posibles.append(receta)
 	posibles.shuffle()
@@ -524,6 +614,38 @@ func abrir_cocina() -> void:
 			if cocinar(receta["id"]):
 				abrir_cocina()
 				_contenido.add_child(_texto("¡Cocinaste %s! %s" % [nombre(receta["id"]).to_lower(), receta["dato"]], 24, Color(0.99, 0.86, 0.45)))))
+
+
+## Panel de un taller: qué necesita, qué da y el botón para ponerlo a trabajar.
+func abrir_taller(id: String) -> void:
+	var dato: Dictionary = datos["talleres"][id]
+	_abrir("taller", dato["nombre"])
+	_contenido.add_child(_texto(dato["dato"], 24, Color(0.85, 0.95, 0.8)))
+	var producto: String = dato["salida"].keys()[0]
+	var partes := []
+	for ingrediente in dato["entrada"]:
+		partes.append("%d %s (tienes %d)" % [int(dato["entrada"][ingrediente]), nombre(ingrediente).to_lower(), cantidad(ingrediente)])
+	var receta := "%s  →  %d %s  ·  %d min" % [" + ".join(partes), int(dato["salida"][producto]), nombre(producto).to_lower(),
+		ceili(float(dato["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)]
+	if dato["entrada"].is_empty():
+		receta = "Hace %d %s cada %d min, sin que hagas nada." % [int(dato["salida"][producto]), nombre(producto).to_lower(),
+			ceili(float(dato["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)]
+	var t := taller(id)
+	var estado := ""
+	if not taller_abierto(id):
+		estado = "Se abre en el nivel %d." % int(dato["nivel"])
+	elif t["trabajando"]:
+		estado = "Trabajando: faltan unos %d min." % minutos_taller(id)
+	elif not puede_trabajar(id):
+		var faltan := []
+		for ingrediente in dato["entrada"]:
+			var falta := int(dato["entrada"][ingrediente]) - cantidad(ingrediente)
+			if falta > 0:
+				faltan.append("%d %s" % [falta, nombre(ingrediente).to_lower()])
+		estado = "Te falta: " + ", ".join(faltan) + "."
+	_contenido.add_child(_fila(producto, receta + ("
+" + estado if not estado.is_empty() else ""),
+		dato["accion"] if puede_trabajar(id) else "", func(): trabajar(id); cerrar()))
 
 
 func abrir_tianguis() -> void:

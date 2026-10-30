@@ -88,6 +88,8 @@ var corral: Dictionary = {}
 var pesca: Dictionary = {"dia": 0, "veces": 0}
 var silvestres: Array = []
 var silvestres_dia := 0
+## Talleres (molino, quesería, colmena): id -> {"horas", "trabajando", "listo"}.
+var talleres: Dictionary = {}
 ## Experiencia de la granja (el nivel se calcula con Granja.nivel()) y pedidos del tianguis.
 var xp := 0
 var tianguis: Array = []
@@ -125,6 +127,7 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	energia = 100.0
 	recetario.clear()
 	corral.clear()
+	talleres.clear()
 	pesca = {"dia": 0, "veces": 0}
 	silvestres.clear()
 	silvestres_dia = 0
@@ -329,6 +332,7 @@ func a_diccionario() -> Dictionary:
 		"energia": energia,
 		"recetario": recetario,
 		"corral": corral,
+		"talleres": talleres,
 		"pesca": pesca,
 		"silvestres": silvestres.map(func(s): return {"tipo": s["tipo"], "pos": [s["pos"].x, s["pos"].y]}),
 		"silvestres_dia": silvestres_dia,
@@ -365,6 +369,7 @@ func desde_diccionario(datos: Dictionary) -> void:
 	energia = float(datos.get("energia", 100.0))
 	recetario.assign(datos.get("recetario", []))
 	corral = datos.get("corral", {}) if datos.get("corral") is Dictionary else {}
+	talleres = datos.get("talleres", {}).duplicate(true) if datos.get("talleres") is Dictionary else {}
 	pesca = datos.get("pesca", {"dia": 0, "veces": 0}) if datos.get("pesca") is Dictionary else {"dia": 0, "veces": 0}
 	silvestres = datos.get("silvestres", []).map(func(s): return {"tipo": s["tipo"], "pos": Vector2(s["pos"][0], s["pos"][1])})
 	silvestres_dia = int(datos.get("silvestres_dia", 0))
