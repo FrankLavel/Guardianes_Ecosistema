@@ -25,6 +25,8 @@ enum Estado { PASEO, VA_AL_JUGADOR, ESPERA, SIGUE }
 @export var vuela := false
 ## El dibujo mira a la derecha (si no, se voltea al revés).
 @export var mira_derecha := true
+## Lugares que no pisa (la milpa); las mariposas sí pasan volando por encima.
+var prohibido: Array[Rect2] = []
 
 var estado := Estado.PASEO
 ## A quién sigue o hacia quién va (el guardián, o la mamá en el caso de una cría).
@@ -111,16 +113,39 @@ func _pasear(delta: float) -> Vector2:
 	if global_position.distance_to(_destino) < 8.0:
 		_pausa = randf_range(1.5, 4.5)
 		_pose = ([anim_quieto] + anims_pausa).pick_random()
-		_destino = Vector2(randf_range(zona_paseo.position.x, zona_paseo.end.x),
-			randf_range(zona_paseo.position.y, zona_paseo.end.y))
+		for intento in 10:
+			_destino = Vector2(randf_range(zona_paseo.position.x, zona_paseo.end.x),
+				randf_range(zona_paseo.position.y, zona_paseo.end.y))
+			if not _pisa_prohibido(_destino):
+				break
 		return Vector2.ZERO
-	return _mover_hacia(_destino, velocidad, delta)
+	var paso := _mover_hacia(_destino, velocidad, delta)
+	if paso == Vector2.ZERO:
+		_destino = global_position  # Se topó con la milpa: escoge otro rumbo.
+	return paso
 
 
 func _mover_hacia(punto: Vector2, rapidez: float, delta: float) -> Vector2:
 	var antes := global_position
-	global_position = global_position.move_toward(punto, rapidez * delta)
+	var nuevo := antes.move_toward(punto, rapidez * delta)
+	# Si el paso cae en la milpa, se desliza por la orilla (solo en x o solo en y) o se queda.
+	if _pisa_prohibido(nuevo) and not _pisa_prohibido(antes):
+		nuevo = Vector2(nuevo.x, antes.y)
+		if _pisa_prohibido(nuevo):
+			nuevo = Vector2(antes.x, antes.move_toward(punto, rapidez * delta).y)
+		if _pisa_prohibido(nuevo):
+			nuevo = antes
+	global_position = nuevo
 	return global_position - antes
+
+
+func _pisa_prohibido(punto: Vector2) -> bool:
+	if vuela:
+		return false
+	for zona in prohibido:
+		if zona.has_point(punto):
+			return true
+	return false
 
 
 func _animar(paso: Vector2) -> void:

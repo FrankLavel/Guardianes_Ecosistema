@@ -385,6 +385,9 @@ func _crear_animales() -> void:
 		animal.escala = datos["escala"]
 		animal.velocidad = datos["velocidad"]
 		animal.vuela = datos.get("vuela", false)
+		if Juego.zona_esta_completa("rio"):
+			animal.prohibido.append(Rect2(MILPA - SEPARACION_MILPA / 2.0,
+				SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, Granja.PARCELAS_MAX / COLUMNAS_MILPA)).grow(16))
 		$Objetos.add_child(animal)
 		animales.append(animal)
 

@@ -181,3 +181,17 @@ func test_tianguis_y_nivel_se_guardan() -> void:
 	assert_eq(Juego.xp, 30)
 	assert_eq(Granja.pedidos_tianguis().size(), pedidos.size())
 	assert_eq(Granja.pedidos_tianguis()[0]["hojas"], pedidos[0]["hojas"])
+
+
+func test_los_animales_no_pisan_la_milpa() -> void:
+	var animal: AnimalValle = preload("res://scenes/valle/AnimalValle.tscn").instantiate()
+	animal.prohibido.append(Rect2(100, 0, 100, 100))
+	animal.position = Vector2(50, 50)
+	for i in 100:
+		animal._mover_hacia(Vector2(300, 50), 70.0, 0.1)
+	assert_lt(animal.position.x, 100.0, "Se queda en la orilla")
+	animal.vuela = true
+	for i in 100:
+		animal._mover_hacia(Vector2(300, 50), 70.0, 0.1)
+	assert_eq(animal.position, Vector2(300, 50), "Las mariposas pasan volando")
+	animal.free()
