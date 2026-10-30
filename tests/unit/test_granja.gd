@@ -230,3 +230,20 @@ func test_los_talleres_se_guardan() -> void:
 	assert_true(Juego.cargar(RANURA))
 	assert_true(Granja.taller("queseria")["trabajando"])
 	assert_eq(Granja.cantidad("leche"), 0)
+
+
+func test_el_fogon_cocina_despues_del_fuego_y_cerrar_lo_cancela() -> void:
+	Granja.dar("maiz", 2)
+	Granja.dar("lena", 2)
+	var receta: Dictionary = Granja.datos["recetas"][0]
+	Granja.abrir_cocina()
+	Granja._cocinar_con_fuego(receta)
+	assert_eq(Granja.cantidad(receta["id"]), 0, "Primero se ve el fuego")
+	await wait_seconds(1.4)
+	assert_eq(Granja.cantidad(receta["id"]), 1)
+	Granja.abrir_cocina()
+	Granja._cocinar_con_fuego(receta)
+	Granja.cerrar()
+	await wait_seconds(1.4)
+	assert_eq(Granja.cantidad(receta["id"]), 1, "Si se cierra a medias no se gasta nada")
+	assert_eq(Granja.cantidad("maiz"), 1)

@@ -35,8 +35,11 @@ var abierto := ""
 
 ## Donde vuelan los productos recogidos (esquina del panel del valle, junto a "Hojas").
 const DESTINO_RECOGIDOS := Vector2(140, 90)
+const FOGON := preload("res://assets/maps/casa/fogon.png")
 
 var _efectos: Node2D
+var _avisos: VBoxContainer
+var _capa_cocina: Control
 var _fondo: Control
 var _titulo: Label
 var _contenido: VBoxContainer
@@ -50,6 +53,13 @@ func _ready() -> void:
 	_efectos = Node2D.new()
 	add_child(_efectos)
 	_construir_panel()
+	# Avisos de logros: arriba al centro, encima de todo.
+	_avisos = VBoxContainer.new()
+	_avisos.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_avisos.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_avisos.position.y = 24
+	_avisos.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_avisos)
 	Juego.dia_cambio.connect(func(_d): nuevo_dia())
 	Juego.zona_completada.connect(_al_completar_zona)
 
@@ -601,51 +611,218 @@ func abrir_semillas(i: int, al_plantar: Callable) -> void:
 func abrir_cocina() -> void:
 	_abrir("cocina", "Fogón")
 	_contenido.add_child(_texto("Cada platillo necesita leña para el fuego. Recoge ramas en el valle.", 24, Color(0.85, 0.95, 0.8)))
+	var rejilla := GridContainer.new()
+	rejilla.columns = 2
+	rejilla.add_theme_constant_override("h_separation", 16)
+	rejilla.add_theme_constant_override("v_separation", 16)
+	rejilla.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_contenido.add_child(rejilla)
 	for receta in datos["recetas"]:
-		var partes := []
-		for id in receta["ingredientes"]:
-			partes.append("%d %s" % [int(receta["ingredientes"][id]), nombre(id).to_lower()])
-		var conocida: bool = receta["id"] in Juego.recetario
-		var bloqueada := nivel() < int(receta.get("nivel", 1))
-		var texto := "%s%s\n%s" % [nombre(receta["id"]), "  ★" if conocida else "",
-			"Se desbloquea en el nivel %d" % int(receta["nivel"]) if bloqueada else ", ".join(partes)]
-		var boton := "COCINAR" if puede_cocinar(receta) else ""
-		_contenido.add_child(_fila(receta["id"], texto, boton, func():
-			if cocinar(receta["id"]):
-				abrir_cocina()
-				_contenido.add_child(_texto("¡Cocinaste %s! %s" % [nombre(receta["id"]).to_lower(), receta["dato"]], 24, Color(0.99, 0.86, 0.45)))))
+		var id: String = receta["id"]
+		var energia := int(datos["objetos"][id].get("energia", 0))
+		rejilla.add_child(_tarjeta(id, nombre(id) + ("  ★" if id in Juego.recetario else ""), receta["ingredientes"],
+			"+%d de energía" % energia, "COCINAR", puede_cocinar(receta), int(receta.get("nivel", 1)),
+			func(): _cocinar_con_fuego(receta)))
 
 
-## Panel de un taller: qué necesita, qué da y el botón para ponerlo a trabajar.
+## Tarjeta de receta o de taller: ícono grande, nombre, ingredientes con ícono y cuántos tienes
+## (verde si alcanza, rojo si falta), una nota y el botón. Bloqueada: gris y dice en qué nivel se abre.
+func _tarjeta(id: String, titulo: String, ingredientes: Dictionary, nota: String, boton: String,
+		habilitado: bool, nivel_minimo: int, accion: Callable) -> PanelContainer:
+	var bloqueada := nivel() < nivel_minimo
+	var tarjeta := PanelContainer.new()
+	tarjeta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.22, 0.14, 0.08, 0.9) if not bloqueada else Color(0.16, 0.13, 0.11, 0.9)
+	estilo.border_color = Color(0.55, 0.38, 0.18) if habilitado else Color(0.38, 0.27, 0.15)
+	estilo.set_border_width_all(3)
+	estilo.set_corner_radius_all(10)
+	estilo.set_content_margin_all(14)
+	tarjeta.add_theme_stylebox_override("panel", estilo)
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 14)
+	tarjeta.add_child(fila)
+	var imagen := TextureRect.new()
+	imagen.custom_minimum_size = Vector2(96, 96)
+	imagen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	imagen.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	imagen.texture = icono(id)
+	imagen.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if bloqueada:
+		imagen.modulate = Color(0.2, 0.2, 0.2)
+	fila.add_child(imagen)
+	var columna := VBoxContainer.new()
+	columna.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columna.add_theme_constant_override("separation", 6)
+	fila.add_child(columna)
+	columna.add_child(_texto(titulo, 28, Color(0.99, 0.86, 0.45) if not bloqueada else Color(0.6, 0.55, 0.5)))
+	if bloqueada:
+		columna.add_child(_texto("Se abre en el nivel %d" % nivel_minimo, 24, Color(0.75, 0.7, 0.65)))
+		return tarjeta
+	var lista := HBoxContainer.new()
+	lista.add_theme_constant_override("separation", 6)
+	for ingrediente in ingredientes:
+		var pide := int(ingredientes[ingrediente])
+		var cuadro := TextureRect.new()
+		cuadro.custom_minimum_size = Vector2(40, 40)
+		cuadro.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		cuadro.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cuadro.texture = icono(ingrediente)
+		cuadro.tooltip_text = nombre(ingrediente)
+		lista.add_child(cuadro)
+		var cuenta := _texto("%d/%d" % [cantidad(ingrediente), pide], 22,
+			Color(0.65, 1, 0.55) if cantidad(ingrediente) >= pide else Color(1, 0.6, 0.5))
+		cuenta.autowrap_mode = TextServer.AUTOWRAP_OFF
+		cuenta.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		lista.add_child(cuenta)
+		lista.add_child(Control.new())
+	columna.add_child(lista)
+	var abajo := HBoxContainer.new()
+	var etiqueta := _texto(nota, 20, Color(0.85, 0.95, 0.8))
+	etiqueta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	etiqueta.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	abajo.add_child(etiqueta)
+	if not boton.is_empty():
+		var b := Button.new()
+		b.text = boton
+		b.add_theme_font_size_override("font_size", 24)
+		b.custom_minimum_size = Vector2(170, 48)
+		b.disabled = not habilitado
+		if not habilitado:
+			# El tema no trae estilo para "deshabilitado": el mismo botón, apagado.
+			b.add_theme_stylebox_override("disabled", b.get_theme_stylebox("normal"))
+			b.modulate = Color(0.55, 0.55, 0.55)
+			b.tooltip_text = "Te faltan ingredientes"
+		b.pressed.connect(accion)
+		abajo.add_child(b)
+	columna.add_child(abajo)
+	return tarjeta
+
+
+## Al cocinar: el fuego se aviva un momento, luego aparece el platillo con su dato y queda un aviso.
+func _cocinar_con_fuego(receta: Dictionary) -> void:
+	var id: String = receta["id"]
+	var capa := ColorRect.new()
+	capa.color = Color(0.05, 0.03, 0.02, 0.92)
+	capa.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fondo.add_child(capa)
+	_capa_cocina = capa
+	var centro := VBoxContainer.new()
+	centro.set_anchors_preset(Control.PRESET_CENTER)
+	centro.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	centro.grow_vertical = Control.GROW_DIRECTION_BOTH
+	centro.custom_minimum_size = Vector2(900, 0)
+	centro.alignment = BoxContainer.ALIGNMENT_CENTER
+	centro.add_theme_constant_override("separation", 16)
+	capa.add_child(centro)
+	var dibujo := TextureRect.new()
+	dibujo.custom_minimum_size = Vector2(260, 260)
+	dibujo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	dibujo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	dibujo.texture = FOGON
+	dibujo.pivot_offset = Vector2(130, 130)
+	dibujo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	centro.add_child(dibujo)
+	# Chispas que suben del comal (cuadritos, como el resto del pixel art).
+	for k in 24:
+		var chispa := ColorRect.new()
+		chispa.size = Vector2.ONE * randf_range(5, 10)
+		chispa.color = Color(1, randf_range(0.5, 0.9), 0.2)
+		chispa.position = Vector2(randf_range(80, 180), 80)
+		chispa.modulate.a = 0.0
+		dibujo.add_child(chispa)
+		var subir := chispa.create_tween()
+		subir.tween_interval(k * 0.045)
+		subir.tween_property(chispa, "modulate:a", 1.0, 0.05)
+		subir.tween_property(chispa, "position", chispa.position + Vector2(randf_range(-30, 30), randf_range(-120, -70)), 0.6)
+		subir.parallel().tween_property(chispa, "modulate:a", 0.0, 0.6).set_ease(Tween.EASE_IN)
+		subir.tween_callback(chispa.queue_free)
+	var texto := _texto("Cocinando %s…" % nombre(id).to_lower(), 34, Color(0.99, 0.86, 0.45))
+	texto.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	centro.add_child(texto)
+	var avivar := dibujo.create_tween().set_loops(4)
+	avivar.tween_property(dibujo, "modulate", Color(1.25, 1.1, 0.9), 0.14)
+	avivar.tween_property(dibujo, "modulate", Color.WHITE, 0.14)
+	await get_tree().create_timer(1.2).timeout
+	if not is_instance_valid(capa) or not cocinar(id):
+		if is_instance_valid(capa):
+			capa.queue_free()
+		return
+	avivar.kill()
+	dibujo.texture = icono(id)
+	dibujo.scale = Vector2.ZERO
+	dibujo.modulate = Color.WHITE
+	var salto := dibujo.create_tween()
+	salto.tween_property(dibujo, "scale", Vector2.ONE * 1.15, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	salto.tween_property(dibujo, "scale", Vector2.ONE, 0.12)
+	texto.text = "¡Preparaste %s!" % nombre(id).to_lower()
+	texto.add_theme_font_size_override("font_size", 40)
+	var premio := _texto("+%d de experiencia  ·  ya está en tu mochila" % int(datos["xp"]["cocinar"]), 26, Color(0.65, 1, 0.55))
+	premio.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	centro.add_child(premio)
+	var dato := _texto(receta["dato"], 26)
+	dato.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	centro.add_child(dato)
+	var seguir := Button.new()
+	seguir.text = "SEGUIR"
+	seguir.custom_minimum_size = Vector2(300, 66)
+	seguir.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	seguir.pressed.connect(func():
+		capa.queue_free()
+		abrir_cocina())
+	centro.add_child(seguir)
+	seguir.grab_focus()
+	avisar_logro(id, "¡Preparaste %s!" % nombre(id).to_lower())
+
+
+## Aviso pequeño arriba de la pantalla (ícono y texto) que entra, se queda un momento y se va.
+func avisar_logro(id: String, texto: String) -> void:
+	var aviso := PanelContainer.new()
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.2, 0.13, 0.07, 0.95)
+	estilo.border_color = Color(0.99, 0.86, 0.45)
+	estilo.set_border_width_all(3)
+	estilo.set_corner_radius_all(12)
+	estilo.set_content_margin_all(12)
+	aviso.add_theme_stylebox_override("panel", estilo)
+	aviso.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 12)
+	aviso.add_child(fila)
+	var imagen := TextureRect.new()
+	imagen.custom_minimum_size = Vector2(48, 48)
+	imagen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	imagen.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	imagen.texture = icono(id)
+	fila.add_child(imagen)
+	var etiqueta := _texto(texto, 28, Color(0.99, 0.95, 0.75))
+	etiqueta.autowrap_mode = TextServer.AUTOWRAP_OFF
+	etiqueta.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	fila.add_child(etiqueta)
+	_avisos.add_child(aviso)
+	aviso.modulate.a = 0.0
+	var mostrar := aviso.create_tween()
+	mostrar.tween_property(aviso, "modulate:a", 1.0, 0.25)
+	mostrar.tween_interval(2.8)
+	mostrar.tween_property(aviso, "modulate:a", 0.0, 0.4)
+	mostrar.tween_callback(aviso.queue_free)
+
+
+## Panel de un taller: la misma tarjeta que el fogón (qué pide, qué da) y su estado.
 func abrir_taller(id: String) -> void:
 	var dato: Dictionary = datos["talleres"][id]
 	_abrir("taller", dato["nombre"])
 	_contenido.add_child(_texto(dato["dato"], 24, Color(0.85, 0.95, 0.8)))
 	var producto: String = dato["salida"].keys()[0]
-	var partes := []
-	for ingrediente in dato["entrada"]:
-		partes.append("%d %s (tienes %d)" % [int(dato["entrada"][ingrediente]), nombre(ingrediente).to_lower(), cantidad(ingrediente)])
-	var receta := "%s  →  %d %s  ·  %d min" % [" + ".join(partes), int(dato["salida"][producto]), nombre(producto).to_lower(),
-		ceili(float(dato["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)]
-	if dato["entrada"].is_empty():
-		receta = "Hace %d %s cada %d min, sin que hagas nada." % [int(dato["salida"][producto]), nombre(producto).to_lower(),
-			ceili(float(dato["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)]
+	var minutos := ceili(float(dato["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)
 	var t := taller(id)
-	var estado := ""
-	if not taller_abierto(id):
-		estado = "Se abre en el nivel %d." % int(dato["nivel"])
-	elif t["trabajando"]:
-		estado = "Trabajando: faltan unos %d min." % minutos_taller(id)
-	elif not puede_trabajar(id):
-		var faltan := []
-		for ingrediente in dato["entrada"]:
-			var falta := int(dato["entrada"][ingrediente]) - cantidad(ingrediente)
-			if falta > 0:
-				faltan.append("%d %s" % [falta, nombre(ingrediente).to_lower()])
-		estado = "Te falta: " + ", ".join(faltan) + "."
-	_contenido.add_child(_fila(producto, receta + ("
-" + estado if not estado.is_empty() else ""),
-		dato["accion"] if puede_trabajar(id) else "", func(): trabajar(id); cerrar()))
+	var nota := "Da %d %s en %d min" % [int(dato["salida"][producto]), nombre(producto).to_lower(), minutos]
+	if dato["entrada"].is_empty():
+		nota = "Hace %d %s cada %d min, sin que hagas nada." % [int(dato["salida"][producto]), nombre(producto).to_lower(), minutos]
+	if t["trabajando"] and taller_abierto(id):
+		nota = "Trabajando: faltan unos %d min." % minutos_taller(id)
+	_contenido.add_child(_tarjeta(producto, nombre(producto), dato["entrada"], nota, dato["accion"],
+		puede_trabajar(id), int(dato["nivel"]), func(): trabajar(id); cerrar()))
 
 
 func abrir_tianguis() -> void:
@@ -703,6 +880,8 @@ func cerrar() -> void:
 		return
 	abierto = ""
 	_fondo.visible = false
+	if is_instance_valid(_capa_cocina):
+		_capa_cocina.queue_free()
 	await get_tree().process_frame
 	Juego.entrada_bloqueada = false
 
