@@ -47,7 +47,9 @@ func actualizar() -> void:
 			planta.offset = Vector2(0, -textura.get_height() / 2.0)
 			planta.position = Vector2(hilera[k], 6.0)
 	var texto := "E  Sembrar"
-	if not p["cultivo"].is_empty():
+	if indice >= Granja.surcos():
+		texto = "Se abre en el nivel %d" % Granja.nivel_del_surco(indice)
+	elif not p["cultivo"].is_empty():
 		if int(p["etapa"]) >= Granja.LISTO:
 			texto = "E  Cosechar"
 		elif not p["regada"]:
@@ -59,7 +61,9 @@ func actualizar() -> void:
 
 func _al_interactuar(_jugador: Node2D) -> void:
 	var p := Granja.parcela(indice)
-	if p["cultivo"].is_empty():
+	if indice >= Granja.surcos():
+		aviso.emit("Este surco se abre en el nivel %d. Cosecha y entrega pedidos para subir." % Granja.nivel_del_surco(indice))
+	elif p["cultivo"].is_empty():
 		Granja.abrir_semillas(indice, actualizar)
 	elif int(p["etapa"]) >= Granja.LISTO:
 		var cosecha := Granja.cosechar(indice)

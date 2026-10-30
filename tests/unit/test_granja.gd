@@ -126,6 +126,9 @@ func test_la_milpa_aparece_al_restaurar_el_rio() -> void:
 func test_subir_de_nivel_desbloquea_cosas() -> void:
 	assert_eq(Granja.nivel(), 1)
 	assert_eq(Granja.surcos(), 6)
+	assert_eq(Granja.nivel_del_surco(5), 1)
+	assert_eq(Granja.nivel_del_surco(6), 2)
+	assert_eq(Granja.nivel_del_surco(11), 4)
 	assert_false(Granja.desbloqueado("cabra", false))
 	watch_signals(Granja)
 	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][2]))

@@ -169,6 +169,16 @@ func surcos() -> int:
 	return int(desbloqueado("surcos", 6))
 
 
+## Nivel en el que se abre el surco i (1 si ya está desde el principio).
+func nivel_del_surco(i: int) -> int:
+	var n := 1
+	var abiertos := 6
+	while abiertos <= i and n < datos["niveles"]["xp"].size():
+		n += 1
+		abiertos = int(datos["niveles"]["desbloqueos"].get(str(n), {}).get("surcos", abiertos))
+	return n
+
+
 func plantar(i: int, cultivo: String) -> bool:
 	var p := parcela(i)
 	if not p["cultivo"].is_empty() or not quitar(datos["cultivos"][cultivo]["semilla"]):

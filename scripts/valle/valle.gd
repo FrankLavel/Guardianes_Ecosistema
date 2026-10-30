@@ -11,9 +11,9 @@ const ESCENA_PUERTA := preload("res://scenes/valle/ZonaInteraccion.tscn")
 ## Frente a la puerta de la casa de adobe (dónde se entra y dónde se aparece al salir).
 const PUERTA_CASA := Vector2(1615, 905)
 
-## Granja (aparece cuando el río se restaura): milpa junto a la cerca de la casa, corral, muelle
+## Granja (aparece cuando el río se restaura): milpa arriba de la casa (4x3), corral, muelle
 ## para pescar y zona donde salen plantas silvestres y leña.
-const MILPA := Vector2(1880, 925)
+const MILPA := Vector2(1556, 294)
 const COLUMNAS_MILPA := 4
 const SEPARACION_MILPA := Vector2(136, 96)
 ## Por donde caminan la gallina y la cabra (dentro de la cerca en forma de rombo).
@@ -197,7 +197,7 @@ func _crear_granja() -> void:
 	Granja.nivel_subio.connect(_al_subir_nivel)
 
 
-## Surcos de la milpa que ya se desbloquearon (COLUMNAS_MILPA por fila).
+## Los 12 surcos de la milpa (COLUMNAS_MILPA por fila); los que faltan por desbloquear dicen en qué nivel se abren.
 func _poner_parcelas() -> void:
 	if _suelo_milpa == null:
 		_suelo_milpa = MilpaSuelo.new()
@@ -205,12 +205,11 @@ func _poner_parcelas() -> void:
 		add_child(_suelo_milpa)
 		move_child(_suelo_milpa, $Objetos.get_index())
 	_suelo_milpa.tam = SEPARACION_MILPA
-	_suelo_milpa.abiertos = Granja.surcos()
 	_suelo_milpa.posiciones.clear()
 	for i in Granja.PARCELAS_MAX:
 		_suelo_milpa.posiciones.append(MILPA + Vector2(i % COLUMNAS_MILPA, i / COLUMNAS_MILPA) * SEPARACION_MILPA)
 	_suelo_milpa.queue_redraw()
-	for i in Granja.surcos():
+	for i in Granja.PARCELAS_MAX:
 		if $Objetos.has_node("Parcela%d" % i):
 			continue
 		var parcela := Parcela.new()

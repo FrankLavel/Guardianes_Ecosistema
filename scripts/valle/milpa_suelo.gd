@@ -1,8 +1,7 @@
 class_name MilpaSuelo
 extends Node2D
 ## Tierra arada de la milpa, pintada con la textura de surcos y fundida con el pasto (ver
-## shaders/milpa.gdshader). Solo se ara lo que ya está desbloqueado. Va debajo de todo (no entra
-## al orden por altura). Regada se ve más oscura.
+## shaders/milpa.gdshader). Va debajo de todo (no entra al orden por altura). Regada se ve más oscura.
 
 const TIERRA := preload("res://assets/maps/valle/texturas/tierra_arada.png")
 const SHADER := preload("res://shaders/milpa.gdshader")
@@ -11,8 +10,6 @@ const SHADER := preload("res://shaders/milpa.gdshader")
 var tam := Vector2(136, 96)
 ## Centro de cada cuadro del campo completo, en el mismo orden que las parcelas.
 var posiciones: Array[Vector2] = []
-## Cuántos de esos cuadros ya están arados (los primeros).
-var abiertos := 0
 var columnas := 4
 
 
@@ -30,7 +27,7 @@ func _draw() -> void:
 	var origen := posiciones[0] - tam / 2.0
 	# Un texel por cuadro y una orilla vacía alrededor, para que el borde se desvanezca.
 	var mascara := Image.create(columnas + 2, filas + 2, false, Image.FORMAT_RGBA8)
-	for i in mini(abiertos, posiciones.size()):
+	for i in posiciones.size():
 		var regada := 1.0 if Granja.parcela(i)["regada"] else 0.0
 		mascara.set_pixel(i % columnas + 1, i / columnas + 1, Color(1, regada, 0, 1))
 	var material_milpa := material as ShaderMaterial
