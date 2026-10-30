@@ -24,6 +24,12 @@ func interactuar(jugador: Node2D) -> void:
 	_al_interactuar(jugador)
 
 
+## El guardián solo muestra el aviso del objeto más cercano (el que activa la E).
+func mostrar_aviso(si: bool) -> void:
+	if _aviso:
+		_aviso.visible = si
+
+
 ## Para sobrescribir en cada tipo de objeto.
 func _al_interactuar(_jugador: Node2D) -> void:
 	pass

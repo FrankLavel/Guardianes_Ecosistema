@@ -37,6 +37,7 @@ var _pose := &""
 var _dormido := false
 var _alto_alerta := 0.0
 var _salto_alerta: Tween
+var _burbuja: Panel
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var _sombra: Polygon2D = $Sombra
@@ -156,6 +157,34 @@ func volver_a_pasear() -> void:
 
 
 ## "!" = necesita ayuda, "…" = esperando a que termines, "" = sin aviso.
+## Globito con un ícono sobre el animal (lo que necesita o lo que tiene listo). null lo quita.
+func mostrar_burbuja(textura: Texture2D) -> void:
+	if _burbuja == null:
+		_burbuja = Panel.new()
+		var estilo := StyleBoxFlat.new()
+		estilo.bg_color = Color(1, 0.99, 0.94)
+		estilo.border_color = Color(0.35, 0.25, 0.15)
+		estilo.set_border_width_all(3)
+		estilo.set_corner_radius_all(24)
+		_burbuja.add_theme_stylebox_override("panel", estilo)
+		_burbuja.size = Vector2(58, 58)
+		_burbuja.position = Vector2(-29, _alto_alerta - 4)
+		_burbuja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var imagen := TextureRect.new()
+		imagen.name = "Icono"
+		imagen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		imagen.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		imagen.position = Vector2(8, 8)
+		imagen.size = Vector2(42, 42)
+		_burbuja.add_child(imagen)
+		add_child(_burbuja)
+		var flotar := _burbuja.create_tween().set_loops()
+		flotar.tween_property(_burbuja, "position:y", _alto_alerta - 14, 0.7).set_trans(Tween.TRANS_SINE)
+		flotar.tween_property(_burbuja, "position:y", _alto_alerta - 4, 0.7).set_trans(Tween.TRANS_SINE)
+	_burbuja.visible = textura != null
+	(_burbuja.get_node("Icono") as TextureRect).texture = textura
+
+
 func mostrar_alerta(texto: String) -> void:
 	_alerta.text = texto
 	_alerta.visible = not texto.is_empty()

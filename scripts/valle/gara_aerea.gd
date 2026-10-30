@@ -35,8 +35,12 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_animar()
 
+	var cercano := interactuable_mas_cercano()
+	for objeto in _interactuables:
+		if is_instance_valid(objeto) and objeto.has_method("mostrar_aviso"):
+			objeto.mostrar_aviso(objeto == cercano)
 	if entrada_interactuar:
-		var objetivo := interactuable_mas_cercano()
+		var objetivo := cercano
 		if objetivo:
 			objetivo.interactuar(self)
 	entrada_interactuar = false

@@ -212,6 +212,7 @@ func _poner_corral() -> void:
 		animal.texto_aviso = "E  " + datos["nombre"]
 		animal.hablaron.connect(_atender_corral)
 		$Objetos.add_child(animal)
+	_actualizar_corral()
 
 
 func _al_subir_nivel(nivel: int, texto: String) -> void:
@@ -257,17 +258,40 @@ func _poner_silvestres() -> void:
 		planta.add_child(imagen)
 		planta.activada.connect(func(_j):
 			Granja.recolectar(dato)
-			avisar("Recogiste %s." % Granja.nombre(dato["tipo"]).to_lower())
+			Granja.mostrar_recogida(dato["tipo"], 1, planta.global_position)
 			planta.queue_free())
 		$Objetos.add_child(planta)
 
 
 func _al_cambiar_dia(_dia: int) -> void:
 	_poner_silvestres()
+	_actualizar_corral()
 
 
 func _atender_corral(animal: AnimalValle) -> void:
-	avisar(Granja.atender(animal.especie))
+	var producto: String = Granja.datos["corral"][animal.especie]["producto"]
+	var antes := Granja.cantidad(producto)
+	var texto := Granja.atender(animal.especie)
+	if Granja.cantidad(producto) > antes:
+		Granja.mostrar_recogida(producto, 1, animal.global_position + Vector2(0, -40))
+	else:
+		avisar(texto)
+	_actualizar_corral()
+
+
+## Globitos sobre la gallina y la cabra: comida si no han comido hoy, y su huevo o su leche cuando
+## ya están listos para recoger.
+func _actualizar_corral() -> void:
+	for animal in [$Objetos.get_node_or_null("Gallina"), $Objetos.get_node_or_null("Cabra")]:
+		if animal == null:
+			continue
+		var estado: Dictionary = Juego.corral.get(animal.especie, {"comio": -1, "listo": false})
+		if estado["listo"]:
+			animal.mostrar_burbuja(Granja.icono(Granja.datos["corral"][animal.especie]["producto"]))
+		elif int(estado["comio"]) != Juego.dia:
+			animal.mostrar_burbuja(Granja.icono("maiz"))
+		else:
+			animal.mostrar_burbuja(null)
 
 
 ## Pesca responsable: se espera a que pique y se presiona E a tiempo. Las crías se regresan al agua
@@ -297,6 +321,7 @@ func pescar() -> void:
 	elif Granja.sacar_pez(randf() < Granja.PROB_CRIA) == "cria":
 		avisar("Era una cría: la regresaste al agua para que crezca.")
 	else:
+		Granja.mostrar_recogida("pescado", 1, MUELLE)
 		avisar("¡Pescaste un pescado! (%d de %d hoy)" % [Granja.pescas_de_hoy(), Granja.PESCA_POR_DIA])
 	_pescando = false
 	await get_tree().process_frame

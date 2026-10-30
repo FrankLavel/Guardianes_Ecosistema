@@ -69,10 +69,10 @@ func _al_interactuar(_jugador: Node2D) -> void:
 		Granja.abrir_semillas(indice, actualizar)
 	elif int(p["etapa"]) >= Granja.LISTO:
 		var cosecha := Granja.cosechar(indice)
-		var partes := []
+		var fila := 0
 		for id in cosecha:
-			partes.append("%d %s" % [int(cosecha[id]), Granja.nombre(id).to_lower()])
-		aviso.emit("¡Cosechaste %s!" % ", ".join(partes))
+			Granja.mostrar_recogida(id, int(cosecha[id]), global_position + Vector2(0, -40), fila)
+			fila += 1
 	elif Granja.regar(indice):
 		aviso.emit("¡La regaste! Estará lista en unos %d minutos." % Granja.minutos_restantes(indice))
 	else:

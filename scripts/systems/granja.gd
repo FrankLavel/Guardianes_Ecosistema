@@ -30,6 +30,10 @@ const SILVESTRES_POR_DIA := 6
 var datos: Dictionary = {}
 var abierto := ""
 
+## Donde vuelan los productos recogidos (esquina del panel del valle, junto a "Hojas").
+const DESTINO_RECOGIDOS := Vector2(140, 90)
+
+var _efectos: Node2D
 var _fondo: Control
 var _titulo: Label
 var _contenido: VBoxContainer
@@ -40,6 +44,8 @@ func _ready() -> void:
 	layer = 42
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	datos = JSON.parse_string(FileAccess.get_file_as_string(RUTA))
+	_efectos = Node2D.new()
+	add_child(_efectos)
 	_construir_panel()
 	Juego.dia_cambio.connect(func(_d): nuevo_dia())
 	Juego.zona_completada.connect(_al_completar_zona)
@@ -92,6 +98,42 @@ func dar_semillas_de(zona: String) -> void:
 	Juego.marcar("semillas_" + zona)
 	for id in datos["zonas_semillas"][zona]:
 		dar(id, int(datos["zonas_semillas"][zona][id]))
+
+
+## Lo recogido se ve: los íconos saltan desde donde salieron (en el mundo) y vuelan a la esquina
+## de la pantalla, con un "+3 Maíz" que sube y se desvanece.
+## `fila`: si salen varias cosas a la vez, cada etiqueta va un renglón más arriba.
+func mostrar_recogida(id: String, n: int, en_mundo: Vector2, fila := 0) -> void:
+	var textura := icono(id)
+	if textura == null or not is_inside_tree():
+		return
+	var inicio: Vector2 = get_viewport().get_canvas_transform() * en_mundo
+	for k in mini(n, 5):
+		var pieza := Sprite2D.new()
+		pieza.texture = textura
+		var lado := 64.0 / maxf(textura.get_width(), textura.get_height())
+		pieza.position = inicio
+		pieza.scale = Vector2.ZERO
+		_efectos.add_child(pieza)
+		var salto := inicio + Vector2(randf_range(-50, 50) + (k - n / 2.0) * 22.0, randf_range(-110, -80))
+		var vuelo := pieza.create_tween()
+		vuelo.tween_interval(k * 0.08)
+		vuelo.tween_property(pieza, "scale", Vector2.ONE * lado, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		vuelo.parallel().tween_property(pieza, "position", salto, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		vuelo.tween_interval(0.3)
+		vuelo.tween_property(pieza, "position", DESTINO_RECOGIDOS, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		vuelo.parallel().tween_property(pieza, "scale", Vector2.ONE * lado * 0.5, 0.55)
+		vuelo.tween_callback(pieza.queue_free)
+	var etiqueta := _texto("+%d %s" % [n, nombre(id)], 30, Color(0.99, 0.95, 0.6))
+	etiqueta.autowrap_mode = TextServer.AUTOWRAP_OFF
+	etiqueta.add_theme_color_override("font_outline_color", Color(0.15, 0.1, 0.05))
+	etiqueta.add_theme_constant_override("outline_size", 10)
+	etiqueta.position = inicio + Vector2(-80, -170 - fila * 40)
+	_efectos.add_child(etiqueta)
+	var subir := etiqueta.create_tween()
+	subir.tween_property(etiqueta, "position:y", etiqueta.position.y - 50, 1.2)
+	subir.parallel().tween_property(etiqueta, "modulate:a", 0.0, 1.2).set_delay(0.6)
+	subir.tween_callback(etiqueta.queue_free)
 
 
 # ---------------------------------------------------------------- Energía
