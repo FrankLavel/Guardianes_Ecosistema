@@ -20,9 +20,9 @@ const SEPARACION_MILPA := Vector2(150, 110)
 const CORRAL := Rect2(1300, 1150, 150, 90)
 const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
 const MUELLE := Vector2(800, 760)
-## El letrero del cruce de caminos hace de tianguis.
-## shortcut: hasta tener el arte de un puesto (prompt en la guía de arte).
-const TIANGUIS := Vector2(1540, 1080)
+## Puesto del tianguis, junto al cruce de caminos.
+const TIANGUIS := Vector2(1690, 1075)
+const PUESTO := preload("res://assets/maps/valle/objetos/tianguis.png")
 const AREA_SILVESTRES := Rect2(900, 300, 1700, 1300)
 const ANIMALES_CORRAL := [
 	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/gallina_frames.tres", "escala": 0.2},
@@ -173,6 +173,23 @@ func _crear_granja() -> void:
 	tianguis.texto_aviso = "E  Tianguis"
 	tianguis.position = TIANGUIS
 	tianguis.activada.connect(func(_j): Granja.abrir_tianguis())
+	for nodo in $Objetos.get_children():
+		if nodo is StaticBody2D and Rect2(TIANGUIS - Vector2(150, 140), Vector2(300, 200)).has_point(nodo.position):
+			nodo.queue_free()
+	var puesto := Sprite2D.new()
+	puesto.texture = PUESTO
+	puesto.scale = Vector2(0.22, 0.22)
+	puesto.offset = Vector2(0, -PUESTO.get_height() / 2.0 + 30)
+	tianguis.add_child(puesto)
+	# No se puede atravesar la mesa del puesto.
+	var mesa := StaticBody2D.new()
+	var forma := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(180, 36)
+	forma.shape = rect
+	forma.position = Vector2(0, -20)
+	mesa.add_child(forma)
+	tianguis.add_child(mesa)
 	$Objetos.add_child(tianguis)
 	_poner_silvestres()
 	Juego.dia_cambio.connect(_al_cambiar_dia)

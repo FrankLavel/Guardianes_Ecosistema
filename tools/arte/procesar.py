@@ -723,13 +723,22 @@ def granja() -> None:
     rgba = quitar_fondo(cargar("granja_corral.jpg"))
     cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
     destino = ASSETS / "characters/animales/valle"
-    for nombre, indices in [("gallina", [0, 1, 2, 3]), ("cabra", [4, 5, 6])]:
-        construir_atlas(
-            [cuadros[i] for i in indices], {"idle": ([0], 1.0, True), "caminar": (list(range(len(indices))), 7.0, True)},
-            (360, 260), destino / f"{nombre}_atlas.png", destino / f"{nombre}_frames.tres",
-            f"res://assets/characters/animales/valle/{nombre}_atlas.png", por_fila=4,
-        )
+    construir_atlas(
+        cuadros[:4], {"idle": ([0], 1.0, True), "caminar": ([0, 1, 2, 3], 7.0, True)},
+        (360, 260), destino / "gallina_atlas.png", destino / "gallina_frames.tres",
+        "res://assets/characters/animales/valle/gallina_atlas.png", por_fila=4,
+    )
     guardar(cuadros[7], ASSETS / "maps/casa/fogon.png")
+    # Cabra (hoja propia): 4 cuadros caminando, luego quieta y comiendo.
+    rgba = quitar_fondo(cargar("granja_cabra.jpg"))
+    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    construir_atlas(
+        cuadros, {"idle": ([4], 1.0, True), "caminar": ([0, 1, 2, 3], 7.0, True), "comer": ([5, 4], 1.2, True)},
+        (360, 300), destino / "cabra_atlas.png", destino / "cabra_frames.tres",
+        "res://assets/characters/animales/valle/cabra_atlas.png", por_fila=4,
+    )
+    # Puesto del tianguis.
+    objetos("granja_tianguis.jpg", ["tianguis"], "maps/valle/objetos")
 
 
 GRUPOS = {"granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
