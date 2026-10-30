@@ -66,6 +66,7 @@ func _ready() -> void:
 	add_to_group(&"con_reloj")
 	Juego.noche_cambio.connect(_al_cambiar_noche)
 	Juego.hora_cambio.connect(_al_cambiar_hora)
+	Granja.fogon_cambio.connect(queue_redraw)
 	Granja.nivel_subio.connect(func(n, texto):
 		hud.mostrar_objetivo("¡Subiste al nivel %d!%s" % [n, "  Desbloqueaste: " + texto if not texto.is_empty() else ""], 7.0))
 
@@ -74,7 +75,7 @@ func _ready() -> void:
 	add_child(_noche)
 	var rutas := ["res://assets/ui/bitacora/monarca.png", "res://assets/objects/zona1/brote_control.png",
 		"res://assets/objects/zona3/tule.png", "res://assets/objects/zona3/achoque.png"]
-	for mueble in ["repisa", "tablero", "alfombra", "fogon"]:
+	for mueble in ["repisa", "tablero", "alfombra", "fogon", "fogon_apagado"]:
 		rutas.append("res://assets/maps/casa/%s.png" % mueble)
 	for zona in ZONAS:
 		rutas.append(ZONAS[zona][1])
@@ -106,7 +107,7 @@ func _ready() -> void:
 	_crear_zona("Repisa", Vector2(880, 660), "E  Ver trofeos", func(_j): abrir_panel("trofeos"))
 	_crear_zona("Tablero", Vector2(1480, 660), "E  Tablero de pedidos", func(_j): abrir_panel("tablero"))
 	_crear_zona("Baul", Vector2(1480, 850), "E  Muebles", func(_j): abrir_panel("muebles"))
-	_crear_zona("Fogon", FOGON + Vector2(0, 40), "E  Cocinar", func(_j): Granja.abrir_cocina())
+	_crear_zona("Fogon", FOGON + Vector2(0, 40), "E  Fogón", func(_j): Granja.abrir_cocina())
 	_crear_zona("Puerta", PUERTA + Vector2(0, -50), "E  Salir al valle", func(_j): salir())
 	hud.get_node("PanelLugar/HBox/VBox/Lugar").text = "Tu casa"
 	_actualizar()
@@ -445,7 +446,13 @@ func _draw() -> void:
 
 func _dibujar_fogon() -> void:
 	_sombra(FOGON, 120.0)
-	_textura("res://assets/maps/casa/fogon.png", Rect2(FOGON + Vector2(-125, -215), Vector2(250, 215)))
+	var prendido := Granja.fogon_prendido()
+	_textura("res://assets/maps/casa/%s.png" % ("fogon" if prendido else "fogon_apagado"),
+		Rect2(FOGON + Vector2(-125, -215), Vector2(250, 215)))
+	# Prendido, la lumbre alumbra un poco el piso de enfrente.
+	if prendido:
+		for r in [150.0, 100.0, 60.0]:
+			draw_circle(FOGON + Vector2(0, -40), r, Color(1, 0.6, 0.2, 0.07), true, -1.0, true)
 
 
 func _sombra(pie: Vector2, radio: float) -> void:

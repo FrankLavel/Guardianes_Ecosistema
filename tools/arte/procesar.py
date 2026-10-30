@@ -754,6 +754,12 @@ def granja() -> None:
         "res://assets/characters/animales/valle/gallina_atlas.png", por_fila=4,
     )
     guardar(cuadros[7], ASSETS / "maps/casa/fogon.png")
+    # Fogón apagado: las llamas de la boca se vuelven el fondo oscuro del hueco (quedan los leños).
+    apagado = np.asarray(cuadros[7].convert("RGBA")).copy()
+    boca = apagado[188:276, 136:244]
+    llama = (boca[..., 0].astype(int) > 50) & (boca[..., 3] > 0)
+    boca[llama, :3] = (43, 14, 10)
+    guardar(Image.fromarray(apagado), ASSETS / "maps/casa/fogon_apagado.png")
     # Cabra (hoja propia): 4 cuadros caminando, luego quieta y comiendo.
     rgba = quitar_fondo(cargar("granja_cabra.jpg"))
     cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]

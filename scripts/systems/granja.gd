@@ -15,6 +15,7 @@ signal energia_cambio(valor: float)
 signal nivel_subio(nivel: int, texto: String)
 signal parcelas_cambio
 signal talleres_cambio
+signal fogon_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
@@ -29,6 +30,9 @@ const PROB_CRIA := 0.3
 const SILVESTRES_POR_DIA := 6
 ## Tandas que un taller guarda listas antes de pararse (la colmena deja de hacer miel si no la recoges).
 const TANDAS_MAX := 3
+## Horas de juego que arde un leño (4 h = 2 minutos reales) y cuántos caben en el fogón.
+const HORAS_POR_LENO := 4.0
+const LENOS_MAX := 3
 
 var datos: Dictionary = {}
 var abierto := ""
@@ -36,6 +40,7 @@ var abierto := ""
 ## Donde vuelan los productos recogidos (esquina del panel del valle, junto a "Hojas").
 const DESTINO_RECOGIDOS := Vector2(140, 90)
 const FOGON := preload("res://assets/maps/casa/fogon.png")
+const FOGON_APAGADO := preload("res://assets/maps/casa/fogon_apagado.png")
 
 var _efectos: Node2D
 var _avisos: VBoxContainer
@@ -68,6 +73,7 @@ func _process(delta: float) -> void:
 	if Juego.reloj_corre():
 		crecer(delta / Juego.SEGUNDOS_POR_HORA)
 		avanzar_talleres(delta / Juego.SEGUNDOS_POR_HORA)
+		quemar_lena(delta / Juego.SEGUNDOS_POR_HORA)
 
 
 # ---------------------------------------------------------------- Inventario
@@ -339,8 +345,58 @@ func recolectar(dato: Dictionary) -> void:
 
 # ---------------------------------------------------------------- Cocina
 
+# ---------------------------------------------------------------- Fogón
+
+func fogon_prendido() -> bool:
+	return bool(Juego.fogon["prendido"])
+
+
+## Prende el fogón: si no le queda leña adentro, gasta un leño de la mochila.
+func prender_fogon() -> bool:
+	if fogon_prendido():
+		return false
+	if float(Juego.fogon["horas"]) <= 0.0:
+		if not quitar("lena"):
+			return false
+		Juego.fogon["horas"] = HORAS_POR_LENO
+	Juego.fogon["prendido"] = true
+	Sonido.efecto("correcto")
+	fogon_cambio.emit()
+	return true
+
+
+## Echa otro leño para que dure más (hasta LENOS_MAX).
+func echar_lena() -> bool:
+	if not fogon_prendido() or float(Juego.fogon["horas"]) > HORAS_POR_LENO * (LENOS_MAX - 1) or not quitar("lena"):
+		return false
+	Juego.fogon["horas"] = float(Juego.fogon["horas"]) + HORAS_POR_LENO
+	fogon_cambio.emit()
+	return true
+
+
+## Apagar guarda la leña que no se quemó: la próxima vez prende sin gastar otro leño.
+func apagar_fogon() -> void:
+	if not fogon_prendido():
+		return
+	Juego.fogon["prendido"] = false
+	fogon_cambio.emit()
+
+
+func quemar_lena(horas: float) -> void:
+	if not fogon_prendido():
+		return
+	Juego.fogon["horas"] = maxf(float(Juego.fogon["horas"]) - horas, 0.0)
+	if Juego.fogon["horas"] <= 0.0:
+		Juego.fogon["prendido"] = false
+		fogon_cambio.emit()
+
+
+func minutos_de_lena() -> int:
+	return ceili(float(Juego.fogon["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)
+
+
 func puede_cocinar(receta: Dictionary) -> bool:
-	if nivel() < int(receta.get("nivel", 1)):
+	if nivel() < int(receta.get("nivel", 1)) or not fogon_prendido():
 		return false
 	for id in receta["ingredientes"]:
 		if cantidad(id) < int(receta["ingredientes"][id]):
@@ -610,7 +666,7 @@ func abrir_semillas(i: int, al_plantar: Callable) -> void:
 
 func abrir_cocina() -> void:
 	_abrir("cocina", "Fogón")
-	_contenido.add_child(_texto("Cada platillo necesita leña para el fuego. Recoge ramas en el valle.", 24, Color(0.85, 0.95, 0.8)))
+	_contenido.add_child(_estado_fogon())
 	var rejilla := GridContainer.new()
 	rejilla.columns = 2
 	rejilla.add_theme_constant_override("h_separation", 16)
@@ -623,6 +679,64 @@ func abrir_cocina() -> void:
 		rejilla.add_child(_tarjeta(id, nombre(id) + ("  ★" if id in Juego.recetario else ""), receta["ingredientes"],
 			"+%d de energía" % energia, "COCINAR", puede_cocinar(receta), int(receta.get("nivel", 1)),
 			func(): _cocinar_con_fuego(receta)))
+
+
+## Arriba del fogón: si está prendido, cuánta leña le queda y los botones para prenderlo,
+## echarle leña o apagarlo.
+func _estado_fogon() -> PanelContainer:
+	var caja := PanelContainer.new()
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.3, 0.14, 0.05, 0.9) if fogon_prendido() else Color(0.14, 0.12, 0.11, 0.9)
+	estilo.border_color = Color(0.99, 0.6, 0.2) if fogon_prendido() else Color(0.4, 0.33, 0.27)
+	estilo.set_border_width_all(3)
+	estilo.set_corner_radius_all(10)
+	estilo.set_content_margin_all(12)
+	caja.add_theme_stylebox_override("panel", estilo)
+	var fila := HBoxContainer.new()
+	fila.add_theme_constant_override("separation", 14)
+	caja.add_child(fila)
+	var dibujo := TextureRect.new()
+	dibujo.custom_minimum_size = Vector2(90, 76)
+	dibujo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	dibujo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	dibujo.texture = FOGON if fogon_prendido() else FOGON_APAGADO
+	fila.add_child(dibujo)
+	var texto := "Fogón apagado. Préndelo con un leño para cocinar."
+	if fogon_prendido():
+		texto = "Fogón prendido: tiene leña para unos %d min." % minutos_de_lena()
+	elif float(Juego.fogon["horas"]) > 0.0:
+		texto = "Fogón apagado. Todavía tiene leña adentro."
+	var columna := VBoxContainer.new()
+	columna.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columna.alignment = BoxContainer.ALIGNMENT_CENTER
+	columna.add_child(_texto(texto, 26, Color(0.99, 0.86, 0.45)))
+	columna.add_child(_texto("Tienes %d de leña. Apágalo al terminar: no gastas leña y evitas un incendio." % cantidad("lena"),
+		20, Color(0.85, 0.95, 0.8)))
+	fila.add_child(columna)
+	if fogon_prendido():
+		fila.add_child(_boton("ECHAR LEÑA", cantidad("lena") > 0 and float(Juego.fogon["horas"]) <= HORAS_POR_LENO * (LENOS_MAX - 1),
+			func(): echar_lena(); abrir_cocina()))
+		fila.add_child(_boton("APAGAR", true, func(): apagar_fogon(); abrir_cocina()))
+	else:
+		fila.add_child(_boton("PRENDER", cantidad("lena") > 0 or float(Juego.fogon["horas"]) > 0.0,
+			func(): prender_fogon(); abrir_cocina()))
+	return caja
+
+
+## Botón chico de los paneles; apagado si no se puede usar.
+func _boton(texto: String, habilitado: bool, accion: Callable) -> Button:
+	var b := Button.new()
+	b.text = texto
+	b.add_theme_font_size_override("font_size", 24)
+	b.custom_minimum_size = Vector2(170, 48)
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	b.disabled = not habilitado
+	if not habilitado:
+		# El tema no trae estilo para "deshabilitado": el mismo botón, apagado.
+		b.add_theme_stylebox_override("disabled", b.get_theme_stylebox("normal"))
+		b.modulate = Color(0.55, 0.55, 0.55)
+	b.pressed.connect(accion)
+	return b
 
 
 ## Tarjeta de receta o de taller: ícono grande, nombre, ingredientes con ícono y cuántos tienes
@@ -683,18 +797,7 @@ func _tarjeta(id: String, titulo: String, ingredientes: Dictionary, nota: String
 	etiqueta.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	abajo.add_child(etiqueta)
 	if not boton.is_empty():
-		var b := Button.new()
-		b.text = boton
-		b.add_theme_font_size_override("font_size", 24)
-		b.custom_minimum_size = Vector2(170, 48)
-		b.disabled = not habilitado
-		if not habilitado:
-			# El tema no trae estilo para "deshabilitado": el mismo botón, apagado.
-			b.add_theme_stylebox_override("disabled", b.get_theme_stylebox("normal"))
-			b.modulate = Color(0.55, 0.55, 0.55)
-			b.tooltip_text = "Te faltan ingredientes"
-		b.pressed.connect(accion)
-		abajo.add_child(b)
+		abajo.add_child(_boton(boton, habilitado, accion))
 	columna.add_child(abajo)
 	return tarjeta
 

@@ -73,8 +73,11 @@ func test_pesca_responsable() -> void:
 func test_cocinar_y_comer() -> void:
 	Granja.dar("maiz")
 	Granja.dar("leche")
-	assert_false(Granja.cocinar("atole"), "Sin leña no hay fuego")
+	assert_false(Granja.cocinar("atole"), "Con el fogón apagado no se cocina")
+	assert_false(Granja.prender_fogon(), "Sin leña no prende")
 	Granja.dar("lena")
+	assert_true(Granja.prender_fogon())
+	assert_eq(Granja.cantidad("lena"), 0)
 	assert_true(Granja.cocinar("atole"))
 	assert_eq(Granja.cantidad("atole"), 1)
 	assert_has(Juego.recetario, "atole")
@@ -141,6 +144,7 @@ func test_subir_de_nivel_desbloquea_cosas() -> void:
 func test_las_recetas_avanzadas_piden_nivel() -> void:
 	for id in ["frijol", "frijol", "calabaza", "lena"]:
 		Granja.dar(id)
+	Granja.prender_fogon()
 	assert_false(Granja.cocinar("sopa_tarasca"), "La sopa tarasca es del nivel 4")
 	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][3]))
 	assert_true(Granja.cocinar("sopa_tarasca"))
@@ -234,7 +238,8 @@ func test_los_talleres_se_guardan() -> void:
 
 func test_el_fogon_cocina_despues_del_fuego_y_cerrar_lo_cancela() -> void:
 	Granja.dar("maiz", 2)
-	Granja.dar("lena", 2)
+	Granja.dar("lena")
+	Granja.prender_fogon()
 	var receta: Dictionary = Granja.datos["recetas"][0]
 	Granja.abrir_cocina()
 	Granja._cocinar_con_fuego(receta)
@@ -247,3 +252,22 @@ func test_el_fogon_cocina_despues_del_fuego_y_cerrar_lo_cancela() -> void:
 	await wait_seconds(1.4)
 	assert_eq(Granja.cantidad(receta["id"]), 1, "Si se cierra a medias no se gasta nada")
 	assert_eq(Granja.cantidad("maiz"), 1)
+
+
+func test_la_lena_se_quema_y_apagar_la_guarda() -> void:
+	Granja.dar("lena", 2)
+	assert_true(Granja.prender_fogon())
+	assert_true(Granja.echar_lena())
+	assert_eq(Granja.cantidad("lena"), 0)
+	Granja.quemar_lena(Granja.HORAS_POR_LENO)
+	assert_true(Granja.fogon_prendido(), "Le queda un leño")
+	Granja.apagar_fogon()
+	Granja.quemar_lena(10.0)
+	assert_false(Granja.fogon_prendido())
+	assert_true(Granja.prender_fogon(), "Prende con la leña que quedó adentro, sin gastar otro leño")
+	Granja.quemar_lena(Granja.HORAS_POR_LENO)
+	assert_false(Granja.fogon_prendido(), "Sin leña se apaga solo")
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_false(Granja.fogon_prendido())

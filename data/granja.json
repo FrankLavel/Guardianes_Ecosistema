@@ -191,8 +191,7 @@
 		{
 			"id": "elote_asado",
 			"ingredientes": {
-				"maiz": 1,
-				"lena": 1
+				"maiz": 1
 			},
 			"dato": "El maíz se cultiva en México desde hace más de 7000 años.",
 			"nivel": 1
@@ -201,8 +200,7 @@
 			"id": "atole",
 			"ingredientes": {
 				"maiz": 1,
-				"leche": 1,
-				"lena": 1
+				"leche": 1
 			},
 			"dato": "El atole calientito se toma desde antes de la llegada de los españoles.",
 			"nivel": 1
@@ -211,8 +209,7 @@
 			"id": "huevos_frijoles",
 			"ingredientes": {
 				"huevo": 1,
-				"frijol": 1,
-				"lena": 1
+				"frijol": 1
 			},
 			"dato": "El frijol tiene mucha proteína y es parte de la comida diaria en México.",
 			"nivel": 1
@@ -221,8 +218,7 @@
 			"id": "corundas",
 			"ingredientes": {
 				"masa": 1,
-				"leche": 1,
-				"lena": 1
+				"leche": 1
 			},
 			"dato": "Las corundas son tamales michoacanos en forma de estrella, envueltos en hoja de milpa.",
 			"nivel": 5
@@ -231,8 +227,7 @@
 			"id": "sopa_tarasca",
 			"ingredientes": {
 				"frijol": 2,
-				"calabaza": 1,
-				"lena": 1
+				"calabaza": 1
 			},
 			"dato": "La sopa tarasca es un platillo de la región purépecha, hecho con frijol.",
 			"nivel": 4
@@ -240,8 +235,7 @@
 		{
 			"id": "calabaza_tacha",
 			"ingredientes": {
-				"calabaza": 1,
-				"lena": 1
+				"calabaza": 1
 			},
 			"dato": "La calabaza en tacha es un dulce tradicional del Día de Muertos.",
 			"nivel": 1
@@ -249,8 +243,7 @@
 		{
 			"id": "nopales_asados",
 			"ingredientes": {
-				"nopal": 2,
-				"lena": 1
+				"nopal": 2
 			},
 			"dato": "El nopal tiene mucha fibra y crece aunque llueva poco.",
 			"nivel": 1
@@ -259,8 +252,7 @@
 			"id": "pescado_asado",
 			"ingredientes": {
 				"pescado": 1,
-				"hierbabuena": 1,
-				"lena": 1
+				"hierbabuena": 1
 			},
 			"dato": "Pescar solo lo necesario y soltar a las crías ayuda a que el lago siga teniendo peces.",
 			"nivel": 3
@@ -268,8 +260,7 @@
 		{
 			"id": "te_manzanilla",
 			"ingredientes": {
-				"manzanilla": 1,
-				"lena": 1
+				"manzanilla": 1
 			},
 			"dato": "La manzanilla es una planta medicinal: su té calma el dolor de panza.",
 			"nivel": 1
@@ -277,8 +268,7 @@
 		{
 			"id": "tortillas",
 			"ingredientes": {
-				"masa": 1,
-				"lena": 1
+				"masa": 1
 			},
 			"dato": "Para hacer masa, el maíz se cuece con cal (nixtamal): así es más nutritivo y fácil de moler.",
 			"nivel": 2
@@ -287,8 +277,7 @@
 			"id": "quesadillas",
 			"ingredientes": {
 				"masa": 1,
-				"queso": 1,
-				"lena": 1
+				"queso": 1
 			},
 			"dato": "El queso Cotija lleva el nombre de un pueblo de Michoacán, donde se hace desde hace siglos.",
 			"nivel": 3
@@ -297,8 +286,7 @@
 			"id": "chongos_zamoranos",
 			"ingredientes": {
 				"leche": 1,
-				"miel": 1,
-				"lena": 1
+				"miel": 1
 			},
 			"dato": "Los chongos zamoranos son un dulce de leche que nació en Zamora, Michoacán.",
 			"nivel": 6
