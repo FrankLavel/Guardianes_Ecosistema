@@ -785,7 +785,8 @@ def granja() -> None:
 
 def decoraciones():
     """Fase 3: decoraciones de la granja (sprite en el valle e ícono del panel) y el guajolote del corral."""
-    nombres = ["cempasuchil", "banca", "espantapajaros", "olla_barro", "farol", "bebedero"]
+    # Orden en que separar_objetos encuentra las piezas de la hoja.
+    nombres = ["espantapajaros", "farol", "cempasuchil", "banca", "olla_barro", "bebedero"]
     for nombre, pieza in objetos("granja_decoraciones.png", nombres, "maps/valle/decoraciones").items():
         guardar(pieza, ASSETS / "ui/granja" / f"{nombre}.png")
     # Guajolote: 4 cuadros caminando y uno quieto, como la cabra.

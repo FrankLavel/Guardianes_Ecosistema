@@ -33,7 +33,7 @@ const ANIMALES_CORRAL := [
 ]
 ## Lugares de la granja donde se pone una decoración (alrededor de la casa, la milpa y el corral).
 const LUGARES_DECORAR := [Vector2(1470, 850), Vector2(1830, 870), Vector2(1880, 1110), Vector2(2060, 760),
-	Vector2(1110, 1250), Vector2(1430, 1360), Vector2(2060, 1180), Vector2(2260, 700)]
+	Vector2(1050, 1230), Vector2(1300, 1425), Vector2(2060, 1180), Vector2(2260, 700)]
 
 ## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
 const VENADO := "res://assets/characters/animales/valle/venado_frames.tres"
@@ -157,7 +157,7 @@ func _crear_granja() -> void:
 	# que quedan adentro (un arbusto) se quitan.
 	var centro := CORRAL.get_center()
 	for nodo in $Objetos.get_children():
-		if nodo is StaticBody2D and CORRAL.grow(70).has_point(nodo.position):
+		if nodo is StaticBody2D and CORRAL.grow(130).has_point(nodo.position):
 			nodo.queue_free()
 	for tramo in [[Vector2(-140, -22), false], [Vector2(140, -22), true], [Vector2(-140, 150), true], [Vector2(140, 150), false]]:
 		var cerca := Sprite2D.new()
