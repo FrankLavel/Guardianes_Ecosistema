@@ -237,20 +237,26 @@ func test_los_talleres_se_guardan() -> void:
 	assert_eq(Granja.cantidad("leche"), 0)
 
 
-func test_las_decoraciones_se_compran_se_guardan_y_no_se_pierden() -> void:
+func test_las_decoraciones_se_compran_se_ponen_donde_sea_y_no_se_pierden() -> void:
 	Juego.dar_hojas(3)
-	assert_false(Granja.poner_decoracion(0, "espantapajaros"), "Se abre en un nivel más alto")
-	assert_true(Granja.poner_decoracion(0, "cempasuchil"))
+	assert_false(Granja.comprar_decoracion("espantapajaros"), "Se abre en un nivel más alto")
+	assert_true(Granja.comprar_decoracion("cempasuchil"))
 	assert_eq(Juego.hojas, 0)
-	assert_false(Granja.poner_decoracion(1, "banca"), "No alcanzan las hojas")
-	Granja.guardar_decoracion(0)
-	assert_eq(Granja.decoracion_en(0), "")
-	assert_true(Granja.poner_decoracion(1, "cempasuchil"), "La guardada se vuelve a poner sin pagar")
+	assert_false(Granja.comprar_decoracion("banca"), "No alcanzan las hojas")
+	var puesta := Granja.poner_decoracion("cempasuchil", Vector2(500, 600))
+	assert_eq(Granja.guardadas("cempasuchil"), 0)
+	assert_true(Granja.poner_decoracion("cempasuchil", Vector2(1, 1)).is_empty(), "Ya no hay otra guardada")
+	puesta["x"] = 700.0
+	Granja.fijar_posicion("molino", Vector2(900, 400))
 	Juego.guardar()
 	Juego.nueva_partida(RANURA)
 	assert_true(Juego.cargar(RANURA))
-	assert_eq(Granja.decoracion_en(1), "cempasuchil")
-	assert_eq(Granja.guardadas("cempasuchil"), 0)
+	assert_eq(Juego.decoraciones["puestas"].size(), 1)
+	assert_eq(float(Juego.decoraciones["puestas"][0]["x"]), 700.0, "Se guarda donde se movió")
+	assert_eq(Granja.posicion("molino", Vector2.ZERO), Vector2(900, 400))
+	assert_eq(Granja.posicion("queseria", Vector2(5, 5)), Vector2(5, 5), "Lo que no se movió sigue en su lugar")
+	Granja.guardar_decoracion(Juego.decoraciones["puestas"][0])
+	assert_eq(Granja.guardadas("cempasuchil"), 1, "Guardarla no la pierde")
 
 
 func test_el_guajolote_llega_en_el_nivel_5() -> void:

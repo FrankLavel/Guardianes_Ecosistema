@@ -16,7 +16,6 @@ signal nivel_subio(nivel: int, texto: String)
 signal parcelas_cambio
 signal talleres_cambio
 signal fogon_cambio
-signal decoraciones_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
@@ -610,51 +609,59 @@ func comprar_semilla(id: String) -> bool:
 	return true
 
 
-# ---------------------------------------------------------------- Decoraciones
-
-func decoracion_en(lugar: int) -> String:
-	return Juego.decoraciones["lugares"].get(str(lugar), "")
-
+# ---------------------------------------------------------------- Decoraciones y lugares de la granja
 
 func guardadas(id: String) -> int:
 	return int(Juego.decoraciones["guardadas"].get(id, 0))
 
 
-## Pone una decoración en un lugar: usa una guardada o la compra con hojas. Lo que había ahí se guarda.
-func poner_decoracion(lugar: int, id: String) -> bool:
+## Compra una decoración con hojas; queda guardada hasta que se pone en el valle.
+func comprar_decoracion(id: String) -> bool:
 	var dato: Dictionary = datos["decoraciones"][id]
-	if nivel() < int(dato["nivel"]):
+	if nivel() < int(dato["nivel"]) or not Juego.gastar_hojas(int(dato["costo"])):
 		return false
-	if guardadas(id) > 0:
-		Juego.decoraciones["guardadas"][id] = guardadas(id) - 1
-	elif Juego.gastar_hojas(int(dato["costo"])):
-		dar_xp(int(datos["xp"]["decorar"]))
-	else:
-		return false
-	guardar_decoracion(lugar)
-	Juego.decoraciones["lugares"][str(lugar)] = id
-	Sonido.efecto("correcto")
-	decoraciones_cambio.emit()
+	Juego.decoraciones["guardadas"][id] = guardadas(id) + 1
+	dar_xp(int(datos["xp"]["decorar"]))
+	Sonido.efecto("recoger")
 	return true
 
 
-## Quita la decoración del lugar y la guarda para ponerla en otro (no se pierde).
-func guardar_decoracion(lugar: int) -> void:
-	var id := decoracion_en(lugar)
-	if id.is_empty():
+## Pone en el valle una decoración guardada. Devuelve lo que quedó puesto ({} si no había guardada);
+## al moverla se cambian su "x" y su "y".
+func poner_decoracion(id: String, pos: Vector2) -> Dictionary:
+	if guardadas(id) <= 0:
+		return {}
+	Juego.decoraciones["guardadas"][id] = guardadas(id) - 1
+	var puesta := {"id": id, "x": pos.x, "y": pos.y}
+	Juego.decoraciones["puestas"].append(puesta)
+	Sonido.efecto("correcto")
+	return puesta
+
+
+## Quita una decoración del valle y la guarda (no se pierde).
+func guardar_decoracion(puesta: Dictionary) -> void:
+	var i: int = Juego.decoraciones["puestas"].find(puesta)
+	if i < 0:
 		return
-	Juego.decoraciones["lugares"].erase(str(lugar))
-	Juego.decoraciones["guardadas"][id] = guardadas(id) + 1
-	decoraciones_cambio.emit()
+	Juego.decoraciones["puestas"].remove_at(i)
+	Juego.decoraciones["guardadas"][puesta["id"]] = guardadas(puesta["id"]) + 1
+	Sonido.efecto("recoger")
 
 
-func abrir_decorar(lugar: int) -> void:
-	_abrir("decorar", "Decorar la granja")
+## Dónde está el corral o un taller: donde lo dejó el jugador o, si nunca lo movió, `por_omision`.
+func posicion(id: String, por_omision: Vector2) -> Vector2:
+	var p: Array = Juego.posiciones.get(id, [])
+	return Vector2(float(p[0]), float(p[1])) if p.size() == 2 else por_omision
+
+
+func fijar_posicion(id: String, pos: Vector2) -> void:
+	Juego.posiciones[id] = [pos.x, pos.y]
+
+
+## Tienda del modo decorar: se compra con hojas o se elige una guardada; `al_elegir(id)` la pone en la mano.
+func abrir_tienda_decoraciones(al_elegir: Callable) -> void:
+	_abrir("decorar", "Decoraciones")
 	_contenido.add_child(_texto("Tienes %d hojas. Las ganas con los pedidos del tianguis." % Juego.hojas, 26, Color(0.8, 1, 0.7)))
-	var actual := decoracion_en(lugar)
-	if not actual.is_empty():
-		_contenido.add_child(_tarjeta(actual, "Aquí está: " + datos["decoraciones"][actual]["nombre"], {},
-			"Guárdala para ponerla en otro lugar.", "GUARDAR", true, 1, func(): guardar_decoracion(lugar); abrir_decorar(lugar)))
 	var rejilla := GridContainer.new()
 	rejilla.columns = 2
 	rejilla.add_theme_constant_override("h_separation", 16)
@@ -662,13 +669,18 @@ func abrir_decorar(lugar: int) -> void:
 	rejilla.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_contenido.add_child(rejilla)
 	for id in datos["decoraciones"]:
-		if id == actual:
-			continue
 		var dato: Dictionary = datos["decoraciones"][id]
-		var nota := "Tienes %d guardada" % guardadas(id) if guardadas(id) > 0 else "Cuesta %d hojas" % int(dato["costo"])
-		rejilla.add_child(_tarjeta(id, dato["nombre"], {}, nota, "PONER" if guardadas(id) > 0 else "COMPRAR",
-			guardadas(id) > 0 or Juego.hojas >= int(dato["costo"]), int(dato["nivel"]),
-			func(): poner_decoracion(lugar, id); cerrar(), dato["dato"]))
+		var costo := int(dato["costo"])
+		var tiene := guardadas(id)
+		var nota := "Cuesta %d hojas" % costo
+		if tiene > 0:
+			nota = "Tienes %d guardada%s" % [tiene, "" if tiene == 1 else "s"]
+		var elegir := func():
+			if guardadas(id) > 0 or comprar_decoracion(id):
+				cerrar()
+				al_elegir.call(id)
+		rejilla.add_child(_tarjeta(id, dato["nombre"], {}, nota, "PONER" if tiene > 0 else "COMPRAR",
+			tiene > 0 or Juego.hojas >= costo, int(dato["nivel"]), elegir, dato["dato"]))
 
 
 # ---------------------------------------------------------------- Menús (mochila, semillas, cocina)

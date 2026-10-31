@@ -66,6 +66,12 @@ func _ready() -> void:
 	actualizar_visibilidad()
 
 
+## Después de mover su corral: elige un destino nuevo dentro de su zona.
+func reiniciar_paseo() -> void:
+	_destino = global_position
+	_pausa = randf_range(0.5, 1.5)
+
+
 ## Solo está en el valle si su zona ya se restauró.
 func actualizar_visibilidad() -> void:
 	var presente := requiere_zona.is_empty() or Juego.zona_esta_completa(requiere_zona)

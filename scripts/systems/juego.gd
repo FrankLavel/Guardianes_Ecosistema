@@ -92,8 +92,10 @@ var silvestres_dia := 0
 var talleres: Dictionary = {}
 ## Fogón de la casa: si está prendido y cuántas horas de juego de leña le quedan.
 var fogon: Dictionary = {"prendido": false, "horas": 0.0}
-## Decoraciones de la granja: "lugares" (lugar -> decoración puesta) y "guardadas" (id -> cuántas).
-var decoraciones: Dictionary = {"lugares": {}, "guardadas": {}}
+## Decoraciones de la granja: "puestas" ([{"id", "x", "y"}] en el valle) y "guardadas" (id -> cuántas).
+var decoraciones: Dictionary = {"puestas": [], "guardadas": {}}
+## Dónde puso el jugador el corral y los talleres (id -> [x, y]); si no está, va en su lugar de siempre.
+var posiciones: Dictionary = {}
 ## Experiencia de la granja (el nivel se calcula con Granja.nivel()) y pedidos del tianguis.
 var xp := 0
 var tianguis: Array = []
@@ -133,7 +135,8 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	corral.clear()
 	talleres.clear()
 	fogon = {"prendido": false, "horas": 0.0}
-	decoraciones = {"lugares": {}, "guardadas": {}}
+	decoraciones = {"puestas": [], "guardadas": {}}
+	posiciones.clear()
 	pesca = {"dia": 0, "veces": 0}
 	silvestres.clear()
 	silvestres_dia = 0
@@ -341,6 +344,7 @@ func a_diccionario() -> Dictionary:
 		"talleres": talleres,
 		"fogon": fogon,
 		"decoraciones": decoraciones,
+		"posiciones": posiciones,
 		"pesca": pesca,
 		"silvestres": silvestres.map(func(s): return {"tipo": s["tipo"], "pos": [s["pos"].x, s["pos"].y]}),
 		"silvestres_dia": silvestres_dia,
@@ -380,8 +384,12 @@ func desde_diccionario(datos: Dictionary) -> void:
 	talleres = datos.get("talleres", {}).duplicate(true) if datos.get("talleres") is Dictionary else {}
 	fogon = datos.get("fogon", {}).duplicate() if datos.get("fogon") is Dictionary else {}
 	fogon = {"prendido": bool(fogon.get("prendido", false)), "horas": float(fogon.get("horas", 0.0))}
-	var deco: Dictionary = datos.get("decoraciones", {}) if datos.get("decoraciones") is Dictionary else {}
-	decoraciones = {"lugares": deco.get("lugares", {}).duplicate(), "guardadas": deco.get("guardadas", {}).duplicate()}
+	var deco: Dictionary = datos.get("decoraciones") if datos.get("decoraciones") is Dictionary else {}
+	decoraciones = {"puestas": deco.get("puestas", []).duplicate(true), "guardadas": deco.get("guardadas", {}).duplicate()}
+	# Partidas de cuando había lugares fijos: lo que estaba puesto se guarda para ponerlo donde quieran.
+	for id in deco.get("lugares", {}).values():
+		decoraciones["guardadas"][id] = int(decoraciones["guardadas"].get(id, 0)) + 1
+	posiciones = datos.get("posiciones", {}).duplicate(true) if datos.get("posiciones") is Dictionary else {}
 	pesca = datos.get("pesca", {"dia": 0, "veces": 0}) if datos.get("pesca") is Dictionary else {"dia": 0, "veces": 0}
 	silvestres = datos.get("silvestres", []).map(func(s): return {"tipo": s["tipo"], "pos": Vector2(s["pos"][0], s["pos"][1])})
 	silvestres_dia = int(datos.get("silvestres_dia", 0))

@@ -16,24 +16,21 @@ const PUERTA_CASA := Vector2(1615, 905)
 const MILPA := Vector2(1556, 294)
 const COLUMNAS_MILPA := 4
 const SEPARACION_MILPA := Vector2(136, 96)
-## Por donde caminan la gallina y la cabra (dentro de la cerca en forma de rombo).
-const CORRAL := Rect2(1255, 1135, 240, 120)
-const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
+## Centro del corral si el jugador no lo ha movido (ver Corral).
+const CORRAL := Vector2(1375, 1195)
 const MUELLE := Vector2(800, 760)
 ## Puesto del tianguis, junto al cruce de caminos.
 const TIANGUIS := Vector2(1690, 1075)
 const PUESTO := preload("res://assets/maps/valle/objetos/tianguis.png")
 const AREA_SILVESTRES := Rect2(900, 300, 1700, 1300)
-## Talleres de la granja (se ven desde el principio; cada uno se abre en su nivel).
+## Talleres de la granja (se ven desde el principio; cada uno se abre en su nivel). Ahí van si el
+## jugador no los ha movido.
 const TALLERES := {"molino": Vector2(1250, 330), "queseria": Vector2(1250, 610), "colmena": Vector2(2150, 420)}
 const ANIMALES_CORRAL := [
 	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/gallina_frames.tres", "escala": 0.2},
 	{"nombre": "Cabra", "cuadros": "res://assets/characters/animales/valle/cabra_frames.tres", "escala": 0.3},
 	{"nombre": "Guajolote", "cuadros": "res://assets/characters/animales/valle/guajolote_frames.tres", "escala": 0.24},
 ]
-## Lugares de la granja donde se pone una decoración (alrededor de la casa, la milpa y el corral).
-const LUGARES_DECORAR := [Vector2(1470, 850), Vector2(1830, 870), Vector2(1880, 1110), Vector2(2060, 760),
-	Vector2(1050, 1230), Vector2(1300, 1425), Vector2(2060, 1180), Vector2(2260, 700)]
 
 ## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
 const VENADO := "res://assets/characters/animales/valle/venado_frames.tres"
@@ -73,6 +70,8 @@ var _noche: CanvasModulate
 var _luz_casa: PointLight2D
 var _aviso_hambre := false
 var _suelo_milpa: MilpaSuelo
+var corral: Corral
+var decorador: Decorador
 
 
 func _ready() -> void:
@@ -153,20 +152,12 @@ func _crear_granja() -> void:
 		if nodo is StaticBody2D and milpa.has_point(nodo.position):
 			nodo.queue_free()
 	_poner_parcelas()
-	# Cerca del corral: cuatro tramos de la cerca del valle formando un rombo. Los adornos del valle
-	# que quedan adentro (un arbusto) se quitan.
-	var centro := CORRAL.get_center()
-	for nodo in $Objetos.get_children():
-		if nodo is StaticBody2D and CORRAL.grow(130).has_point(nodo.position):
-			nodo.queue_free()
-	for tramo in [[Vector2(-140, -22), false], [Vector2(140, -22), true], [Vector2(-140, 150), true], [Vector2(140, 150), false]]:
-		var cerca := Sprite2D.new()
-		cerca.texture = CERCA
-		cerca.scale = Vector2(0.66, 0.6)
-		cerca.offset = Vector2(0, -CERCA.get_height() / 2.0)
-		cerca.flip_h = tramo[1]
-		cerca.position = centro + tramo[0]
-		$Objetos.add_child(cerca)
+	# Corral (donde lo dejó el jugador). Los adornos del valle que le caen encima se quitan.
+	corral = Corral.new()
+	corral.name = "Corral"
+	corral.position = Granja.posicion("corral", CORRAL)
+	_quitar_adornos(corral.huella().grow(30))
+	$Objetos.add_child(corral)
 	_poner_corral()
 	var muelle: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 	muelle.name = "Pescar"
@@ -199,25 +190,37 @@ func _crear_granja() -> void:
 	tianguis.add_child(mesa)
 	$Objetos.add_child(tianguis)
 	for id in TALLERES:
-		for nodo in $Objetos.get_children():
-			if nodo is StaticBody2D and Rect2(TALLERES[id] - Vector2(150, 200), Vector2(300, 260)).has_point(nodo.position):
-				nodo.queue_free()
+		var pos := Granja.posicion(id, TALLERES[id])
+		_quitar_adornos(Rect2(pos - Vector2(150, 200), Vector2(300, 260)))
 		var taller := Taller.new()
 		taller.name = "Taller_" + id
 		taller.id = id
-		taller.position = TALLERES[id]
+		taller.position = pos
 		_zona_de(taller, 95.0)
 		$Objetos.add_child(taller)
-	for i in LUGARES_DECORAR.size():
-		for nodo in $Objetos.get_children():
-			if nodo is StaticBody2D and LUGARES_DECORAR[i].distance_to(nodo.position) < 70.0:
-				nodo.queue_free()
-		var lugar := LugarDecorar.new()
-		lugar.name = "Decorar%d" % i
-		lugar.indice = i
-		lugar.position = LUGARES_DECORAR[i]
-		_zona_de(lugar, 50.0)
-		$Objetos.add_child(lugar)
+	for puesta in Juego.decoraciones["puestas"]:
+		var decoracion := Decoracion.new()
+		decoracion.id = puesta["id"]
+		decoracion.puesta = puesta
+		decoracion.position = Vector2(float(puesta["x"]), float(puesta["y"]))
+		$Objetos.add_child(decoracion)
+	# Modo decorar: con el botón del HUD o la tecla C.
+	decorador = Decorador.new()
+	decorador.name = "Decorador"
+	decorador.valle = self
+	decorador.tamano = TAMANO
+	add_child(decorador)
+	decorador.movido.connect(_al_mover_en_granja)
+	var boton := Button.new()
+	boton.text = "DECORAR (C)"
+	boton.add_theme_font_size_override("font_size", 24)
+	boton.focus_mode = Control.FOCUS_NONE
+	boton.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 24)
+	boton.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	boton.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	boton.pressed.connect(func(): decorador.salir() if decorador.activo else decorador.entrar())
+	hud.add_child(boton)
+	_actualizar_prohibido()
 	_poner_silvestres()
 	Juego.dia_cambio.connect(_al_cambiar_dia)
 	Granja.nivel_subio.connect(_al_subir_nivel)
@@ -263,9 +266,9 @@ func _poner_corral() -> void:
 		animal.anim_caminar = &"caminar"
 		animal.escala = datos["escala"]
 		animal.velocidad = 30.0
-		animal.zona_paseo = CORRAL
 		# Cada uno empieza en un lado del corral para que no se encimen.
-		animal.position = CORRAL.get_center() + Vector2([-70, 70, 0][i], [0, 0, 30][i])
+		animal.position = corral.position + Vector2([-70, 70, 0][i], [0, 0, 30][i])
+		corral.agregar(animal)
 		animal.texto_aviso = "E  " + datos["nombre"]
 		animal.hablaron.connect(_atender_corral)
 		$Objetos.add_child(animal)
@@ -276,6 +279,47 @@ func _al_subir_nivel(nivel: int, texto: String) -> void:
 	_poner_parcelas()
 	_poner_corral()
 	hud.mostrar_objetivo("¡Subiste al nivel %d!%s" % [nivel, "  Desbloqueaste: " + texto if not texto.is_empty() else ""], 7.0)
+
+
+## Quita los adornos del valle (árboles, arbustos, rocas) cuyo pie cae en `zona`.
+func _quitar_adornos(zona: Rect2) -> void:
+	for nodo in $Objetos.get_children():
+		if nodo is StaticBody2D and not nodo.name.begins_with("Casa") and zona.has_point(nodo.position):
+			nodo.queue_free()
+
+
+## Donde no se puede poner nada en el modo decorar: la milpa, frente a la casa, el tianguis, el muelle,
+## el estanque de Achi y las entradas a las zonas.
+func lugares_fijos() -> Array[Rect2]:
+	var lugares: Array[Rect2] = [_rect_milpa().grow(20), Rect2(PUERTA_CASA - Vector2(90, 30), Vector2(180, 110)),
+		Rect2(TIANGUIS - Vector2(130, 130), Vector2(260, 160)), Rect2(MUELLE - Vector2(110, 90), Vector2(220, 180)),
+		Rect2($Objetos/Achi.position - Vector2(170, 110), Vector2(340, 200))]
+	for entrada in entradas():
+		lugares.append(Rect2(entrada.position - Vector2(130, 170), Vector2(260, 230)))
+	return lugares
+
+
+func _rect_milpa() -> Rect2:
+	return Rect2(MILPA - SEPARACION_MILPA / 2.0, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, Granja.PARCELAS_MAX / COLUMNAS_MILPA))
+
+
+## Los animales del valle no pisan la milpa, el corral ni los talleres (estén donde estén).
+func _actualizar_prohibido() -> void:
+	var zonas: Array[Rect2] = [_rect_milpa().grow(16)]
+	for nodo in get_tree().get_nodes_in_group(&"movible"):
+		if not nodo is Decoracion:
+			zonas.append(nodo.huella().grow(30))
+	for animal in animales:
+		animal.prohibido = zonas.duplicate()
+
+
+## Algo cambió de lugar: los animales lo respetan y las plantas silvestres que quedaron debajo se van.
+func _al_mover_en_granja(nodo: Node2D) -> void:
+	_actualizar_prohibido()
+	for planta in get_tree().get_nodes_in_group(&"silvestre"):
+		if nodo.huella().grow(20).has_point(planta.position):
+			Juego.silvestres.erase(planta.get_meta(&"dato"))
+			planta.queue_free()
 
 
 ## Las zonas de interacción de la granja son más chicas que la de una puerta.
@@ -301,15 +345,14 @@ func _poner_silvestres() -> void:
 	for hijo in $Objetos.get_children():
 		if hijo.is_in_group(&"silvestre"):
 			hijo.queue_free()
-	var ocupado: Array[Rect2] = [CORRAL.grow(110), Rect2(MILPA - SEPARACION_MILPA / 2.0, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, 3)).grow(60),
+	var ocupado: Array[Rect2] = [_rect_milpa().grow(60),
 		Rect2($Objetos/Achi.position - Vector2(220, 160), Vector2(440, 280)), Rect2(PUERTA_CASA - Vector2(150, 250), Vector2(300, 300))]
-	for id in TALLERES:
-		ocupado.append(Rect2(TALLERES[id] - Vector2(180, 220), Vector2(360, 320)))
-	for lugar in LUGARES_DECORAR:
-		ocupado.append(Rect2(lugar - Vector2(70, 70), Vector2(140, 110)))
+	for nodo in get_tree().get_nodes_in_group(&"movible"):
+		ocupado.append(nodo.huella().grow(60))
 	for dato in Granja.silvestres_de_hoy(AREA_SILVESTRES, ocupado):
 		var planta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 		planta.add_to_group(&"silvestre")
+		planta.set_meta(&"dato", dato)
 		planta.texto_aviso = "E  Recoger " + Granja.nombre(dato["tipo"]).to_lower()
 		planta.position = dato["pos"]
 		var imagen := Sprite2D.new()
@@ -343,9 +386,7 @@ func _atender_corral(animal: AnimalValle) -> void:
 ## Globitos sobre la gallina y la cabra: comida si no han comido hoy, y su huevo o su leche cuando
 ## ya están listos para recoger.
 func _actualizar_corral() -> void:
-	for animal in [$Objetos.get_node_or_null("Gallina"), $Objetos.get_node_or_null("Cabra")]:
-		if animal == null:
-			continue
+	for animal in corral.animales:
 		var estado: Dictionary = Juego.corral.get(animal.especie, {"comio": -1, "listo": false})
 		if estado["listo"]:
 			animal.mostrar_burbuja(Granja.icono(Granja.datos["corral"][animal.especie]["producto"]))
@@ -418,11 +459,6 @@ func _crear_animales() -> void:
 		animal.escala = datos["escala"]
 		animal.velocidad = datos["velocidad"]
 		animal.vuela = datos.get("vuela", false)
-		if Juego.zona_esta_completa("rio"):
-			animal.prohibido.append(Rect2(MILPA - SEPARACION_MILPA / 2.0,
-				SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, Granja.PARCELAS_MAX / COLUMNAS_MILPA)).grow(16))
-			for id in TALLERES:
-				animal.prohibido.append(Rect2(TALLERES[id] - Vector2(130, 140), Vector2(260, 170)))
 		$Objetos.add_child(animal)
 		animales.append(animal)
 
