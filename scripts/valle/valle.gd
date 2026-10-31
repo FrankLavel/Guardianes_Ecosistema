@@ -17,7 +17,7 @@ const MILPA := Vector2(1556, 294)
 const COLUMNAS_MILPA := 4
 const SEPARACION_MILPA := Vector2(136, 96)
 ## Por donde caminan la gallina y la cabra (dentro de la cerca en forma de rombo).
-const CORRAL := Rect2(1300, 1150, 150, 90)
+const CORRAL := Rect2(1255, 1135, 240, 120)
 const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
 const MUELLE := Vector2(800, 760)
 ## Puesto del tianguis, junto al cruce de caminos.
@@ -29,7 +29,11 @@ const TALLERES := {"molino": Vector2(1250, 330), "queseria": Vector2(1250, 610),
 const ANIMALES_CORRAL := [
 	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/gallina_frames.tres", "escala": 0.2},
 	{"nombre": "Cabra", "cuadros": "res://assets/characters/animales/valle/cabra_frames.tres", "escala": 0.3},
+	{"nombre": "Guajolote", "cuadros": "res://assets/characters/animales/valle/guajolote_frames.tres", "escala": 0.24},
 ]
+## Lugares de la granja donde se pone una decoración (alrededor de la casa, la milpa y el corral).
+const LUGARES_DECORAR := [Vector2(1470, 850), Vector2(1830, 870), Vector2(1880, 1110), Vector2(2060, 760),
+	Vector2(1110, 1250), Vector2(1430, 1360), Vector2(2060, 1180), Vector2(2260, 700)]
 
 ## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
 const VENADO := "res://assets/characters/animales/valle/venado_frames.tres"
@@ -155,10 +159,10 @@ func _crear_granja() -> void:
 	for nodo in $Objetos.get_children():
 		if nodo is StaticBody2D and CORRAL.grow(70).has_point(nodo.position):
 			nodo.queue_free()
-	for tramo in [[Vector2(-92, -18), false], [Vector2(92, -18), true], [Vector2(-92, 112), true], [Vector2(92, 112), false]]:
+	for tramo in [[Vector2(-140, -22), false], [Vector2(140, -22), true], [Vector2(-140, 150), true], [Vector2(140, 150), false]]:
 		var cerca := Sprite2D.new()
 		cerca.texture = CERCA
-		cerca.scale = Vector2(0.45, 0.45)
+		cerca.scale = Vector2(0.66, 0.6)
 		cerca.offset = Vector2(0, -CERCA.get_height() / 2.0)
 		cerca.flip_h = tramo[1]
 		cerca.position = centro + tramo[0]
@@ -204,6 +208,16 @@ func _crear_granja() -> void:
 		taller.position = TALLERES[id]
 		_zona_de(taller, 95.0)
 		$Objetos.add_child(taller)
+	for i in LUGARES_DECORAR.size():
+		for nodo in $Objetos.get_children():
+			if nodo is StaticBody2D and LUGARES_DECORAR[i].distance_to(nodo.position) < 70.0:
+				nodo.queue_free()
+		var lugar := LugarDecorar.new()
+		lugar.name = "Decorar%d" % i
+		lugar.indice = i
+		lugar.position = LUGARES_DECORAR[i]
+		_zona_de(lugar, 50.0)
+		$Objetos.add_child(lugar)
 	_poner_silvestres()
 	Juego.dia_cambio.connect(_al_cambiar_dia)
 	Granja.nivel_subio.connect(_al_subir_nivel)
@@ -233,14 +247,17 @@ func _poner_parcelas() -> void:
 		$Objetos.add_child(parcela)
 
 
-## La gallina está desde el principio; la cabra llega en el nivel 3.
+## La gallina está desde el principio; la cabra llega en el nivel 3 y el guajolote en el 5.
 func _poner_corral() -> void:
-	for datos in ANIMALES_CORRAL:
-		if $Objetos.has_node(datos["nombre"]) or (datos["nombre"] == "Cabra" and not Granja.desbloqueado("cabra", false)):
+	for i in ANIMALES_CORRAL.size():
+		var datos: Dictionary = ANIMALES_CORRAL[i]
+		var especie: String = datos["nombre"].to_lower()
+		if $Objetos.has_node(datos["nombre"]) or (i > 0 and not Granja.desbloqueado(especie, false)) \
+				or not ResourceLoader.exists(datos["cuadros"]):
 			continue
 		var animal: AnimalValle = ESCENA_ANIMAL.instantiate()
 		animal.name = datos["nombre"]
-		animal.especie = datos["nombre"].to_lower()
+		animal.especie = especie
 		animal.cuadros = load(datos["cuadros"])
 		animal.anim_quieto = &"idle"
 		animal.anim_caminar = &"caminar"
@@ -248,7 +265,7 @@ func _poner_corral() -> void:
 		animal.velocidad = 30.0
 		animal.zona_paseo = CORRAL
 		# Cada uno empieza en un lado del corral para que no se encimen.
-		animal.position = CORRAL.get_center() + Vector2(-50 if datos["nombre"] == "Gallina" else 50, 0)
+		animal.position = CORRAL.get_center() + Vector2([-70, 70, 0][i], [0, 0, 30][i])
 		animal.texto_aviso = "E  " + datos["nombre"]
 		animal.hablaron.connect(_atender_corral)
 		$Objetos.add_child(animal)
@@ -288,6 +305,8 @@ func _poner_silvestres() -> void:
 		Rect2($Objetos/Achi.position - Vector2(220, 160), Vector2(440, 280)), Rect2(PUERTA_CASA - Vector2(150, 250), Vector2(300, 300))]
 	for id in TALLERES:
 		ocupado.append(Rect2(TALLERES[id] - Vector2(180, 220), Vector2(360, 320)))
+	for lugar in LUGARES_DECORAR:
+		ocupado.append(Rect2(lugar - Vector2(70, 70), Vector2(140, 110)))
 	for dato in Granja.silvestres_de_hoy(AREA_SILVESTRES, ocupado):
 		var planta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 		planta.add_to_group(&"silvestre")

@@ -307,6 +307,10 @@
 		"cabra": {
 			"nombre": "Cabra",
 			"producto": "leche"
+		},
+		"guajolote": {
+			"nombre": "Guajolote",
+			"producto": "huevo"
 		}
 	},
 	"semillas_tianguis": {
@@ -342,7 +346,8 @@
 			},
 			"5": {
 				"pedidos": 4,
-				"texto": "Un pedido más en el tianguis y la receta de corundas"
+				"guajolote": true,
+				"texto": "El guajolote (un ave de México) en tu corral, un pedido más en el tianguis y la receta de corundas"
 			},
 			"6": {
 				"texto": "La colmena de abejas meliponas y los chongos zamoranos"
@@ -360,7 +365,8 @@
 		"pescar": 2,
 		"recolectar": 1,
 		"ayudar_animal": 10,
-		"taller": 2
+		"taller": 2,
+		"decorar": 2
 	},
 	"talleres": {
 		"molino": {
@@ -399,6 +405,50 @@
 			"horas": 8,
 			"nivel": 6,
 			"dato": "Las abejas meliponas no tienen aguijón. Al buscar néctar polinizan las flores y la milpa."
+		}
+	},
+	"decoraciones": {
+		"cempasuchil": {
+			"nombre": "Cempasúchil",
+			"costo": 3,
+			"nivel": 1,
+			"ancho": 70,
+			"dato": "Sus flores naranjas atraen abejas y mariposas que polinizan la milpa."
+		},
+		"banca": {
+			"nombre": "Banca de madera",
+			"costo": 4,
+			"nivel": 1,
+			"ancho": 110,
+			"dato": "Hecha con un tronco que ya estaba caído: no hubo que cortar un árbol vivo."
+		},
+		"espantapajaros": {
+			"nombre": "Espantapájaros",
+			"costo": 5,
+			"nivel": 2,
+			"ancho": 80,
+			"dato": "Asusta a los pájaros sin lastimarlos para que no se coman las semillas."
+		},
+		"olla_barro": {
+			"nombre": "Olla de barro",
+			"costo": 5,
+			"nivel": 3,
+			"ancho": 70,
+			"dato": "En Michoacán se hacen ollas de barro a mano, como en Capula y Tzintzuntzan."
+		},
+		"farol": {
+			"nombre": "Farol",
+			"costo": 6,
+			"nivel": 4,
+			"ancho": 50,
+			"dato": "De noche basta una luz suave: la luz muy fuerte confunde a las luciérnagas."
+		},
+		"bebedero": {
+			"nombre": "Bebedero para aves",
+			"costo": 7,
+			"nivel": 5,
+			"ancho": 80,
+			"dato": "En tiempo de secas, un poco de agua limpia ayuda a las aves del valle."
 		}
 	}
 }

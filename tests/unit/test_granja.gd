@@ -162,7 +162,8 @@ func test_entregar_un_pedido_del_tianguis() -> void:
 	assert_true(Granja.entregar(0))
 	assert_eq(Juego.hojas, int(pedido["hojas"]))
 	assert_eq(Juego.xp, xp_antes + int(pedido["xp"]))
-	assert_ne(Granja.pedidos_tianguis()[0], pedido, "Llega un pedido nuevo")
+	# Por azar el nuevo puede pedir lo mismo: se revisa que sea otro pedido, no que sea distinto.
+	assert_false(is_same(Granja.pedidos_tianguis()[0], pedido), "Llega un pedido nuevo")
 	for id in pedido["cosas"]:
 		assert_eq(Granja.cantidad(id), 0)
 
@@ -234,6 +235,29 @@ func test_los_talleres_se_guardan() -> void:
 	assert_true(Juego.cargar(RANURA))
 	assert_true(Granja.taller("queseria")["trabajando"])
 	assert_eq(Granja.cantidad("leche"), 0)
+
+
+func test_las_decoraciones_se_compran_se_guardan_y_no_se_pierden() -> void:
+	Juego.dar_hojas(3)
+	assert_false(Granja.poner_decoracion(0, "espantapajaros"), "Se abre en un nivel más alto")
+	assert_true(Granja.poner_decoracion(0, "cempasuchil"))
+	assert_eq(Juego.hojas, 0)
+	assert_false(Granja.poner_decoracion(1, "banca"), "No alcanzan las hojas")
+	Granja.guardar_decoracion(0)
+	assert_eq(Granja.decoracion_en(0), "")
+	assert_true(Granja.poner_decoracion(1, "cempasuchil"), "La guardada se vuelve a poner sin pagar")
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_eq(Granja.decoracion_en(1), "cempasuchil")
+	assert_eq(Granja.guardadas("cempasuchil"), 0)
+
+
+func test_el_guajolote_llega_en_el_nivel_5() -> void:
+	assert_false(Granja.desbloqueado("guajolote", false))
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][4]))
+	assert_true(Granja.desbloqueado("guajolote", false))
+	assert_eq(Granja.atender("guajolote"), "Le diste de comer. Mañana tendrá huevo.")
 
 
 func test_el_fogon_cocina_despues_del_fuego_y_cerrar_lo_cancela() -> void:

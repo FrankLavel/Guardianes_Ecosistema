@@ -783,7 +783,23 @@ def granja() -> None:
     objetos("granja_tianguis.jpg", ["tianguis"], "maps/valle/objetos")
 
 
-GRUPOS = {"granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+def decoraciones():
+    """Fase 3: decoraciones de la granja (sprite en el valle e ícono del panel) y el guajolote del corral."""
+    nombres = ["cempasuchil", "banca", "espantapajaros", "olla_barro", "farol", "bebedero"]
+    for nombre, pieza in objetos("granja_decoraciones.png", nombres, "maps/valle/decoraciones").items():
+        guardar(pieza, ASSETS / "ui/granja" / f"{nombre}.png")
+    # Guajolote: 4 cuadros caminando y uno quieto, como la cabra.
+    rgba = quitar_fondo(cargar("granja_guajolote.png"))
+    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+    destino = ASSETS / "characters/animales/valle"
+    construir_atlas(
+        cuadros, {"idle": ([4], 1.0, True), "caminar": ([0, 1, 2, 3], 7.0, True)},
+        (360, 300), destino / "guajolote_atlas.png", destino / "guajolote_frames.tres",
+        "res://assets/characters/animales/valle/guajolote_atlas.png", por_fila=4,
+    )
+
+
+GRUPOS = {"decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

@@ -16,6 +16,7 @@ signal nivel_subio(nivel: int, texto: String)
 signal parcelas_cambio
 signal talleres_cambio
 signal fogon_cambio
+signal decoraciones_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
@@ -609,6 +610,67 @@ func comprar_semilla(id: String) -> bool:
 	return true
 
 
+# ---------------------------------------------------------------- Decoraciones
+
+func decoracion_en(lugar: int) -> String:
+	return Juego.decoraciones["lugares"].get(str(lugar), "")
+
+
+func guardadas(id: String) -> int:
+	return int(Juego.decoraciones["guardadas"].get(id, 0))
+
+
+## Pone una decoración en un lugar: usa una guardada o la compra con hojas. Lo que había ahí se guarda.
+func poner_decoracion(lugar: int, id: String) -> bool:
+	var dato: Dictionary = datos["decoraciones"][id]
+	if nivel() < int(dato["nivel"]):
+		return false
+	if guardadas(id) > 0:
+		Juego.decoraciones["guardadas"][id] = guardadas(id) - 1
+	elif Juego.gastar_hojas(int(dato["costo"])):
+		dar_xp(int(datos["xp"]["decorar"]))
+	else:
+		return false
+	guardar_decoracion(lugar)
+	Juego.decoraciones["lugares"][str(lugar)] = id
+	Sonido.efecto("correcto")
+	decoraciones_cambio.emit()
+	return true
+
+
+## Quita la decoración del lugar y la guarda para ponerla en otro (no se pierde).
+func guardar_decoracion(lugar: int) -> void:
+	var id := decoracion_en(lugar)
+	if id.is_empty():
+		return
+	Juego.decoraciones["lugares"].erase(str(lugar))
+	Juego.decoraciones["guardadas"][id] = guardadas(id) + 1
+	decoraciones_cambio.emit()
+
+
+func abrir_decorar(lugar: int) -> void:
+	_abrir("decorar", "Decorar la granja")
+	_contenido.add_child(_texto("Tienes %d hojas. Las ganas con los pedidos del tianguis." % Juego.hojas, 26, Color(0.8, 1, 0.7)))
+	var actual := decoracion_en(lugar)
+	if not actual.is_empty():
+		_contenido.add_child(_tarjeta(actual, "Aquí está: " + datos["decoraciones"][actual]["nombre"], {},
+			"Guárdala para ponerla en otro lugar.", "GUARDAR", true, 1, func(): guardar_decoracion(lugar); abrir_decorar(lugar)))
+	var rejilla := GridContainer.new()
+	rejilla.columns = 2
+	rejilla.add_theme_constant_override("h_separation", 16)
+	rejilla.add_theme_constant_override("v_separation", 16)
+	rejilla.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_contenido.add_child(rejilla)
+	for id in datos["decoraciones"]:
+		if id == actual:
+			continue
+		var dato: Dictionary = datos["decoraciones"][id]
+		var nota := "Tienes %d guardada" % guardadas(id) if guardadas(id) > 0 else "Cuesta %d hojas" % int(dato["costo"])
+		rejilla.add_child(_tarjeta(id, dato["nombre"], {}, nota, "PONER" if guardadas(id) > 0 else "COMPRAR",
+			guardadas(id) > 0 or Juego.hojas >= int(dato["costo"]), int(dato["nivel"]),
+			func(): poner_decoracion(lugar, id); cerrar(), dato["dato"]))
+
+
 # ---------------------------------------------------------------- Menús (mochila, semillas, cocina)
 
 func _unhandled_input(evento: InputEvent) -> void:
@@ -742,7 +804,7 @@ func _boton(texto: String, habilitado: bool, accion: Callable) -> Button:
 ## Tarjeta de receta o de taller: ícono grande, nombre, ingredientes con ícono y cuántos tienes
 ## (verde si alcanza, rojo si falta), una nota y el botón. Bloqueada: gris y dice en qué nivel se abre.
 func _tarjeta(id: String, titulo: String, ingredientes: Dictionary, nota: String, boton: String,
-		habilitado: bool, nivel_minimo: int, accion: Callable) -> PanelContainer:
+		habilitado: bool, nivel_minimo: int, accion: Callable, descripcion := "") -> PanelContainer:
 	var bloqueada := nivel() < nivel_minimo
 	var tarjeta := PanelContainer.new()
 	tarjeta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -773,6 +835,8 @@ func _tarjeta(id: String, titulo: String, ingredientes: Dictionary, nota: String
 	if bloqueada:
 		columna.add_child(_texto("Se abre en el nivel %d" % nivel_minimo, 24, Color(0.75, 0.7, 0.65)))
 		return tarjeta
+	if not descripcion.is_empty():
+		columna.add_child(_texto(descripcion, 20, Color(0.85, 0.95, 0.8)))
 	var lista := HBoxContainer.new()
 	lista.add_theme_constant_override("separation", 6)
 	for ingrediente in ingredientes:
