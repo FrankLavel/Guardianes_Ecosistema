@@ -58,6 +58,13 @@ func test_hay_tres_entradas_y_solo_el_rio_esta_abierto() -> void:
 	assert_eq(_entrada("lago").get_node("Estado").text, "Bloqueado")
 
 
+func test_la_entrada_desaparece_al_restaurar_su_zona() -> void:
+	Juego.completar_zona("rio")
+	valle.actualizar_mundo()
+	assert_false(_entrada("rio").visible, "Ya solo queda su trofeo")
+	assert_true(_entrada("bosque").visible)
+
+
 func test_la_entrada_del_rio_lleva_al_nivel_1() -> void:
 	assert_eq(_entrada("rio").escena, "res://scenes/world/Nivel1.tscn")
 	assert_true(ResourceLoader.exists(_entrada("rio").escena))
@@ -84,7 +91,7 @@ func test_el_valle_recupera_color_al_restaurar_zonas() -> void:
 	Juego.completar_zona("rio")
 	assert_lt(filtro.get_shader_parameter("desaturacion"), gris_inicial)
 	assert_eq((valle.rio.material as ShaderMaterial).get_shader_parameter("contaminacion"), 0.0)
-	assert_eq(_entrada("rio").get_node("Estado").text, "¡Restaurado!")
+	assert_false(_entrada("rio").visible, "La entrada se va; queda su trofeo en la casa")
 	assert_eq(_entrada("bosque").get_node("Estado").text, "")
 
 

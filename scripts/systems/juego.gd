@@ -102,6 +102,10 @@ var decoraciones: Dictionary = {"puestas": [], "guardadas": {}}
 var posiciones: Dictionary = {}
 ## Terrenos del valle que se compraron para agrandar la granja ("columna,fila"; ver Granja.expandir).
 var terrenos: Array[String] = []
+## Caminos que pintó el jugador ("columna,fila" -> "arena" o "piedra"; ver Granja.poner_camino) y si ya
+## se pusieron los caminos rectos de siempre (al crear la granja).
+var caminos: Dictionary = {}
+var caminos_listos := false
 ## Experiencia de la granja (el nivel se calcula con Granja.nivel()) y pedidos del tianguis.
 var xp := 0
 var tianguis: Array = []
@@ -146,6 +150,8 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	decoraciones = {"puestas": [], "guardadas": {}}
 	posiciones.clear()
 	terrenos.clear()
+	caminos.clear()
+	caminos_listos = false
 	pesca = {"dia": 0, "veces": 0}
 	silvestres.clear()
 	silvestres_dia = 0
@@ -362,6 +368,8 @@ func a_diccionario() -> Dictionary:
 		"decoraciones": decoraciones,
 		"posiciones": posiciones,
 		"terrenos": terrenos,
+		"caminos": caminos,
+		"caminos_listos": caminos_listos,
 		"pesca": pesca,
 		"silvestres": silvestres.map(func(s): return {"tipo": s["tipo"], "pos": [s["pos"].x, s["pos"].y]}),
 		"silvestres_dia": silvestres_dia,
@@ -410,6 +418,8 @@ func desde_diccionario(datos: Dictionary) -> void:
 		decoraciones["guardadas"][id] = int(decoraciones["guardadas"].get(id, 0)) + 1
 	posiciones = datos.get("posiciones", {}).duplicate(true) if datos.get("posiciones") is Dictionary else {}
 	terrenos.assign(datos.get("terrenos", []))
+	caminos = datos.get("caminos", {}).duplicate() if datos.get("caminos") is Dictionary else {}
+	caminos_listos = bool(datos.get("caminos_listos", false))
 	pesca = datos.get("pesca", {"dia": 0, "veces": 0}) if datos.get("pesca") is Dictionary else {"dia": 0, "veces": 0}
 	silvestres = datos.get("silvestres", []).map(func(s): return {"tipo": s["tipo"], "pos": Vector2(s["pos"][0], s["pos"][1])})
 	silvestres_dia = int(datos.get("silvestres_dia", 0))

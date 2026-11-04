@@ -354,6 +354,24 @@ func test_la_granja_se_expande_por_terrenos() -> void:
 	assert_true(Granja.terreno_abierto(junto))
 
 
+func test_los_caminos_se_pintan_rectos_y_la_piedra_cuesta() -> void:
+	var celda := Vector2i(30, 20)
+	assert_true(Granja.poner_camino(celda, "arena"), "El de tierra es gratis")
+	assert_false(Granja.poner_camino(Vector2i(31, 20), "piedra"), "Sin hojas no hay piedra")
+	Juego.dar_hojas(1)
+	assert_true(Granja.poner_camino(Vector2i(31, 20), "piedra"))
+	assert_eq(Juego.hojas, 0)
+	assert_false(Granja.poner_camino(Vector2i(0, 0), "arena"), "Fuera de la granja no")
+	var tramos := CaminosSuelo.tramos({Vector2i(1, 1): true, Vector2i(2, 1): true, Vector2i(3, 1): true, Vector2i(2, 2): true})
+	assert_has(tramos, [Vector2i(1, 1), Vector2i(3, 1)], "Una fila seguida es un tramo horizontal")
+	assert_has(tramos, [Vector2i(2, 1), Vector2i(2, 2)], "Y una columna, uno vertical")
+	assert_true(Granja.quitar_camino(celda))
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_eq(Granja.camino_en(Vector2i(31, 20)), "piedra")
+
+
 func test_el_guajolote_llega_en_el_nivel_5() -> void:
 	assert_false(Granja.desbloqueado("guajolote", false))
 	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][4]))

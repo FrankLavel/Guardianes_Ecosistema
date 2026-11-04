@@ -220,6 +220,19 @@ func _crear_granja() -> void:
 	boton.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	boton.pressed.connect(func(): decorador.salir() if decorador.activo else decorador.entrar())
 	hud.add_child(boton)
+	# Caminos rectos: los que pinta el jugador. La primera vez se ponen unos que unen la casa con el
+	# tianguis, el muelle y la milpa (en lugar de los caminos chuecos de antes).
+	if not Juego.caminos_listos:
+		Juego.caminos_listos = true
+		Granja.trazar_camino(Vector2i(16, 19), Vector2i(44, 19))
+		Granja.trazar_camino(Vector2i(32, 18), Vector2i(32, 19))
+		Granja.trazar_camino(Vector2i(17, 15), Vector2i(17, 19))
+		Granja.trazar_camino(Vector2i(29, 11), Vector2i(29, 19))
+	var caminos := CaminosSuelo.new()
+	caminos.name = "CaminosGranja"
+	add_child(caminos)
+	move_child(caminos, $Caminos.get_index() + 1)
+	_actualizar_caminos_viejos()
 	# Terrenos: la cuadrícula del modo decorar y los que se pueden comprar.
 	var terrenos := Terrenos.new()
 	terrenos.name = "Terrenos"
@@ -399,8 +412,13 @@ func lugares_fijos() -> Array[Rect2]:
 		Rect2(TIANGUIS - Vector2(110, 30), Vector2(220, 80)), Rect2(MUELLE - Vector2(80, 50), Vector2(160, 100)),
 		Rect2($Objetos/Achi.position - Vector2(170, 110), Vector2(340, 200))]
 	for entrada in entradas():
-		lugares.append(Rect2(entrada.position - Vector2(100, 50), Vector2(200, 100)))
+		if entrada.visible:
+			lugares.append(Rect2(entrada.position - Vector2(100, 50), Vector2(200, 100)))
 	return lugares
+
+
+func rect_milpa() -> Rect2:
+	return _rect_milpa()
 
 
 func _rect_milpa() -> Rect2:
@@ -642,6 +660,14 @@ func _physics_process(_delta: float) -> void:
 		Juego.tiene_posicion_valle = true
 
 
+## Los caminos chuecos de la escena llevan a las entradas de las zonas: el de cada zona se va cuando la
+## restauras (su entrada ya no está), y con la granja el del muelle se cambia por uno recto.
+func _actualizar_caminos_viejos() -> void:
+	for nodo in [$Caminos/CaminoRio, $Caminos/CaminoBosque, $Caminos/CaminoLago]:
+		nodo.visible = not Juego.zona_esta_completa(String(nodo.name).trim_prefix("Camino").to_lower())
+	$Caminos/CaminoMuelle.visible = not Juego.zona_esta_completa("rio")
+
+
 func entradas() -> Array[EntradaZona]:
 	var lista: Array[EntradaZona] = []
 	for nodo in $Objetos.get_children():
@@ -657,6 +683,7 @@ func actualizar_mundo() -> void:
 		"desaturacion", DESATURACION_INICIAL * (1.0 - Juego.progreso()))
 	for entrada in entradas():
 		entrada.actualizar_estado()
+	_actualizar_caminos_viejos()
 	# Con el río restaurado ya no hay tubería tirando agua sucia.
 	for nodo in $Objetos.get_children():
 		if nodo.name.begins_with("Tuberia"):

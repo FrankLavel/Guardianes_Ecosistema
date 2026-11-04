@@ -18,6 +18,7 @@ signal talleres_cambio
 signal fogon_cambio
 signal corral_cambio
 signal terrenos_cambio
+signal caminos_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
@@ -43,6 +44,13 @@ const COLUMNAS_TERRENO := 8
 const FILAS_TERRENO := 6
 const TERRENOS_INICIALES := Rect2i(2, 0, 5, 5)
 const HOJA := preload("res://assets/ui/iconos/escalado/icono_hoja.png")
+## Caminos: cuadritos de 50 px (los mismos de la cuadrícula del modo decorar). El de tierra es gratis y el
+## de piedra cuesta una hoja por cuadrito.
+const CELDA_CAMINO := 50.0
+const CAMINOS := {
+	"arena": {"nombre": "Camino de tierra", "costo": 0, "dato": "Gratis. Así eran los caminos del campo."},
+	"piedra": {"nombre": "Camino de piedra", "costo": 1, "dato": "Una hoja por cuadrito. El empedrado no se hace lodo cuando llueve."},
+}
 ## Horas de juego que arde un leño (4 h = 2 minutos reales) y cuántos caben en el fogón.
 const HORAS_POR_LENO := 4.0
 const LENOS_MAX := 3
@@ -898,6 +906,58 @@ func _circulo_costo(dibujo: Texture2D, texto: String, nota: String, alcanza: boo
 	columna.add_child(_texto(texto, 26, Color(0.7, 1, 0.6) if alcanza else Color(1, 0.65, 0.55)))
 	columna.add_child(_texto(nota, 20, Color(0.85, 0.95, 0.8)))
 	return columna
+
+
+# ---------------------------------------------------------------- Caminos
+
+func camino_en(celda: Vector2i) -> String:
+	return Juego.caminos.get("%d,%d" % [celda.x, celda.y], "")
+
+
+func rect_de_camino(celda: Vector2i) -> Rect2:
+	return Rect2(Vector2(celda) * CELDA_CAMINO, Vector2.ONE * CELDA_CAMINO)
+
+
+## Pinta un cuadrito de camino (dentro de la granja). El de piedra cuesta; cambiarlo a tierra no devuelve nada.
+func poner_camino(celda: Vector2i, tipo: String) -> bool:
+	if camino_en(celda) == tipo or not en_la_granja(rect_de_camino(celda)):
+		return false
+	if not Juego.gastar_hojas(int(CAMINOS[tipo]["costo"])):
+		return false
+	Juego.caminos["%d,%d" % [celda.x, celda.y]] = tipo
+	caminos_cambio.emit()
+	return true
+
+
+func quitar_camino(celda: Vector2i) -> bool:
+	if not Juego.caminos.erase("%d,%d" % [celda.x, celda.y]):
+		return false
+	caminos_cambio.emit()
+	return true
+
+
+## Pinta un tramo recto de `desde` a `hasta` (en cuadritos, misma fila o columna), sin cobrar.
+func trazar_camino(desde: Vector2i, hasta: Vector2i, tipo := "arena") -> void:
+	var paso := (hasta - desde).sign()
+	var c := desde
+	while true:
+		Juego.caminos["%d,%d" % [c.x, c.y]] = tipo
+		if c == hasta:
+			break
+		c += paso
+
+
+## Elegir con qué se pinta: `al_elegir(tipo)` recibe "arena", "piedra" o "quitar".
+func abrir_caminos(al_elegir: Callable) -> void:
+	_abrir("caminos", "Caminos")
+	_contenido.add_child(_texto("Pinta caminos rectos sobre la cuadrícula de tu granja: haz clic o arrastra.", 24, Color(0.85, 0.95, 0.8)))
+	var rejilla := _rejilla()
+	for tipo in CAMINOS:
+		var dato: Dictionary = CAMINOS[tipo]
+		rejilla.add_child(_tarjeta("camino_" + tipo, dato["nombre"], {}, "Tienes %d hojas" % Juego.hojas if int(dato["costo"]) > 0 else "",
+			"PINTAR", Juego.hojas >= int(dato["costo"]), 1, func(): cerrar(); al_elegir.call(tipo), dato["dato"]))
+	rejilla.add_child(_tarjeta("camino_quitar", "Quitar camino", {}, "", "QUITAR", true, 1,
+		func(): cerrar(); al_elegir.call("quitar"), "Vuelve a dejar pasto donde había camino."))
 
 
 # ---------------------------------------------------------------- Menús (mochila, semillas, cocina)

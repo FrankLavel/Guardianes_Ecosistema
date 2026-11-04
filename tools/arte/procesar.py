@@ -847,7 +847,36 @@ def animales_granja():
         objetos("granja_gallinero.png", ["gallinero"], "maps/valle/objetos")
 
 
-GRUPOS = {"animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+def caminos():
+    """Camino de piedra que el jugador pinta en la granja (el de tierra usa camino.png): un tramo vertical
+    del empedrado del tileset, girado para que el largo quede en horizontal (Line2D), con el pasto de entre
+    las piedras transparente para que se vea el pasto del valle."""
+    tiles = rellenar_magenta(cargar("valle_tileset.jpg"))
+    piedra = Image.fromarray(tiles[290:660, 1214:1296]).convert("RGBA")
+    # Sin las líneas magenta de la cuadrícula del tileset.
+    px = np.asarray(piedra).copy()
+    filas = [y for y in range(px.shape[0]) if not ((px[y, :, 0] > 180) & (px[y, :, 2] > 180) & (px[y, :, 1] < 90)).mean() > 0.3]
+    px = px[filas]
+    piedra = Image.fromarray(px).transpose(Image.Transpose.ROTATE_90)
+    px = np.asarray(hacer_repetible_h(piedra, 16)).copy()
+    r, g, b = (px[..., k].astype(np.float32) for k in range(3))
+    pasto = np.clip((g - np.maximum(r, b) - 8.0) / 22.0, 0.0, 1.0)
+    alfa = (1.0 - pasto) * 255
+    alfa = np.asarray(Image.fromarray(alfa.astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.8)))
+    px[..., 3] = alfa
+    guardar(Image.fromarray(px), ASSETS / "maps/valle/texturas/camino_piedra.png")
+    # Íconos de las tarjetas: un cuadro de cada camino sobre el pasto, y pasto solo para "quitar".
+    pasto = Image.open(ASSETS / "maps/valle/texturas/pasto.png").convert("RGBA").resize((96, 96))
+    for nombre, textura in {"arena": "camino.png", "piedra": "camino_piedra.png", "quitar": None}.items():
+        icono = pasto.copy()
+        if textura:
+            tira = Image.open(ASSETS / "maps/valle/texturas" / textura).convert("RGBA")
+            tira = tira.resize((round(tira.width * 96 / tira.height), 96)).crop((0, 0, 96, 96))
+            icono.alpha_composite(tira)
+        guardar(icono, ASSETS / "ui/granja" / f"camino_{nombre}.png")
+
+
+GRUPOS = {"caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

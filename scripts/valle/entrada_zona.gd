@@ -1,6 +1,7 @@
 class_name EntradaZona
 extends ZonaInteraccion
-## Arco de entrada a una zona. Si la zona está bloqueada, Gara explica por qué.
+## Arco de entrada a una zona. Si la zona está bloqueada, Gara explica por qué. Cuando la zona ya está
+## restaurada la entrada desaparece (queda su trofeo en la casa).
 
 @export_enum("rio", "bosque", "lago") var zona := "rio"
 @export var nombre_zona := "Río Cupatitzio"
@@ -23,11 +24,11 @@ func _ready() -> void:
 
 
 func actualizar_estado() -> void:
-	if Juego.zona_esta_completa(zona):
-		_sprite.modulate = Color.WHITE
-		_estado.text = "¡Restaurado!"
-		_estado.modulate = Color(0.75, 1, 0.6)
-	elif Juego.zona_desbloqueada(zona):
+	visible = not Juego.zona_esta_completa(zona)
+	set_deferred("monitoring", visible)
+	if not visible:
+		return
+	if Juego.zona_desbloqueada(zona):
 		_sprite.modulate = Color.WHITE
 		_estado.text = ""
 	else:

@@ -26,9 +26,14 @@ var _capa: CanvasLayer
 var _texto: Label
 var _guardar: Button
 var _girar: Button
+## Con qué se están pintando caminos ("arena", "piedra", "quitar"; "" = no se pinta).
+var pintar := ""
+var _arrastrando := false
+var _sin_hojas := false
 
 
 func _ready() -> void:
+	z_index = 5
 	_capa = CanvasLayer.new()
 	_capa.layer = 41
 	_capa.visible = false
@@ -56,6 +61,7 @@ func _ready() -> void:
 	_texto.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	fila.add_child(_texto)
 	fila.add_child(_boton("TIENDA", _abrir_tienda))
+	fila.add_child(_boton("CAMINOS", _abrir_caminos))
 	_girar = _boton("GIRAR (R)", girar)
 	fila.add_child(_girar)
 	_guardar = _boton("GUARDAR", _guardar_cargada)
@@ -90,6 +96,9 @@ func entrar() -> void:
 func salir() -> void:
 	if _cargando:
 		_cancelar()
+	pintar = ""
+	_arrastrando = false
+	queue_redraw()
 	activo = false
 	_capa.visible = false
 
@@ -101,6 +110,9 @@ func _unhandled_input(evento: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 	if not Granja.abierto.is_empty():
+		return
+	if not pintar.is_empty():
+		_pintar_input(evento)
 		return
 	if evento is InputEventMouseButton and evento.pressed:
 		if evento.button_index == MOUSE_BUTTON_LEFT:
@@ -123,6 +135,8 @@ func _unhandled_input(evento: InputEvent) -> void:
 
 
 func _process(_delta: float) -> void:
+	if not pintar.is_empty():
+		queue_redraw()
 	if _cargando == null:
 		return
 	_mover(_cargando, get_global_mouse_position() + _agarre)
@@ -244,10 +258,74 @@ func _mover(nodo: Node2D, destino: Vector2) -> void:
 		nodo.global_position = destino
 
 
+# ---------------------------------------------------------------- Pintar caminos
+
+func _abrir_caminos() -> void:
+	if _cargando:
+		_cancelar()
+	Granja.abrir_caminos(func(tipo: String):
+		pintar = tipo
+		_sin_hojas = false
+		_actualizar_barra())
+
+
+func _pintar_input(evento: InputEvent) -> void:
+	if evento is InputEventMouseButton and evento.button_index == MOUSE_BUTTON_LEFT:
+		_arrastrando = evento.pressed
+		if evento.pressed:
+			_pintar_en(get_global_mouse_position())
+	elif evento is InputEventMouseMotion and _arrastrando:
+		_pintar_en(get_global_mouse_position())
+	elif (evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_RIGHT) \
+			or evento.is_action_pressed("pausa") or evento.is_action_pressed("ui_cancel") or evento.is_action_pressed("decorar"):
+		pintar = ""
+		_arrastrando = false
+		queue_redraw()
+		_actualizar_barra()
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
+func celda_de_camino(punto: Vector2) -> Vector2i:
+	return Vector2i((punto / Granja.CELDA_CAMINO).floor())
+
+
+## Dónde se puede pintar camino: dentro de la granja y fuera de la milpa.
+func se_puede_pintar(celda: Vector2i) -> bool:
+	var r := Granja.rect_de_camino(celda)
+	return Granja.en_la_granja(r) and not valle.rect_milpa().intersects(r.grow(-2))
+
+
+func _pintar_en(punto: Vector2) -> void:
+	var celda := celda_de_camino(punto)
+	if not se_puede_pintar(celda):
+		return
+	if pintar == "quitar":
+		Granja.quitar_camino(celda)
+	elif not Granja.poner_camino(celda, pintar) and Juego.hojas < int(Granja.CAMINOS[pintar]["costo"]) and not _sin_hojas:
+		_sin_hojas = true
+		valle.avisar("Ya no tienes hojas para más camino de piedra. El de tierra es gratis.")
+
+
+## El cuadrito bajo el mouse mientras se pinta: verde donde se puede, rojo donde no.
+func _draw() -> void:
+	if pintar.is_empty():
+		return
+	var celda := celda_de_camino(get_global_mouse_position())
+	var r := Granja.rect_de_camino(celda)
+	var color := Color(1, 0.45, 0.4) if not se_puede_pintar(celda) else (Color(1, 0.85, 0.5) if pintar == "quitar" else Color(0.6, 1, 0.6))
+	draw_rect(r, Color(color, 0.35))
+	draw_rect(r, color, false, 3.0)
+
+
 func _actualizar_barra() -> void:
 	_guardar.visible = _cargando is Decoracion
 	_girar.visible = _cargando is Decoracion
-	if _cargando:
+	if not pintar.is_empty():
+		var que: String = "quitando camino" if pintar == "quitar" else "pintando " + Granja.CAMINOS[pintar]["nombre"].to_lower()
+		_texto.text = "Estás %s: haz clic o arrastra sobre la cuadrícula. Clic derecho o Esc: terminar." % que
+	elif _cargando:
 		_texto.text = "Clic para soltar donde esté verde.  Clic derecho o Esc: regresar."
 	else:
 		_texto.text = "Modo decorar: haz clic en una decoración, el corral o un taller para moverlo, o en un terreno azul para expandir la granja."
