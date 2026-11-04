@@ -18,13 +18,17 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 import arte
-from arte import RAIZ, cargar, fondo_cerca, construir_atlas, guardar, hacer_repetible, hacer_repetible_h, quitar_fondo, recortar, separar_objetos
+from arte import RAIZ, cargar, fondo_cerca, construir_atlas, guardar, hacer_repetible, hacer_repetible_h, quitar_fondo, recortar, separar_objetos, sin_orilla_blanca
 
 ASSETS = RAIZ / "assets"
 
 
-def objetos(fuente: str, nombres: list[str | None], destino: str, area_min: int = 400, huecos: bool = True) -> dict[str, Image.Image]:
+def objetos(fuente: str, nombres: list[str | None], destino: str, area_min: int = 400, huecos: bool = True,
+            orilla_blanca: bool = False) -> dict[str, Image.Image]:
+    """`orilla_blanca`: el dibujo venía sobre fondo blanco; se le quita la orilla clara del contorno."""
     rgba = quitar_fondo(cargar(fuente), huecos=huecos)
+    if orilla_blanca:
+        rgba = sin_orilla_blanca(rgba)
     encontrados = separar_objetos(rgba, area_min=area_min)
     if len(encontrados) != len(nombres):
         raise SystemExit(f"{fuente}: se esperaban {len(nombres)} objetos y se encontraron {len(encontrados)}")
@@ -787,10 +791,10 @@ def decoraciones():
     """Fase 3: decoraciones de la granja (sprite en el valle e ícono del panel) y el guajolote del corral."""
     # Orden en que separar_objetos encuentra las piezas de la hoja.
     nombres = ["espantapajaros", "farol", "cempasuchil", "banca", "olla_barro", "bebedero"]
-    for nombre, pieza in objetos("granja_decoraciones.png", nombres, "maps/valle/decoraciones").items():
+    for nombre, pieza in objetos("granja_decoraciones.png", nombres, "maps/valle/decoraciones", orilla_blanca=True).items():
         guardar(pieza, ASSETS / "ui/granja" / f"{nombre}.png")
     # Guajolote: 4 cuadros caminando y uno quieto, como la cabra.
-    rgba = quitar_fondo(cargar("granja_guajolote.png"))
+    rgba = sin_orilla_blanca(quitar_fondo(cargar("granja_guajolote.png")))
     cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
     destino = ASSETS / "characters/animales/valle"
     construir_atlas(
@@ -809,7 +813,7 @@ def animales_granja():
         if not (arte.FUENTE / f"granja_{nombre}.png").exists():
             continue
         # Sin quitar huecos: lo blanco de adentro (manchas de la vaca, lana) es del animal.
-        rgba = quitar_fondo(cargar(f"granja_{nombre}.png"), huecos=False)
+        rgba = sin_orilla_blanca(quitar_fondo(cargar(f"granja_{nombre}.png"), huecos=False))
         cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
         construir_atlas(
             cuadros, {"idle": ([4], 1.0, True), "caminar": ([0, 1, 2, 3], 7.0, True)},
@@ -823,7 +827,7 @@ def animales_granja():
             primero = Image.open(atlas).convert("RGBA").crop((0, 0) + cuadro)
             guardar(primero.crop(primero.getbbox()), ASSETS / "ui/granja" / f"{nombre}.png")
     if (arte.FUENTE / "granja_iconos3.png").exists():
-        objetos("granja_iconos3.png", ["abono", "lana"], "ui/granja", huecos=False)
+        objetos("granja_iconos3.png", ["abono", "lana"], "ui/granja", huecos=False, orilla_blanca=True)
 
 
 GRUPOS = {"animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}

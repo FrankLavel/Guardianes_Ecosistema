@@ -136,6 +136,27 @@ def separar_objetos(rgba: np.ndarray, area_min: int = 400, union: int = 6) -> li
     return cajas
 
 
+def sin_orilla_blanca(rgba: np.ndarray, pasadas: int = 2) -> np.ndarray:
+    """Quita los pixeles blancos o grises claros que quedan pegados al contorno cuando el dibujo venía
+    sobre fondo blanco (se ven como una orilla blanca). Solo los de afuera del contorno: lo blanco
+    que está dentro del dibujo, rodeado de su línea oscura (manchas de la vaca, lana), se queda."""
+    rgba = rgba.copy()
+    rgb = rgba[..., :3].astype(int)
+    blanco = (rgb.min(-1) > 200) & ((rgb.max(-1) - rgb.min(-1)) < 30)
+    for _ in range(pasadas):
+        vacio = rgba[..., 3] == 0
+        junto = np.zeros_like(vacio)
+        junto[1:] |= vacio[:-1]
+        junto[:-1] |= vacio[1:]
+        junto[:, 1:] |= vacio[:, :-1]
+        junto[:, :-1] |= vacio[:, 1:]
+        quitar = blanco & junto & ~vacio
+        if not quitar.any():
+            break
+        rgba[quitar, 3] = 0
+    return rgba
+
+
 def recortar(rgba: np.ndarray, objeto: dict) -> Image.Image:
     """Recorta solo los pixeles del objeto (sin pedazos de objetos vecinos)."""
     x0, y0, x1, y1 = objeto["caja"]
