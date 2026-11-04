@@ -76,6 +76,8 @@ var hojas := 0
 var ayudas: Dictionary = {}
 var muebles: Array[String] = []
 var pedido: Dictionary = {}
+## Hora del juego (ver horas_totales) en que un animal vuelve a pedir ayuda; -1 si no se ha decidido.
+var siguiente_pedido := -1.0
 var dia := 1
 ## Granja (ver granja.gd): objeto -> cantidad, parcelas de la milpa, energía del guardián,
 ## platillos ya cocinados, corral (animal -> {"comio": día, "listo": bool}), pesca del día y
@@ -125,6 +127,7 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	hojas = 0
 	ayudas.clear()
 	muebles.clear()
+	siguiente_pedido = -1.0
 	pedido.clear()
 	dia = 1
 	hora = 8.0
@@ -210,6 +213,11 @@ func avanzar_hora(horas: float) -> void:
 		hora_cambio.emit(int(hora))
 	if es_de_noche != noche_antes:
 		noche_cambio.emit(es_de_noche)
+
+
+## Horas de juego desde que empezó la partida (no se reinicia cada día).
+func horas_totales() -> float:
+	return (dia - 1) * 24.0 + hora
 
 
 ## Dormir en la cama: empieza un día nuevo en la mañana.
@@ -333,6 +341,7 @@ func a_diccionario() -> Dictionary:
 		"hojas": hojas,
 		"ayudas": ayudas,
 		"muebles": muebles,
+		"siguiente_pedido": siguiente_pedido,
 		"pedido": pedido,
 		"dia": dia,
 		"hora": hora,
@@ -370,6 +379,7 @@ func desde_diccionario(datos: Dictionary) -> void:
 	hojas = int(datos.get("hojas", 0))
 	ayudas = datos.get("ayudas", {}) if datos.get("ayudas") is Dictionary else {}
 	muebles.assign(datos.get("muebles", []))
+	siguiente_pedido = float(datos.get("siguiente_pedido", -1.0))
 	pedido = datos.get("pedido", {}) if datos.get("pedido") is Dictionary else {}
 	dia = int(datos.get("dia", 1))
 	hora = float(datos.get("hora", 22.0 if datos.get("es_de_noche", false) else 8.0))

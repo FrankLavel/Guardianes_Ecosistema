@@ -204,15 +204,47 @@ func test_los_animales_no_pisan_la_milpa() -> void:
 
 func test_el_molino_hace_masa_desde_el_nivel_2() -> void:
 	Granja.dar("maiz", 2)
-	assert_false(Granja.trabajar("molino"), "Antes del nivel 2 está cerrado")
+	assert_true(Granja.hacer_en_taller("molino").is_empty(), "Antes del nivel 2 está cerrado")
 	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][1]))
-	assert_true(Granja.trabajar("molino"))
+	assert_eq(Granja.hacer_en_taller("molino"), {"masa": 2}, "Al terminar de moler sale la masa")
 	assert_eq(Granja.cantidad("maiz"), 0)
-	assert_false(Granja.trabajar("molino"), "Una tanda a la vez")
-	Granja.avanzar_talleres(float(Granja.datos["talleres"]["molino"]["horas"]))
-	assert_eq(Granja.recoger_taller("molino"), {"masa": 2})
 	assert_eq(Granja.cantidad("masa"), 2)
-	assert_eq(Granja.recoger_taller("molino"), {}, "Ya no queda nada")
+	assert_true(Granja.hacer_en_taller("molino").is_empty(), "Sin maíz no se muele")
+
+
+func test_los_minijuegos_se_ganan_y_se_pierden() -> void:
+	var moler := Minijuego.new()
+	moler.tipo = "machacar"
+	moler.meta = 3
+	add_child_autofree(moler)
+	watch_signals(moler)
+	for i in 3:
+		moler.accion()
+	await wait_seconds(0.9)
+	assert_signal_emitted_with_parameters(moler, "terminado", [true])
+	var revolver := Minijuego.new()
+	revolver.tipo = "revolver"
+	revolver.meta = 2
+	add_child_autofree(revolver)
+	revolver.revolver(1)
+	assert_eq(revolver.progreso, 0, "Hay que empezar por la izquierda")
+	revolver.revolver(-1)
+	revolver.revolver(-1)
+	assert_eq(revolver.progreso, 1, "Hay que alternar los lados")
+	var pescar := Minijuego.new()
+	pescar.tipo = "atinar"
+	pescar.fallas_max = 2
+	add_child_autofree(pescar)
+	watch_signals(pescar)
+	pescar._zona = Vector2(0.4, 0.6)
+	pescar._marca = 0.5
+	pescar.accion()
+	assert_eq(pescar.progreso, 1, "En lo verde se atina")
+	pescar._zona = Vector2(0.4, 0.6)
+	for i in 2:
+		pescar._marca = 0.05
+		pescar.accion()
+	assert_signal_emitted_with_parameters(pescar, "terminado", [false])
 
 
 func test_la_colmena_trabaja_sola_y_se_llena() -> void:
@@ -227,14 +259,12 @@ func test_la_colmena_trabaja_sola_y_se_llena() -> void:
 
 
 func test_los_talleres_se_guardan() -> void:
-	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][2]))
-	Granja.dar("leche", 2)
-	Granja.trabajar("queseria")
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][5]))
+	Granja.avanzar_talleres(float(Granja.datos["talleres"]["colmena"]["horas"]))
 	Juego.guardar()
 	Juego.nueva_partida(RANURA)
 	assert_true(Juego.cargar(RANURA))
-	assert_true(Granja.taller("queseria")["trabajando"])
-	assert_eq(Granja.cantidad("leche"), 0)
+	assert_eq(int(Granja.taller("colmena")["listo"]), 1, "La miel que hicieron las abejas sigue ahí")
 
 
 func test_las_decoraciones_se_compran_se_ponen_donde_sea_y_no_se_pierden() -> void:

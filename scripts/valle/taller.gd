@@ -72,13 +72,17 @@ func actualizar() -> void:
 	if not Granja.taller_abierto(id):
 		texto = "%s · nivel %d" % [dato["nombre"], int(dato["nivel"])]
 	elif int(t["listo"]) > 0:
-		texto = "E  Recoger"
+		texto = "E  Sacar miel" if dato["entrada"].is_empty() else "E  Recoger"
 	elif t["trabajando"]:
 		texto = "%s · %d min" % [dato["nombre"], Granja.minutos_taller(id)]
 	_aviso.text = texto
 
 
 func _al_interactuar(_jugador: Node2D) -> void:
+	# La miel se saca con su minijuego, desde el panel.
+	if Granja.datos["talleres"][id]["entrada"].is_empty():
+		Granja.abrir_taller(id)
+		return
 	var fila := 0
 	var recogido := Granja.recoger_taller(id)
 	for producto in recogido:

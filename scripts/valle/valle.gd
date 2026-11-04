@@ -399,7 +399,6 @@ func _actualizar_corral() -> void:
 ## Pesca responsable: se espera a que pique y se presiona E a tiempo. Las crías se regresan al agua
 ## y solo se pueden sacar PESCA_POR_DIA peces al día.
 var _pescando := false
-var _jalo := false
 
 
 func pescar() -> void:
@@ -412,28 +411,22 @@ func pescar() -> void:
 	Juego.entrada_bloqueada = true
 	avisar("Lanzaste el anzuelo... espera a que piquen.")
 	await get_tree().create_timer(randf_range(1.5, 3.5)).timeout
+	Juego.entrada_bloqueada = false
 	Sonido.efecto("chapoteo")
-	avisar("¡Picó! Presiona E")
-	_jalo = false
-	var limite := Time.get_ticks_msec() + 1200
-	while Time.get_ticks_msec() < limite and not _jalo:
-		await get_tree().process_frame
-	if not _jalo:
+	Granja.jugar({"tipo": "atinar", "escena": "agua", "titulo": "¡Picó un pez!",
+		"texto": "Jala la caña con cuidado para que no se escape.", "iconos": [Granja.icono("pescado")],
+		"meta": 3, "fallas_max": 3}, _al_terminar_pesca)
+
+
+func _al_terminar_pesca(exito: bool) -> void:
+	_pescando = false
+	if not exito:
 		avisar("Se escapó. Puedes intentarlo otra vez.")
 	elif Granja.sacar_pez(randf() < Granja.PROB_CRIA) == "cria":
 		avisar("Era una cría: la regresaste al agua para que crezca.")
 	else:
 		Granja.mostrar_recogida("pescado", 1, MUELLE)
 		avisar("¡Pescaste un pescado! (%d de %d hoy)" % [Granja.pescas_de_hoy(), Granja.PESCA_POR_DIA])
-	_pescando = false
-	await get_tree().process_frame
-	Juego.entrada_bloqueada = false
-
-
-func _unhandled_input(evento: InputEvent) -> void:
-	if _pescando and evento.is_action_pressed("interactuar"):
-		_jalo = true
-		get_viewport().set_input_as_handled()
 
 
 func avisar(texto: String) -> void:

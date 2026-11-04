@@ -70,30 +70,34 @@ func test_los_animales_aparecen_al_restaurar_su_zona() -> void:
 func test_no_hay_pedidos_antes_del_final() -> void:
 	Juego.completar_zona("rio")
 	var valle = await _valle()
-	valle.pedidos._espera = 0.0
+	Juego.siguiente_pedido = 0.0
 	await wait_process_frames(3)
 	assert_true(Juego.pedido.is_empty())
 
 
-func test_pedido_de_basura_completo() -> void:
+func test_ya_no_piden_recoger_basura_ni_plantar_arboles() -> void:
+	_terminar_juego()
+	var valle = await _valle()
+	var pedidos: PedidosAyuda = valle.pedidos
+	assert_false(pedidos.iniciar_pedido("basura"))
+	assert_false(pedidos.iniciar_pedido("plantar"))
+
+
+func test_el_siguiente_pedido_tarda_un_dia() -> void:
 	_terminar_juego()
 	var valle = await _valle()
 	var pedidos: PedidosAyuda = valle.pedidos
 	var venado: AnimalValle = valle.get_node("Objetos/Venado1")
-	assert_true(pedidos.iniciar_pedido("basura", venado))
+	assert_true(pedidos.iniciar_pedido("cria", venado))
 	assert_eq(Juego.pedido["estado"], "aviso")
-	assert_eq(venado.estado, AnimalValle.Estado.VA_AL_JUGADOR)
 	pedidos._activar()
-	assert_eq(Juego.pedido["estado"], "activo")
-	assert_eq(pedidos._objetos.size(), 3, "Aparecen 3 basuras")
-	for objeto in pedidos._objetos.duplicate():
-		objeto.interactuar(valle.gara)
-	assert_eq(int(Juego.pedido["progreso"]), 3)
+	Juego.pedido["progreso"] = 1
 	pedidos._terminar()
-	assert_true(Juego.pedido.is_empty())
-	assert_eq(Juego.hojas, 5)
-	assert_eq(int(Juego.ayudas["basura"]), 1)
+	assert_eq(Juego.hojas, 8)
 	assert_eq(venado.estado, AnimalValle.Estado.PASEO)
+	assert_gte(Juego.siguiente_pedido - Juego.horas_totales(), 20.0, "El que sigue llega casi un día después")
+	await wait_process_frames(3)
+	assert_true(Juego.pedido.is_empty(), "No llega otro enseguida")
 
 
 func test_la_cria_cuenta_al_llegar_con_su_mama() -> void:
@@ -113,10 +117,10 @@ func test_la_cria_cuenta_al_llegar_con_su_mama() -> void:
 
 func test_un_pedido_a_medias_reaparece_al_volver() -> void:
 	_terminar_juego()
-	Juego.pedido = {"tipo": "plantar", "animal": "Venado2", "especie": "venado", "estado": "activo", "progreso": 1}
+	Juego.pedido = {"tipo": "flores", "animal": "Monarca1", "especie": "monarca", "estado": "activo", "progreso": 2}
 	var valle = await _valle()
-	assert_eq(valle.pedidos._objetos.size(), 1, "Solo falta plantar uno")
-	assert_eq(valle.get_node("Objetos/Venado2").estado, AnimalValle.Estado.ESPERA)
+	assert_eq(valle.pedidos._objetos.size(), 1, "Solo falta plantar una")
+	assert_eq(valle.get_node("Objetos/Monarca1").estado, AnimalValle.Estado.ESPERA)
 
 
 func test_comprar_mueble_en_la_casa() -> void:
@@ -199,7 +203,7 @@ func test_de_noche_los_animales_duermen_y_no_piden_ayuda() -> void:
 	_terminar_juego()
 	Juego.hora = 23.0
 	var valle = await _valle()
-	valle.pedidos._espera = 0.0
+	Juego.siguiente_pedido = 0.0
 	await wait_process_frames(3)
 	await wait_physics_frames(3)
 	assert_true(Juego.pedido.is_empty(), "De noche no hay pedidos")

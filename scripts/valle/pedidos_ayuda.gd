@@ -1,8 +1,8 @@
 class_name PedidosAyuda
 extends Node
-## Después del final, de vez en cuando un animal del valle busca al guardián para pedirle ayuda:
-## recoger basura, encontrar a su cría o plantar arbolitos. Al terminar regala hojas, que se
-## gastan en muebles para la casa. Los textos están en data/pedidos.json.
+## Después del final, más o menos una vez al día un animal del valle busca al guardián para pedirle
+## ayuda: encontrar a su cría o plantar flores. Al terminar regala hojas, que se gastan en muebles
+## para la casa. Los textos están en data/pedidos.json.
 ##
 ## El pedido en curso se guarda en Juego.pedido:
 ##     {"tipo": "basura", "animal": "Venado1", "estado": "aviso" | "activo", "progreso": 0}
@@ -12,9 +12,10 @@ signal pedido_cambio
 const RUTA := "res://data/pedidos.json"
 const ESCENA_OBJETO := preload("res://scenes/valle/ObjetoAyuda.tscn")
 const ESCENA_ANIMAL := preload("res://scenes/valle/AnimalValle.tscn")
-## Segundos entre que termina un pedido y empieza el siguiente.
-const ESPERA_MIN := 25.0
-const ESPERA_MAX := 50.0
+## Horas de juego entre un pedido y el siguiente (un día son 24 h, unos 12 minutos reales), y cuánto
+## tarda el primero después del final.
+const HORAS_ENTRE_PEDIDOS := Vector2(20.0, 28.0)
+const HORAS_PRIMER_PEDIDO := 6.0
 ## Parte del valle donde pueden aparecer cosas (lejos del río y de los bordes).
 const AREA := Rect2(880, 220, 1760, 1420)
 ## Qué tan cerca de su mamá hay que llevar a la cría.
@@ -28,7 +29,6 @@ var hud: Node
 var contenedor: Node2D
 var cria: AnimalValle
 
-var _espera := 0.0
 var _objetos: Array[ObjetoAyuda] = []
 
 
@@ -44,20 +44,21 @@ func configurar(lista: Array[AnimalValle], guardian: Node2D, interfaz: Node, nod
 	for animal in animales:
 		animal.hablaron.connect(_al_hablar)
 		animal.llego_al_jugador.connect(_al_llegar)
-	_espera = randf_range(8.0, 15.0)
 	if not Juego.pedido.is_empty():
 		_reanudar()
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if not Juego.juego_terminado() or Dialogo.activo or get_tree().paused:
 		return
 	if Juego.pedido.is_empty():
 		# De noche los animales duermen: no piden ayuda.
 		if Juego.es_de_noche:
 			return
-		_espera -= delta
-		if _espera <= 0.0:
+		# Se cuenta con el reloj del juego (que se guarda): salir y volver al valle no lo adelanta.
+		if Juego.siguiente_pedido < 0.0:
+			Juego.siguiente_pedido = Juego.horas_totales() + HORAS_PRIMER_PEDIDO
+		if Juego.horas_totales() >= Juego.siguiente_pedido:
 			iniciar_pedido()
 	elif cria and cria.estado == AnimalValle.Estado.SIGUE and cria.objetivo == jugador:
 		var mama := animal_del_pedido()
@@ -92,7 +93,7 @@ func iniciar_pedido(tipo := "", animal: AnimalValle = null) -> bool:
 			if (tipo.is_empty() or t == tipo) and a.especie in datos["pedidos"][t]["animales"]:
 				opciones.append([t, a])
 	if opciones.is_empty():
-		_espera = ESPERA_MIN
+		Juego.siguiente_pedido = Juego.horas_totales() + 1.0
 		return false
 	var elegido: Array = opciones.pick_random()
 	Juego.pedido = {"tipo": elegido[0], "animal": String(elegido[1].name), "especie": elegido[1].especie,
@@ -245,7 +246,7 @@ func _terminar() -> void:
 		cria = null
 	_objetos.clear()
 	Juego.pedido = {}
-	_espera = randf_range(ESPERA_MIN, ESPERA_MAX)
+	Juego.siguiente_pedido = Juego.horas_totales() + randf_range(HORAS_ENTRE_PEDIDOS.x, HORAS_ENTRE_PEDIDOS.y)
 	Sonido.efecto("zona_restaurada")
 	hud.mostrar_objetivo("+%d hojas  ·  Gástalas en muebles para tu casa." % int(def["recompensa"]))
 	Juego.guardar()
@@ -269,7 +270,8 @@ func texto_objetivo() -> String:
 ## Al volver al valle con un pedido a medias: el animal espera y vuelve a aparecer lo que falta.
 func _reanudar() -> void:
 	var animal := animal_del_pedido()
-	if animal == null or not animal.visible:
+	# Partidas con un pedido que ya no existe (recoger basura o plantar árboles): se olvida.
+	if animal == null or not animal.visible or definicion().is_empty():
 		Juego.pedido = {}
 		return
 	if Juego.pedido["estado"] == "aviso":

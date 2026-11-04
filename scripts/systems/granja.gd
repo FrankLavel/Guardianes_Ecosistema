@@ -41,6 +41,16 @@ var abierto := ""
 const DESTINO_RECOGIDOS := Vector2(140, 90)
 const FOGON := preload("res://assets/maps/casa/fogon.png")
 const FOGON_APAGADO := preload("res://assets/maps/casa/fogon_apagado.png")
+const PUESTO := preload("res://assets/maps/valle/objetos/tianguis.png")
+## Quién hace los pedidos del tianguis.
+const VECINOS := ["Doña Rosa", "Don Tacho", "Doña Chela", "Don Lencho", "Doña Mari", "Don Pancho", "Doña Lupe", "Don Beto"]
+## Cómo se juega cada minijuego y cuántas veces hay que lograrlo.
+const INSTRUCCION := {
+	"machacar": "Presiona E o haz clic muchas veces.",
+	"revolver": "Presiona ← y → (o A y D) una y otra vez, o haz clic a cada lado.",
+	"atinar": "Presiona E o haz clic cuando la marca blanca esté en lo verde.",
+}
+const META := {"machacar": 12, "revolver": 10, "atinar": 3}
 
 var _efectos: Node2D
 var _avisos: VBoxContainer
@@ -435,31 +445,34 @@ func taller_abierto(id: String) -> bool:
 	return nivel() >= int(datos["talleres"][id]["nivel"])
 
 
-func puede_trabajar(id: String) -> bool:
-	var t := taller(id)
-	if not taller_abierto(id) or t["trabajando"] or int(t["listo"]) > 0:
+func puede_hacer(id: String) -> bool:
+	if not taller_abierto(id):
 		return false
 	var entrada: Dictionary = datos["talleres"][id]["entrada"]
 	for ingrediente in entrada:
 		if cantidad(ingrediente) < int(entrada[ingrediente]):
 			return false
-	return true
+	return not entrada.is_empty()
 
 
-func trabajar(id: String) -> bool:
-	if not puede_trabajar(id):
-		return false
-	var entrada: Dictionary = datos["talleres"][id]["entrada"]
-	for ingrediente in entrada:
-		quitar(ingrediente, int(entrada[ingrediente]))
-	var t := taller(id)
-	t["trabajando"] = true
-	t["horas"] = 0.0
-	Sonido.efecto("correcto")
+## El molino y la quesería hacen su producto al terminar el minijuego (moler, revolver la leche).
+func hacer_en_taller(id: String) -> Dictionary:
+	if not puede_hacer(id):
+		return {}
+	var dato: Dictionary = datos["talleres"][id]
+	for ingrediente in dato["entrada"]:
+		quitar(ingrediente, int(dato["entrada"][ingrediente]))
+	var hecho := {}
+	for producto in dato["salida"]:
+		hecho[producto] = int(dato["salida"][producto])
+		dar(producto, hecho[producto])
+	Sonido.efecto("recoger")
+	dar_xp(int(datos["xp"]["taller"]))
 	talleres_cambio.emit()
-	return true
+	return hecho
 
 
+## Solo la colmena trabaja sola con el tiempo (y los talleres de partidas viejas que dejaron una tanda).
 func avanzar_talleres(horas: float) -> void:
 	for id in datos["talleres"]:
 		if not taller_abierto(id):
@@ -573,7 +586,7 @@ func nuevo_pedido() -> Dictionary:
 		var n := randi_range(1, 2) if es_platillo else randi_range(1, 3)
 		cosas[id] = n
 		valor += n * int(datos["objetos"][id].get("valor", 1))
-	return {"cosas": cosas, "hojas": valor + 1, "xp": valor * 3}
+	return {"cosas": cosas, "hojas": valor + 1, "xp": valor * 3, "quien": VECINOS.pick_random()}
 
 
 func puede_entregar(pedido: Dictionary) -> bool:
@@ -752,7 +765,7 @@ func abrir_cocina() -> void:
 		var energia := int(datos["objetos"][id].get("energia", 0))
 		rejilla.add_child(_tarjeta(id, nombre(id) + ("  ★" if id in Juego.recetario else ""), receta["ingredientes"],
 			"+%d de energía" % energia, "COCINAR", puede_cocinar(receta), int(receta.get("nivel", 1)),
-			func(): _cocinar_con_fuego(receta)))
+			func(): _preparar(receta)))
 
 
 ## Arriba del fogón: si está prendido, cuánta leña le queda y los botones para prenderlo,
@@ -816,7 +829,8 @@ func _boton(texto: String, habilitado: bool, accion: Callable) -> Button:
 ## Tarjeta de receta o de taller: ícono grande, nombre, ingredientes con ícono y cuántos tienes
 ## (verde si alcanza, rojo si falta), una nota y el botón. Bloqueada: gris y dice en qué nivel se abre.
 func _tarjeta(id: String, titulo: String, ingredientes: Dictionary, nota: String, boton: String,
-		habilitado: bool, nivel_minimo: int, accion: Callable, descripcion := "") -> PanelContainer:
+		habilitado: bool, nivel_minimo: int, accion: Callable, descripcion := "", boton2 := "",
+		accion2 := Callable()) -> PanelContainer:
 	var bloqueada := nivel() < nivel_minimo
 	var tarjeta := PanelContainer.new()
 	tarjeta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -872,10 +886,52 @@ func _tarjeta(id: String, titulo: String, ingredientes: Dictionary, nota: String
 	etiqueta.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	etiqueta.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	abajo.add_child(etiqueta)
+	if not boton2.is_empty():
+		var otro := _boton(boton2, true, accion2)
+		otro.custom_minimum_size = Vector2(130, 48)
+		otro.add_theme_font_size_override("font_size", 20)
+		abajo.add_child(otro)
 	if not boton.is_empty():
 		abajo.add_child(_boton(boton, habilitado, accion))
 	columna.add_child(abajo)
 	return tarjeta
+
+
+## Antes de cocinar se prepara el platillo con su minijuego (revolver, voltear, palmear...).
+func _preparar(receta: Dictionary) -> void:
+	var juego: Dictionary = receta.get("juego", {})
+	var primero: String = receta["ingredientes"].keys()[0]
+	jugar({"tipo": juego.get("tipo", "revolver"), "escena": juego.get("escena", "olla"), "titulo": nombre(receta["id"]),
+		"texto": juego.get("texto", ""), "iconos": [icono(primero), icono(receta["id"])]},
+		func(exito: bool):
+			if exito and abierto == "cocina":
+				_cocinar_con_fuego(receta))
+
+
+## Abre un minijuego (ver Minijuego) encima de todo; `al_terminar(exito)` decide qué pasa después.
+## Esc o SALIR lo cancelan sin gastar nada.
+func jugar(config: Dictionary, al_terminar: Callable) -> void:
+	var juego := Minijuego.new()
+	juego.tipo = config.get("tipo", "machacar")
+	juego.escena = config.get("escena", "olla")
+	juego.titulo = config.get("titulo", "")
+	juego.instruccion = (config.get("texto", "") + "\n" + INSTRUCCION[juego.tipo]).strip_edges()
+	juego.iconos = config.get("iconos", [])
+	juego.meta = int(config.get("meta", META[juego.tipo]))
+	juego.fallas_max = int(config.get("fallas_max", 0))
+	# Si no hay un panel abierto (al pescar), el minijuego bloquea al guardián por su cuenta.
+	var propio := abierto.is_empty()
+	if propio:
+		abierto = "juego"
+		Juego.entrada_bloqueada = true
+	add_child(juego)
+	juego.terminado.connect(func(exito: bool):
+		juego.queue_free()
+		if propio and abierto == "juego":
+			abierto = ""
+			await get_tree().process_frame
+			Juego.entrada_bloqueada = false
+		al_terminar.call(exito))
 
 
 ## Al cocinar: el fuego se aviva un momento, luego aparece el platillo con su dato y queda un aviso.
@@ -993,65 +1049,109 @@ func abrir_taller(id: String) -> void:
 	_abrir("taller", dato["nombre"])
 	_contenido.add_child(_texto(dato["dato"], 24, Color(0.85, 0.95, 0.8)))
 	var producto: String = dato["salida"].keys()[0]
-	var minutos := ceili(float(dato["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)
-	var t := taller(id)
-	var nota := "Da %d %s en %d min" % [int(dato["salida"][producto]), nombre(producto).to_lower(), minutos]
+	var cuantos := int(dato["salida"][producto])
+	var juego: Dictionary = dato["juego"]
+	var entra: String = dato["entrada"].keys()[0] if not dato["entrada"].is_empty() else producto
+	var config := {"tipo": juego["tipo"], "escena": juego["escena"], "titulo": dato["nombre"], "texto": juego["texto"],
+		"iconos": [icono(entra), icono(producto)]}
 	if dato["entrada"].is_empty():
-		nota = "Hace %d %s cada %d min, sin que hagas nada." % [int(dato["salida"][producto]), nombre(producto).to_lower(), minutos]
-	if t["trabajando"] and taller_abierto(id):
-		nota = "Trabajando: faltan unos %d min." % minutos_taller(id)
-	_contenido.add_child(_tarjeta(producto, nombre(producto), dato["entrada"], nota, dato["accion"],
-		puede_trabajar(id), int(dato["nivel"]), func(): trabajar(id); cerrar()))
+		# La colmena trabaja sola: se juega para sacar la miel que ya hicieron las abejas.
+		var listo := int(taller(id)["listo"]) * cuantos
+		var minutos := ceili(float(dato["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)
+		var nota := "Las abejas hacen %d de %s cada %d min." % [cuantos, nombre(producto).to_lower(), minutos]
+		if listo > 0:
+			nota = "Hay %d de %s lista para sacar." % [listo, nombre(producto).to_lower()]
+		elif taller_abierto(id):
+			nota += " Faltan unos %d min." % minutos_taller(id)
+		_contenido.add_child(_tarjeta(producto, nombre(producto), {}, nota, dato["accion"], listo > 0, int(dato["nivel"]),
+			func(): _jugar_taller(id, config)))
+		return
+	_contenido.add_child(_tarjeta(producto, nombre(producto), dato["entrada"],
+		"Da %d de %s" % [cuantos, nombre(producto).to_lower()], dato["accion"], puede_hacer(id), int(dato["nivel"]),
+		func(): _jugar_taller(id, config)))
+
+
+## Al ganar el minijuego: el molino y la quesería hacen su producto; en la colmena se saca la miel.
+func _jugar_taller(id: String, config: Dictionary) -> void:
+	jugar(config, func(exito: bool):
+		if exito:
+			_mostrar_hecho(recoger_taller(id) if datos["talleres"][id]["entrada"].is_empty() else hacer_en_taller(id))
+			abrir_taller(id))
+
+
+func _mostrar_hecho(hecho: Dictionary) -> void:
+	for producto in hecho:
+		avisar_logro(producto, "¡Hiciste %d de %s!" % [int(hecho[producto]), nombre(producto).to_lower()])
 
 
 func abrir_tianguis() -> void:
 	_abrir("tianguis", "Tianguis del valle")
-	var avance := progreso_nivel()
-	_contenido.add_child(_texto("Nivel %d  ·  %d / %d de experiencia  ·  Tienes %d hojas" % [nivel(), avance[0], avance[1], Juego.hojas],
-		26, Color(0.8, 1, 0.7)))
-	_contenido.add_child(_texto("Pedidos de la gente del valle:", 28, Color(0.99, 0.86, 0.45)))
-	var pedidos := pedidos_tianguis()
-	for i in pedidos.size():
-		_contenido.add_child(_fila_pedido(i, pedidos[i]))
-	_contenido.add_child(_texto("Semillas:", 28, Color(0.99, 0.86, 0.45)))
+	_contenido.add_child(_estado_tianguis())
+	_contenido.add_child(_texto("Pedidos de la gente del valle", 28, Color(0.99, 0.86, 0.45)))
+	var pedidos := _rejilla()
+	for i in pedidos_tianguis().size():
+		var pedido: Dictionary = Juego.tianguis[i]
+		pedidos.add_child(_tarjeta(pedido["cosas"].keys()[0], "Pedido de " + pedido.get("quien", "un vecino"), pedido["cosas"],
+			"", "ENTREGAR", puede_entregar(pedido), 1, func(): entregar(i); abrir_tianguis(),
+			"Te da %d hojas y %d de experiencia." % [int(pedido["hojas"]), int(pedido["xp"])],
+			"CAMBIAR", func(): cambiar_pedido(i); abrir_tianguis()))
+	_contenido.add_child(_texto("Semillas", 28, Color(0.99, 0.86, 0.45)))
+	var semillas := _rejilla()
 	for id in datos["semillas_tianguis"]:
 		var precio := int(datos["semillas_tianguis"][id])
-		_contenido.add_child(_fila(id, "%s  (tienes %d)" % [nombre(id), cantidad(id)],
-			"COMPRAR (%d hojas)" % precio if Juego.hojas >= precio else "", func(): comprar_semilla(id); abrir_tianguis()))
+		var minutos := 0
+		for cultivo in datos["cultivos"]:
+			if datos["cultivos"][cultivo]["semilla"] == id:
+				minutos = ceili(float(datos["cultivos"][cultivo]["horas"]) * Juego.SEGUNDOS_POR_HORA / 60.0)
+		semillas.add_child(_tarjeta(id, nombre(id), {}, "Cuesta %d hojas · tienes %d" % [precio, cantidad(id)], "COMPRAR",
+			Juego.hojas >= precio, 1, func(): comprar_semilla(id); abrir_tianguis(),
+			"Siémbrala y riégala: se cosecha en unos %d min." % minutos))
 
 
-func _fila_pedido(i: int, pedido: Dictionary) -> HBoxContainer:
+## Arriba del tianguis: el puesto, tu nivel y tus hojas.
+func _estado_tianguis() -> PanelContainer:
+	var caja := PanelContainer.new()
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.22, 0.14, 0.08, 0.9)
+	estilo.border_color = Color(0.55, 0.38, 0.18)
+	estilo.set_border_width_all(3)
+	estilo.set_corner_radius_all(10)
+	estilo.set_content_margin_all(12)
+	caja.add_theme_stylebox_override("panel", estilo)
 	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 10)
-	for id in pedido["cosas"]:
-		var imagen := TextureRect.new()
-		imagen.custom_minimum_size = Vector2(52, 52)
-		imagen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		imagen.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		imagen.texture = icono(id)
-		fila.add_child(imagen)
-		var falta := cantidad(id) < int(pedido["cosas"][id])
-		var cuenta := _texto("%d/%d" % [mini(cantidad(id), int(pedido["cosas"][id])), int(pedido["cosas"][id])], 26,
-			Color(1, 0.7, 0.6) if falta else Color(0.7, 1, 0.6))
-		cuenta.autowrap_mode = TextServer.AUTOWRAP_OFF
-		cuenta.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		fila.add_child(cuenta)
-	var premio := _texto("→  %d hojas, %d exp." % [int(pedido["hojas"]), int(pedido["xp"])], 24)
-	premio.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	premio.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	fila.add_child(premio)
-	var boton := Button.new()
-	boton.custom_minimum_size = Vector2(200, 52)
-	boton.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	if puede_entregar(pedido):
-		boton.text = "ENTREGAR"
-		boton.pressed.connect(func(): entregar(i); abrir_tianguis())
-	else:
-		boton.text = "CAMBIAR"
-		boton.tooltip_text = "Cambiar por otro pedido"
-		boton.pressed.connect(func(): cambiar_pedido(i); abrir_tianguis())
-	fila.add_child(boton)
-	return fila
+	fila.add_theme_constant_override("separation", 16)
+	caja.add_child(fila)
+	var dibujo := TextureRect.new()
+	dibujo.custom_minimum_size = Vector2(110, 90)
+	dibujo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	dibujo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	dibujo.texture = PUESTO
+	fila.add_child(dibujo)
+	var columna := VBoxContainer.new()
+	columna.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columna.alignment = BoxContainer.ALIGNMENT_CENTER
+	fila.add_child(columna)
+	var avance := progreso_nivel()
+	columna.add_child(_texto("Nivel %d  ·  Tienes %d hojas" % [nivel(), Juego.hojas], 28, Color(0.99, 0.86, 0.45)))
+	var barra := ProgressBar.new()
+	barra.custom_minimum_size = Vector2(0, 22)
+	barra.max_value = maxi(int(avance[1]), 1)
+	barra.value = int(avance[0])
+	barra.show_percentage = false
+	columna.add_child(barra)
+	columna.add_child(_texto("%d / %d de experiencia para el siguiente nivel. Entrega pedidos para ganar hojas." % [avance[0], avance[1]],
+		20, Color(0.85, 0.95, 0.8)))
+	return caja
+
+
+func _rejilla() -> GridContainer:
+	var rejilla := GridContainer.new()
+	rejilla.columns = 2
+	rejilla.add_theme_constant_override("h_separation", 16)
+	rejilla.add_theme_constant_override("v_separation", 16)
+	rejilla.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_contenido.add_child(rejilla)
+	return rejilla
 
 
 func cerrar() -> void:
