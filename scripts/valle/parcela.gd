@@ -54,6 +54,8 @@ func actualizar() -> void:
 			texto = "E  Cosechar"
 		elif not p["regada"]:
 			texto = "E  Regar"
+		elif Granja.puede_abonar(indice):
+			texto = "E  Abonar · %d min" % Granja.minutos_restantes(indice)
 		else:
 			texto = "Creciendo · %d min" % Granja.minutos_restantes(indice)
 	_aviso.text = texto
@@ -73,6 +75,8 @@ func _al_interactuar(_jugador: Node2D) -> void:
 			fila += 1
 	elif Granja.regar(indice):
 		aviso.emit("¡La regaste! Estará lista en unos %d minutos." % Granja.minutos_restantes(indice))
+	elif Granja.abonar(indice):
+		aviso.emit("¡Le echaste abono! Ahora crece el doble de rápido: faltan unos %d minutos." % Granja.minutos_restantes(indice))
 	else:
 		aviso.emit("Está creciendo. Faltan unos %d minutos." % Granja.minutos_restantes(indice))
 	actualizar()

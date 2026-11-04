@@ -16,6 +16,7 @@ signal nivel_subio(nivel: int, texto: String)
 signal parcelas_cambio
 signal talleres_cambio
 signal fogon_cambio
+signal corral_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
@@ -30,6 +31,11 @@ const PROB_CRIA := 0.3
 const SILVESTRES_POR_DIA := 6
 ## Tandas que un taller guarda listas antes de pararse (la colmena deja de hacer miel si no la recoges).
 const TANDAS_MAX := 3
+## Cuántos animales caben en el corral (crece solo hasta este tamaño) y cuánto más rápido se camina
+## con caballo.
+const ANIMALES_MAX := 9
+const VELOCIDAD_CABALLO := 1.35
+const CUADROS_ANIMAL := "res://assets/characters/animales/valle/%s_frames.tres"
 ## Horas de juego que arde un leño (4 h = 2 minutos reales) y cuántos caben en el fogón.
 const HORAS_POR_LENO := 4.0
 const LENOS_MAX := 3
@@ -175,7 +181,8 @@ func fijar_energia(valor: float) -> void:
 
 ## Con poca energía el guardián camina más despacio (nunca se pierde ni se muere).
 func factor_velocidad() -> float:
-	return 0.65 if Juego.juego_terminado() and Juego.energia < 25.0 else 1.0
+	var factor := 0.65 if Juego.juego_terminado() and Juego.energia < 25.0 else 1.0
+	return factor * (VELOCIDAD_CABALLO if animales_de("caballo") > 0 else 1.0)
 
 
 func comer(id: String) -> bool:
@@ -216,6 +223,7 @@ func plantar(i: int, cultivo: String) -> bool:
 	p["cultivo"] = cultivo
 	p["etapa"] = 0
 	p["regada"] = false
+	p["abonada"] = false
 	p["horas"] = 0.0
 	Sonido.efecto("correcto")
 	parcelas_cambio.emit()
@@ -232,13 +240,29 @@ func regar(i: int) -> bool:
 	return true
 
 
+## Echarle abono (del cerdo) a lo que está creciendo: crece el doble de rápido.
+func abonar(i: int) -> bool:
+	var p := parcela(i)
+	if p["cultivo"].is_empty() or p.get("abonada", false) or int(p["etapa"]) >= LISTO or not quitar("abono"):
+		return false
+	p["abonada"] = true
+	Sonido.efecto("recoger")
+	parcelas_cambio.emit()
+	return true
+
+
+func puede_abonar(i: int) -> bool:
+	var p := parcela(i)
+	return not p["cultivo"].is_empty() and not p.get("abonada", false) and int(p["etapa"]) < LISTO and cantidad("abono") > 0
+
+
 ## Lo que se sembró y se regó crece con el tiempo (en horas del juego: 1 hora = 30 s).
 func crecer(horas: float) -> void:
 	var cambio := false
 	for p in Juego.parcelas:
 		if p["cultivo"].is_empty() or not p["regada"] or int(p["etapa"]) >= LISTO:
 			continue
-		p["horas"] = float(p.get("horas", 0.0)) + horas
+		p["horas"] = float(p.get("horas", 0.0)) + horas * (2.0 if p.get("abonada", false) else 1.0)
 		var etapa := mini(int(p["horas"] * LISTO / float(datos["cultivos"][p["cultivo"]]["horas"])), LISTO)
 		if etapa != int(p["etapa"]):
 			p["etapa"] = etapa
@@ -253,6 +277,8 @@ func minutos_restantes(i: int) -> int:
 	if p["cultivo"].is_empty() or not p["regada"]:
 		return 0
 	var falta: float = float(datos["cultivos"][p["cultivo"]]["horas"]) - float(p.get("horas", 0.0))
+	if p.get("abonada", false):
+		falta /= 2.0
 	return maxi(ceili(falta * Juego.SEGUNDOS_POR_HORA / 60.0), 0)
 
 
@@ -267,6 +293,7 @@ func cosechar(i: int) -> Dictionary:
 	p["cultivo"] = ""
 	p["etapa"] = 0
 	p["regada"] = false
+	p["abonada"] = false
 	p["horas"] = 0.0
 	Sonido.efecto("recoger")
 	dar_xp(int(datos["xp"]["cosechar"]))
@@ -290,15 +317,62 @@ func nuevo_dia() -> void:
 
 # ---------------------------------------------------------------- Corral
 
-## Hablar con la gallina o la cabra: si tiene huevo o leche se recoge; si no ha comido hoy se le da
-## de comer (al día siguiente tendrá). Devuelve el texto que se le muestra al jugador.
+## Cuántos animales de una especie hay: el que regala el nivel (la gallina desde el principio, la cabra y
+## el guajolote al subir) más los que se compraron.
+func animales_de(especie: String) -> int:
+	var regalado: bool = especie == "gallina" or (especie in ["cabra", "guajolote"] and desbloqueado(especie, false))
+	return (1 if regalado else 0) + Juego.comprados.count(especie)
+
+
+## Todos los animales del corral por su nombre: el primero de cada especie se llama como ella
+## ("vaca") y los demás llevan número ("vaca_2"); así cada uno come y produce por su cuenta.
+func animales_del_corral() -> Array[String]:
+	var lista: Array[String] = []
+	for especie in datos["corral"]:
+		for k in animales_de(especie):
+			lista.append(especie if k == 0 else "%s_%d" % [especie, k + 1])
+	return lista
+
+
+func especie_de(animal: String) -> String:
+	return animal.get_slice("_", 0)
+
+
+## Solo se venden los animales que ya tienen su dibujo.
+func se_vende(especie: String) -> bool:
+	return ResourceLoader.exists(CUADROS_ANIMAL % especie)
+
+
+func comprar_animal(especie: String) -> bool:
+	var dato: Dictionary = datos["corral"][especie]
+	if nivel() < int(dato["nivel"]) or animales_del_corral().size() >= ANIMALES_MAX \
+			or not Juego.gastar_hojas(int(dato["costo"])):
+		return false
+	Juego.comprados.append(especie)
+	Sonido.efecto("zona_restaurada")
+	dar_xp(int(datos["xp"]["comprar_animal"]))
+	corral_cambio.emit()
+	return true
+
+
+## Hablar con un animal del corral: si tiene huevo, leche, abono o lana se recoge; si no ha comido hoy
+## se le da de comer (al día siguiente tendrá). Devuelve el texto que se le muestra al jugador.
 func atender(animal: String) -> String:
 	var estado: Dictionary = Juego.corral.get(animal, {"comio": -1, "listo": false})
 	Juego.corral[animal] = estado
-	var producto: String = datos["corral"][animal]["producto"]
+	var dato: Dictionary = datos["corral"][especie_de(animal)]
+	var producto: String = dato["producto"]
+	if producto.is_empty():
+		# El caballo no da nada: con darle de comer basta para que te lleve más rápido.
+		if int(estado["comio"]) == Juego.dia:
+			return "Ya comió hoy. Con el %s caminas más rápido por el valle." % dato["nombre"].to_lower()
+		estado["comio"] = Juego.dia
+		Sonido.efecto("correcto")
+		dar_xp(int(datos["xp"]["corral"]))
+		return "Le diste de comer. ¡Está contento!"
 	if estado["listo"]:
 		estado["listo"] = false
-		dar(producto)
+		dar(producto, maxi(int(dato["cantidad"]), 1))
 		Sonido.efecto("recoger")
 		dar_xp(int(datos["xp"]["corral"]))
 		return "¡Recogiste %s!" % nombre(producto).to_lower()
@@ -567,12 +641,15 @@ func pedidos_tianguis() -> Array:
 
 ## Pide de 1 a 2 cosas que el guardián ya puede conseguir.
 func nuevo_pedido() -> Dictionary:
-	var posibles := ["huevo", "pescado"]
+	var posibles := ["pescado"]
+	# Piden lo que dan los animales que tienes.
+	for especie in datos["corral"]:
+		var producto: String = datos["corral"][especie]["producto"]
+		if animales_de(especie) > 0 and not producto.is_empty() and producto not in posibles:
+			posibles.append(producto)
 	for zona_cultivo in [["rio", "frijol"], ["bosque", "maiz"], ["lago", "calabaza"]]:
 		if Juego.zona_esta_completa(zona_cultivo[0]):
 			posibles.append(zona_cultivo[1])
-	if desbloqueado("cabra", false):
-		posibles.append("leche")
 	for id in datos["talleres"]:
 		if taller_abierto(id):
 			posibles.append_array(datos["talleres"][id]["salida"].keys())
@@ -1095,6 +1172,20 @@ func abrir_tianguis() -> void:
 			"", "ENTREGAR", puede_entregar(pedido), 1, func(): entregar(i); abrir_tianguis(),
 			"Te da %d hojas y %d de experiencia." % [int(pedido["hojas"]), int(pedido["xp"])],
 			"CAMBIAR", func(): cambiar_pedido(i); abrir_tianguis()))
+	_contenido.add_child(_texto("Animales para tu corral (%d / %d)" % [animales_del_corral().size(), ANIMALES_MAX],
+		28, Color(0.99, 0.86, 0.45)))
+	var animales := _rejilla()
+	var lleno := animales_del_corral().size() >= ANIMALES_MAX
+	for especie in datos["corral"]:
+		if not se_vende(especie):
+			continue
+		var dato: Dictionary = datos["corral"][especie]
+		var costo := int(dato["costo"])
+		var da := "No da nada, pero te lleva más rápido." if dato["producto"].is_empty() else \
+			"Si le das de comer, al otro día da %d de %s." % [int(dato["cantidad"]), nombre(dato["producto"]).to_lower()]
+		var nota := "El corral está lleno" if lleno else "Tienes %d · cuesta %d hojas" % [animales_de(especie), costo]
+		animales.add_child(_tarjeta(especie, dato["nombre"], {}, nota, "COMPRAR", not lleno and Juego.hojas >= costo,
+			int(dato["nivel"]), func(): comprar_animal(especie); abrir_tianguis(), dato["dato"] + " " + da))
 	_contenido.add_child(_texto("Semillas", 28, Color(0.99, 0.86, 0.45)))
 	var semillas := _rejilla()
 	for id in datos["semillas_tianguis"]:

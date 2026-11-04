@@ -87,6 +87,8 @@ var parcelas: Array = []
 var energia := 100.0
 var recetario: Array[String] = []
 var corral: Dictionary = {}
+## Animales que se compraron en el tianguis (una entrada por animal, con su especie).
+var comprados: Array[String] = []
 var pesca: Dictionary = {"dia": 0, "veces": 0}
 var silvestres: Array = []
 var silvestres_dia := 0
@@ -136,6 +138,7 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	energia = 100.0
 	recetario.clear()
 	corral.clear()
+	comprados.clear()
 	talleres.clear()
 	fogon = {"prendido": false, "horas": 0.0}
 	decoraciones = {"puestas": [], "guardadas": {}}
@@ -350,6 +353,7 @@ func a_diccionario() -> Dictionary:
 		"energia": energia,
 		"recetario": recetario,
 		"corral": corral,
+		"comprados": comprados,
 		"talleres": talleres,
 		"fogon": fogon,
 		"decoraciones": decoraciones,
@@ -391,6 +395,7 @@ func desde_diccionario(datos: Dictionary) -> void:
 	energia = float(datos.get("energia", 100.0))
 	recetario.assign(datos.get("recetario", []))
 	corral = datos.get("corral", {}) if datos.get("corral") is Dictionary else {}
+	comprados.assign(datos.get("comprados", []))
 	talleres = datos.get("talleres", {}).duplicate(true) if datos.get("talleres") is Dictionary else {}
 	fogon = datos.get("fogon", {}).duplicate() if datos.get("fogon") is Dictionary else {}
 	fogon = {"prendido": bool(fogon.get("prendido", false)), "horas": float(fogon.get("horas", 0.0))}

@@ -26,11 +26,6 @@ const AREA_SILVESTRES := Rect2(900, 300, 1700, 1300)
 ## Talleres de la granja (se ven desde el principio; cada uno se abre en su nivel). Ahí van si el
 ## jugador no los ha movido.
 const TALLERES := {"molino": Vector2(1250, 330), "queseria": Vector2(1250, 610), "colmena": Vector2(2150, 420)}
-const ANIMALES_CORRAL := [
-	{"nombre": "Gallina", "cuadros": "res://assets/characters/animales/valle/gallina_frames.tres", "escala": 0.2},
-	{"nombre": "Cabra", "cuadros": "res://assets/characters/animales/valle/cabra_frames.tres", "escala": 0.3},
-	{"nombre": "Guajolote", "cuadros": "res://assets/characters/animales/valle/guajolote_frames.tres", "escala": 0.24},
-]
 
 ## Animales que pasean por el valle. Cada uno aparece cuando su zona ya está restaurada.
 const VENADO := "res://assets/characters/animales/valle/venado_frames.tres"
@@ -222,6 +217,7 @@ func _crear_granja() -> void:
 	hud.add_child(boton)
 	_actualizar_prohibido()
 	_poner_silvestres()
+	Granja.corral_cambio.connect(_poner_corral)
 	Juego.dia_cambio.connect(_al_cambiar_dia)
 	Granja.nivel_subio.connect(_al_subir_nivel)
 
@@ -250,29 +246,48 @@ func _poner_parcelas() -> void:
 		$Objetos.add_child(parcela)
 
 
-## La gallina está desde el principio; la cabra llega en el nivel 3 y el guajolote en el 5.
+## Los animales del corral (ver Granja.animales_del_corral): los regalados al subir de nivel y los que
+## se compran en el tianguis. El corral crece cuando son más.
 func _poner_corral() -> void:
-	for i in ANIMALES_CORRAL.size():
-		var datos: Dictionary = ANIMALES_CORRAL[i]
-		var especie: String = datos["nombre"].to_lower()
-		if $Objetos.has_node(datos["nombre"]) or (i > 0 and not Granja.desbloqueado(especie, false)) \
-				or not ResourceLoader.exists(datos["cuadros"]):
+	var lista := Granja.animales_del_corral()
+	# Primero crece el corral, para repartir a los animales en todo su espacio.
+	var antes := corral.huella()
+	corral.ajustar(lista.size())
+	for i in lista.size():
+		var id := lista[i]
+		var especie := Granja.especie_de(id)
+		var cuadros := Granja.CUADROS_ANIMAL % especie
+		if $Objetos.has_node(id.to_pascal_case()) or not ResourceLoader.exists(cuadros):
 			continue
+		var dato: Dictionary = Granja.datos["corral"][especie]
 		var animal: AnimalValle = ESCENA_ANIMAL.instantiate()
-		animal.name = datos["nombre"]
+		animal.name = id.to_pascal_case()
+		animal.set_meta(&"corral", id)
 		animal.especie = especie
-		animal.cuadros = load(datos["cuadros"])
+		animal.cuadros = load(cuadros)
 		animal.anim_quieto = &"idle"
 		animal.anim_caminar = &"caminar"
-		animal.escala = datos["escala"]
+		animal.escala = float(dato["escala"])
 		animal.velocidad = 30.0
-		# Cada uno empieza en un lado del corral para que no se encimen.
-		animal.position = corral.position + Vector2([-70, 70, 0][i], [0, 0, 30][i])
-		corral.agregar(animal)
-		animal.texto_aviso = "E  " + datos["nombre"]
+		# Cada uno empieza en otro lugar del corral para que no se encimen.
+		var paseo := corral.paseo()
+		animal.position = paseo.position + paseo.size * Vector2(randf_range(0.1, 0.9), randf_range(0.15, 0.85))
+		animal.texto_aviso = "E  " + dato["nombre"]
 		animal.hablaron.connect(_atender_corral)
+		corral.agregar(animal)
 		$Objetos.add_child(animal)
+	if corral.huella() != antes:
+		_quitar_adornos(corral.huella().grow(30))
+		_al_mover_en_granja(corral)
+		_avisar_si_no_cabe()
 	_actualizar_corral()
+
+
+## Los árboles que quitó el corral al crecer desaparecen hasta el siguiente cuadro de física.
+func _avisar_si_no_cabe() -> void:
+	await get_tree().physics_frame
+	if decorador and not decorador.cabe(corral):
+		avisar("¡Tu corral creció! Si quedó encimado con algo, muévelo con el modo decorar (C).")
 
 
 func _al_subir_nivel(nivel: int, texto: String) -> void:
@@ -373,23 +388,25 @@ func _al_cambiar_dia(_dia: int) -> void:
 
 
 func _atender_corral(animal: AnimalValle) -> void:
-	var producto: String = Granja.datos["corral"][animal.especie]["producto"]
-	var antes := Granja.cantidad(producto)
-	var texto := Granja.atender(animal.especie)
-	if Granja.cantidad(producto) > antes:
-		Granja.mostrar_recogida(producto, 1, animal.global_position + Vector2(0, -40))
+	var id: String = animal.get_meta(&"corral")
+	var dato: Dictionary = Granja.datos["corral"][animal.especie]
+	var producto: String = dato["producto"]
+	var antes := Granja.cantidad(producto) if not producto.is_empty() else 0
+	var texto := Granja.atender(id)
+	if not producto.is_empty() and Granja.cantidad(producto) > antes:
+		Granja.mostrar_recogida(producto, Granja.cantidad(producto) - antes, animal.global_position + Vector2(0, -40))
 	else:
 		avisar(texto)
 	_actualizar_corral()
 
 
-## Globitos sobre la gallina y la cabra: comida si no han comido hoy, y su huevo o su leche cuando
-## ya están listos para recoger.
+## Globitos sobre los animales: comida si no han comido hoy, y lo que dan cuando ya está listo.
 func _actualizar_corral() -> void:
 	for animal in corral.animales:
-		var estado: Dictionary = Juego.corral.get(animal.especie, {"comio": -1, "listo": false})
-		if estado["listo"]:
-			animal.mostrar_burbuja(Granja.icono(Granja.datos["corral"][animal.especie]["producto"]))
+		var estado: Dictionary = Juego.corral.get(animal.get_meta(&"corral"), {"comio": -1, "listo": false})
+		var producto: String = Granja.datos["corral"][animal.especie]["producto"]
+		if estado["listo"] and not producto.is_empty():
+			animal.mostrar_burbuja(Granja.icono(producto))
 		elif int(estado["comio"]) != Juego.dia:
 			animal.mostrar_burbuja(Granja.icono("maiz"))
 		else:

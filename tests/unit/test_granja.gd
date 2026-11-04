@@ -289,6 +289,49 @@ func test_las_decoraciones_se_compran_se_ponen_donde_sea_y_no_se_pierden() -> vo
 	assert_eq(Granja.guardadas("cempasuchil"), 1, "Guardarla no la pierde")
 
 
+func test_se_compran_mas_animales_y_cada_uno_produce() -> void:
+	Juego.dar_hojas(40)
+	assert_false(Granja.comprar_animal("vaca"), "La vaca se vende desde el nivel 4")
+	assert_true(Granja.comprar_animal("gallina"))
+	assert_eq(Granja.animales_del_corral(), ["gallina", "gallina_2"] as Array[String])
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][3]))
+	assert_true(Granja.comprar_animal("vaca"))
+	Granja.atender("vaca")
+	Granja.atender("gallina_2")
+	_dia_siguiente()
+	Granja.atender("vaca")
+	Granja.atender("gallina_2")
+	assert_eq(Granja.cantidad("leche"), 2, "La vaca da 2 de leche")
+	assert_eq(Granja.cantidad("huevo"), 1, "La gallina comprada también pone")
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_has(Granja.animales_del_corral(), "vaca")
+
+
+func test_el_corral_tiene_limite() -> void:
+	Juego.dar_hojas(100)
+	for i in 20:
+		Granja.comprar_animal("gallina")
+	assert_eq(Granja.animales_del_corral().size(), Granja.ANIMALES_MAX)
+
+
+func test_el_abono_hace_crecer_mas_rapido_y_el_caballo_corre() -> void:
+	Granja.dar("semilla_maiz")
+	Granja.plantar(0, "maiz")
+	Granja.regar(0)
+	var antes := Granja.minutos_restantes(0)
+	assert_false(Granja.abonar(0), "Sin abono no se abona")
+	Granja.dar("abono")
+	assert_true(Granja.abonar(0))
+	assert_lt(Granja.minutos_restantes(0), antes)
+	Granja.crecer(float(Granja.datos["cultivos"]["maiz"]["horas"]) / 2.0)
+	assert_eq(int(Granja.parcela(0)["etapa"]), Granja.LISTO, "Con abono tarda la mitad")
+	var lento := Granja.factor_velocidad()
+	Juego.comprados.append("caballo")
+	assert_gt(Granja.factor_velocidad(), lento)
+
+
 func test_el_guajolote_llega_en_el_nivel_5() -> void:
 	assert_false(Granja.desbloqueado("guajolote", false))
 	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][4]))

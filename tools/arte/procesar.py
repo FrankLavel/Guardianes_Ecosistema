@@ -800,7 +800,32 @@ def decoraciones():
     )
 
 
-GRUPOS = {"decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+def animales_granja():
+    """Animales que se compran en el tianguis (vaca, cerdo, borrego, caballo): 4 cuadros caminando y uno
+    quieto, como el guajolote; los que todavía no tienen hoja se saltan. También el ícono de cada animal
+    del corral (su primer cuadro) y los de abono y lana."""
+    destino = ASSETS / "characters/animales/valle"
+    for nombre in ["vaca", "cerdo", "borrego", "caballo"]:
+        if not (arte.FUENTE / f"granja_{nombre}.png").exists():
+            continue
+        rgba = quitar_fondo(cargar(f"granja_{nombre}.png"))
+        cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+        construir_atlas(
+            cuadros, {"idle": ([4], 1.0, True), "caminar": ([0, 1, 2, 3], 7.0, True)},
+            (420, 320), destino / f"{nombre}_atlas.png", destino / f"{nombre}_frames.tres",
+            f"res://assets/characters/animales/valle/{nombre}_atlas.png", por_fila=4,
+        )
+    for nombre, cuadro in {"gallina": (360, 260), "cabra": (360, 300), "guajolote": (360, 300), "vaca": (420, 320),
+                           "cerdo": (420, 320), "borrego": (420, 320), "caballo": (420, 320)}.items():
+        atlas = destino / f"{nombre}_atlas.png"
+        if atlas.exists():
+            primero = Image.open(atlas).convert("RGBA").crop((0, 0) + cuadro)
+            guardar(primero.crop(primero.getbbox()), ASSETS / "ui/granja" / f"{nombre}.png")
+    if (arte.FUENTE / "granja_iconos3.png").exists():
+        objetos("granja_iconos3.png", ["abono", "lana"], "ui/granja")
+
+
+GRUPOS = {"animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:
