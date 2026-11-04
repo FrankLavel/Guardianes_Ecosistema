@@ -8,8 +8,11 @@ const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
 const GALLINERO := "res://assets/maps/valle/objetos/gallinero.png"
 ## Por donde caminan los animales, alrededor del centro (con tamaño 1).
 const PASEO := Vector2(270, 130)
-## Dónde está la puerta del gallinero (al fondo del corral).
-const PUERTA := Vector2(-60, 20)
+## Dónde va el gallinero (al fondo del corral, con tamaño 1), qué tan ancho es y dónde queda el pie de
+## su rampa (por donde entran las aves), contando desde el gallinero.
+const LUGAR_GALLINERO := Vector2(-70, 40)
+const ANCHO_GALLINERO := 170.0
+const RAMPA := Vector2(78, -4)
 
 var especie := "gallina"
 var animales: Array[AnimalValle] = []
@@ -46,14 +49,15 @@ func _poner_cerca() -> void:
 		var gallinero := Sprite2D.new()
 		gallinero.name = "Gallinero"
 		gallinero.texture = load(GALLINERO)
-		gallinero.scale = Vector2.ONE * 120.0 * tamano / gallinero.texture.get_width()
+		gallinero.scale = Vector2.ONE * ANCHO_GALLINERO * tamano / gallinero.texture.get_width()
 		gallinero.offset = Vector2(0, -gallinero.texture.get_height() / 2.0)
-		gallinero.position = puerta_local()
+		gallinero.position = LUGAR_GALLINERO * tamano
 		add_child(gallinero)
 
 
+## El pie de la rampa del gallinero.
 func puerta_local() -> Vector2:
-	return PUERTA * tamano
+	return (LUGAR_GALLINERO + RAMPA) * tamano
 
 
 ## Con 3 o 4 animales el corral se hace un poco más grande.
@@ -76,7 +80,7 @@ func paseo() -> Rect2:
 
 ## Lo que ocupa la cerca dibujada (cada tramo mide 274 x 184 con tamaño 1).
 func huella() -> Rect2:
-	return Rect2(global_position + Vector2(-280, -120) * tamano, Vector2(560, 280) * tamano)
+	return Rect2(global_position + Vector2(-280, -210) * tamano, Vector2(560, 370) * tamano)
 
 
 func contiene(punto: Vector2) -> bool:

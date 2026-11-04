@@ -843,6 +843,8 @@ def animales_granja():
         guardar(primero.crop(primero.getbbox()), ASSETS / "ui/granja" / f"{nombre}.png")
     if (arte.FUENTE / "granja_iconos3.png").exists():
         objetos("granja_iconos3.png", ["abono", "lana"], "ui/granja")
+    if (arte.FUENTE / "granja_gallinero.png").exists():
+        objetos("granja_gallinero.png", ["gallinero"], "maps/valle/objetos")
 
 
 GRUPOS = {"animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}

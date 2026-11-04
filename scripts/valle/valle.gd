@@ -390,14 +390,16 @@ func _quitar_adornos(zona: Rect2, solo: Array = []) -> void:
 			nodo.queue_free()
 
 
-## Donde no se puede poner nada en el modo decorar: la milpa, frente a la casa, el tianguis, el muelle,
-## el estanque de Achi y las entradas a las zonas.
+## Donde no se puede poner nada en el modo decorar: la milpa, el pasillo frente a la puerta de la casa,
+## el frente del tianguis y del muelle, el estanque de Achi y el pie de las entradas a las zonas. Solo
+## cuenta la base de cada cosa (lo que pisa), no su dibujo completo: el techo o un arco pueden tapar
+## algo que está detrás sin estorbarle. La casa y el puesto ya chocan con su propia base.
 func lugares_fijos() -> Array[Rect2]:
-	var lugares: Array[Rect2] = [_rect_milpa().grow(20), Rect2(PUERTA_CASA - Vector2(190, 330), Vector2(380, 440)),
-		Rect2(TIANGUIS - Vector2(130, 130), Vector2(260, 160)), Rect2(MUELLE - Vector2(110, 90), Vector2(220, 180)),
+	var lugares: Array[Rect2] = [_rect_milpa().grow(20), Rect2(PUERTA_CASA - Vector2(55, 20), Vector2(110, 90)),
+		Rect2(TIANGUIS - Vector2(110, 30), Vector2(220, 80)), Rect2(MUELLE - Vector2(80, 50), Vector2(160, 100)),
 		Rect2($Objetos/Achi.position - Vector2(170, 110), Vector2(340, 200))]
 	for entrada in entradas():
-		lugares.append(Rect2(entrada.position - Vector2(130, 170), Vector2(260, 230)))
+		lugares.append(Rect2(entrada.position - Vector2(100, 50), Vector2(200, 100)))
 	return lugares
 
 
