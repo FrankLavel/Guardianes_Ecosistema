@@ -25,6 +25,7 @@ var _cabe := false
 var _capa: CanvasLayer
 var _texto: Label
 var _guardar: Button
+var _girar: Button
 
 
 func _ready() -> void:
@@ -55,6 +56,8 @@ func _ready() -> void:
 	_texto.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	fila.add_child(_texto)
 	fila.add_child(_boton("TIENDA", _abrir_tienda))
+	_girar = _boton("GIRAR (R)", girar)
+	fila.add_child(_girar)
 	_guardar = _boton("GUARDAR", _guardar_cargada)
 	fila.add_child(_guardar)
 	fila.add_child(_boton("LISTO", salir))
@@ -108,6 +111,9 @@ func _unhandled_input(evento: InputEvent) -> void:
 		elif evento.button_index == MOUSE_BUTTON_RIGHT and _cargando:
 			_cancelar()
 		get_viewport().set_input_as_handled()
+	elif evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_R:
+		girar()
+		get_viewport().set_input_as_handled()
 	elif evento.is_action_pressed("pausa") or evento.is_action_pressed("ui_cancel") or evento.is_action_pressed("decorar"):
 		if _cargando:
 			_cancelar()
@@ -124,6 +130,13 @@ func _process(_delta: float) -> void:
 	_cargando.modulate = VERDE if _cabe else ROJO
 
 
+## Entra al modo decorar con `nodo` (que ya está en el valle) en la mano, para que el jugador elija dónde va.
+func acomodar(nodo: Node2D) -> void:
+	entrar()
+	if activo:
+		_tomar(nodo, false)
+
+
 ## Pone en la mano una decoración nueva (de la tienda) para soltarla donde se quiera.
 func empezar_nueva(id: String) -> void:
 	if _cargando:
@@ -138,8 +151,10 @@ func empezar_nueva(id: String) -> void:
 func _agarrar(punto: Vector2) -> void:
 	var elegido: Node2D
 	for nodo in get_tree().get_nodes_in_group(&"movible"):
-		# Si hay varias cosas bajo el mouse se agarra la más chica (la decoración, no el corral).
-		if nodo.contiene(punto) and (elegido == null or nodo.huella().get_area() < elegido.huella().get_area()):
+		# Si hay varias cosas bajo el mouse se agarra la más chica (la decoración, no el corral). Los
+		# árboles y rocas de fuera de la granja no se tocan.
+		if nodo.contiene(punto) and Granja.en_la_granja(nodo.huella()) \
+				and (elegido == null or nodo.huella().get_area() < elegido.huella().get_area()):
 			elegido = nodo
 	if elegido:
 		_tomar(elegido, false)
@@ -173,6 +188,7 @@ func _soltar() -> void:
 		else:
 			nodo.puesta["x"] = pos.x
 			nodo.puesta["y"] = pos.y
+		nodo.puesta["girada"] = nodo.girada
 	else:
 		Granja.fijar_posicion(nodo.clave, pos)
 	Sonido.efecto("correcto")
@@ -187,6 +203,13 @@ func _cancelar() -> void:
 	else:
 		_mover(_cargando, _origen)
 	_soltar_de_la_mano()
+
+
+## Voltea la decoración que va en la mano (como en un espejo).
+func girar() -> void:
+	if _cargando is Decoracion:
+		_cargando.girada = not _cargando.girada
+		Sonido.efecto("boton")
 
 
 func _guardar_cargada() -> void:
@@ -223,14 +246,16 @@ func _mover(nodo: Node2D, destino: Vector2) -> void:
 
 func _actualizar_barra() -> void:
 	_guardar.visible = _cargando is Decoracion
+	_girar.visible = _cargando is Decoracion
 	if _cargando:
 		_texto.text = "Clic para soltar donde esté verde.  Clic derecho o Esc: regresar."
 	else:
 		_texto.text = "Modo decorar: haz clic en una decoración, el corral o un taller para moverlo, o en un terreno azul para expandir la granja."
 
 
-## Si `nodo` cabe donde está ahora.
-func cabe(nodo: Node2D) -> bool:
+## Si `nodo` cabe donde está ahora. `ignorar`: adornos del valle (por nombre, p. ej. "Tocon") que no
+## estorban porque se pueden quitar.
+func cabe(nodo: Node2D, ignorar: Array = []) -> bool:
 	var huella: Rect2 = nodo.huella()
 	if not Rect2(Vector2(60, 60), tamano - Vector2(120, 120)).encloses(huella) or not Granja.en_la_granja(huella):
 		return false
@@ -238,7 +263,7 @@ func cabe(nodo: Node2D) -> bool:
 		if zona.intersects(huella):
 			return false
 	for otro in get_tree().get_nodes_in_group(&"movible"):
-		if otro != nodo and otro.huella().intersects(huella):
+		if otro != nodo and otro.huella().intersects(huella) and not _ignorado(otro, ignorar):
 			return false
 	# Los árboles, las rocas, el río y la casa tienen cuerpo; los animales y el guardián no estorban.
 	var forma := RectangleShape2D.new()
@@ -246,9 +271,15 @@ func cabe(nodo: Node2D) -> bool:
 	var consulta := PhysicsShapeQueryParameters2D.new()
 	consulta.shape = forma
 	consulta.transform = Transform2D(0.0, huella.get_center())
+	if nodo is StaticBody2D:
+		consulta.exclude.append(nodo.get_rid())
 	for cuerpo in nodo.find_children("*", "StaticBody2D", true, false):
 		consulta.exclude.append(cuerpo.get_rid())
 	for choque in get_world_2d().direct_space_state.intersect_shape(consulta, 16):
-		if not choque["collider"] is CharacterBody2D:
+		if not choque["collider"] is CharacterBody2D and not _ignorado(choque["collider"], ignorar):
 			return false
 	return true
+
+
+func _ignorado(nodo: Node, ignorar: Array) -> bool:
+	return String(nodo.name).rstrip("0123456789") in ignorar

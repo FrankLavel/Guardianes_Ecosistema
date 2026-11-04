@@ -377,7 +377,8 @@
 			"costo": 3,
 			"nivel": 1,
 			"escala": 0.2,
-			"dato": "Las gallinas comen semillas e insectos; sus huevos se recogen cada mañana."
+			"dato": "Las gallinas comen semillas e insectos; sus huevos se recogen cada mañana.",
+			"corral": 0.6
 		},
 		"cabra": {
 			"nombre": "Cabra",
@@ -386,7 +387,8 @@
 			"costo": 5,
 			"nivel": 3,
 			"escala": 0.3,
-			"dato": "Las cabras dan leche y comen hierbas que otros animales no comen."
+			"dato": "Las cabras dan leche y comen hierbas que otros animales no comen.",
+			"corral": 0.7
 		},
 		"cerdo": {
 			"nombre": "Cerdo",
@@ -395,7 +397,8 @@
 			"costo": 6,
 			"nivel": 3,
 			"escala": 0.34,
-			"dato": "El estiércol del cerdo, hecho composta, es abono: alimenta la tierra y la milpa crece más rápido."
+			"dato": "El estiércol del cerdo, hecho composta, es abono: alimenta la tierra y la milpa crece más rápido.",
+			"corral": 0.7
 		},
 		"vaca": {
 			"nombre": "Vaca",
@@ -404,7 +407,8 @@
 			"costo": 9,
 			"nivel": 4,
 			"escala": 0.42,
-			"dato": "Una vaca da mucha leche, pero necesita bastante agua y pasto: hay que cuidarla bien."
+			"dato": "Una vaca da mucha leche, pero necesita bastante agua y pasto: hay que cuidarla bien.",
+			"corral": 0.85
 		},
 		"guajolote": {
 			"nombre": "Guajolote",
@@ -413,7 +417,8 @@
 			"costo": 5,
 			"nivel": 5,
 			"escala": 0.24,
-			"dato": "El guajolote es un ave de México: los pueblos antiguos ya lo criaban hace miles de años."
+			"dato": "El guajolote es un ave de México: los pueblos antiguos ya lo criaban hace miles de años.",
+			"corral": 0.62
 		},
 		"borrego": {
 			"nombre": "Borrego",
@@ -422,7 +427,8 @@
 			"costo": 7,
 			"nivel": 5,
 			"escala": 0.3,
-			"dato": "La lana se trasquila sin lastimar al borrego y le vuelve a crecer; con ella se tejen sarapes."
+			"dato": "La lana se trasquila sin lastimar al borrego y le vuelve a crecer; con ella se tejen sarapes.",
+			"corral": 0.72
 		},
 		"caballo": {
 			"nombre": "Caballo",
@@ -431,7 +437,8 @@
 			"costo": 12,
 			"nivel": 6,
 			"escala": 0.45,
-			"dato": "El caballo ayudaba a cargar y a viajar por el campo. Con él caminas más rápido por el valle."
+			"dato": "El caballo ayudaba a cargar y a viajar por el campo. Con él caminas más rápido por el valle.",
+			"corral": 0.85
 		}
 	},
 	"semillas_tianguis": {

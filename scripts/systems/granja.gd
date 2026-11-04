@@ -32,9 +32,8 @@ const PROB_CRIA := 0.3
 const SILVESTRES_POR_DIA := 6
 ## Tandas que un taller guarda listas antes de pararse (la colmena deja de hacer miel si no la recoges).
 const TANDAS_MAX := 3
-## Cuántos animales caben en el corral (crece solo hasta este tamaño) y cuánto más rápido se camina
-## con caballo.
-const ANIMALES_MAX := 9
+## Cuántos animales de cada especie caben en su corral y cuánto más rápido se camina con caballo.
+const ANIMALES_POR_ESPECIE := 4
 const VELOCIDAD_CABALLO := 1.35
 const CUADROS_ANIMAL := "res://assets/characters/animales/valle/%s_frames.tres"
 ## El valle (2800 x 1800) en terrenos de 350 x 300. La granja empieza con los del centro (donde están la
@@ -353,7 +352,7 @@ func se_vende(especie: String) -> bool:
 
 func comprar_animal(especie: String) -> bool:
 	var dato: Dictionary = datos["corral"][especie]
-	if nivel() < int(dato["nivel"]) or animales_del_corral().size() >= ANIMALES_MAX \
+	if nivel() < int(dato["nivel"]) or animales_de(especie) >= ANIMALES_POR_ESPECIE \
 			or not Juego.gastar_hojas(int(dato["costo"])):
 		return false
 	Juego.comprados.append(especie)
@@ -925,19 +924,55 @@ func _se_puede_abrir() -> bool:
 
 func abrir_mochila() -> void:
 	_abrir("mochila", "Mochila")
-	_contenido.add_child(_texto("Energía: %d / 100" % int(Juego.energia), 28, Color(0.8, 1, 0.7)))
-	if Juego.inventario.is_empty():
+	_contenido.add_child(_estado_energia())
+	var cosas := Juego.inventario.keys().filter(func(id): return cantidad(id) > 0)
+	if cosas.is_empty():
 		_contenido.add_child(_texto("Tu mochila está vacía. Siembra, recolecta plantas en el valle o pesca en el muelle del río."))
 		return
-	var rejilla := GridContainer.new()
-	rejilla.columns = 2
-	rejilla.add_theme_constant_override("h_separation", 40)
-	rejilla.add_theme_constant_override("v_separation", 8)
-	for id in Juego.inventario:
+	var rejilla := _rejilla()
+	for id in cosas:
 		var energia := int(datos["objetos"].get(id, {}).get("energia", 0))
-		rejilla.add_child(_fila(id, "%s  x%d" % [nombre(id), cantidad(id)],
-			"COMER (+%d)" % energia if energia > 0 else "", func(): comer(id); abrir_mochila()))
-	_contenido.add_child(rejilla)
+		var nota := "+%d de energía" % energia if energia > 0 else ""
+		rejilla.add_child(_tarjeta(id, "%s  ×%d" % [nombre(id), cantidad(id)], {}, nota, "COMER" if energia > 0 else "",
+			energia > 0, 1, func(): comer(id); abrir_mochila(), _para_que_sirve(id)))
+
+
+func _para_que_sirve(id: String) -> String:
+	if id.begins_with("semilla_"):
+		return "Siémbrala en un surco de la milpa."
+	if id in Juego.recetario or datos["recetas"].any(func(r): return r["id"] == id):
+		return "Un platillo: cómetelo o entrégalo en el tianguis."
+	match id:
+		"abono":
+			return "Échalo a la milpa para que crezca el doble de rápido."
+		"lena":
+			return "Para prender el fogón y para expandir la granja."
+		"masa", "queso", "miel", "leche", "huevo":
+			return "Para cocinar en el fogón o para los pedidos del tianguis."
+	return "Para cocinar o para los pedidos del tianguis."
+
+
+## Arriba de la mochila: la energía del guardián.
+func _estado_energia() -> PanelContainer:
+	var caja := PanelContainer.new()
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.22, 0.14, 0.08, 0.9)
+	estilo.border_color = Color(0.55, 0.38, 0.18)
+	estilo.set_border_width_all(3)
+	estilo.set_corner_radius_all(10)
+	estilo.set_content_margin_all(12)
+	caja.add_theme_stylebox_override("panel", estilo)
+	var columna := VBoxContainer.new()
+	caja.add_child(columna)
+	columna.add_child(_texto("Energía: %d / 100" % int(Juego.energia), 28, Color(0.99, 0.86, 0.45)))
+	var barra := ProgressBar.new()
+	barra.custom_minimum_size = Vector2(0, 22)
+	barra.max_value = 100
+	barra.value = Juego.energia
+	barra.show_percentage = false
+	columna.add_child(barra)
+	columna.add_child(_texto("Comer platillos te da más energía que comer cosas sueltas.", 20, Color(0.85, 0.95, 0.8)))
+	return caja
 
 
 ## Elegir qué sembrar en la parcela `i`. `al_plantar` se llama después de sembrar.
@@ -1300,18 +1335,18 @@ func abrir_tianguis() -> void:
 			"", "ENTREGAR", puede_entregar(pedido), 1, func(): entregar(i); abrir_tianguis(),
 			"Te da %d hojas y %d de experiencia." % [int(pedido["hojas"]), int(pedido["xp"])],
 			"CAMBIAR", func(): cambiar_pedido(i); abrir_tianguis()))
-	_contenido.add_child(_texto("Animales para tu corral (%d / %d)" % [animales_del_corral().size(), ANIMALES_MAX],
-		28, Color(0.99, 0.86, 0.45)))
+	_contenido.add_child(_texto("Animales (cada especie tiene su corral)", 28, Color(0.99, 0.86, 0.45)))
 	var animales := _rejilla()
-	var lleno := animales_del_corral().size() >= ANIMALES_MAX
 	for especie in datos["corral"]:
+		var lleno := animales_de(especie) >= ANIMALES_POR_ESPECIE
 		if not se_vende(especie):
 			continue
 		var dato: Dictionary = datos["corral"][especie]
 		var costo := int(dato["costo"])
 		var da := "No da nada, pero te lleva más rápido." if dato["producto"].is_empty() else \
 			"Si le das de comer, al otro día da %d de %s." % [int(dato["cantidad"]), nombre(dato["producto"]).to_lower()]
-		var nota := "El corral está lleno" if lleno else "Tienes %d · cuesta %d hojas" % [animales_de(especie), costo]
+		var nota := "Su corral está lleno (%d)" % ANIMALES_POR_ESPECIE if lleno else \
+			"Tienes %d de %d · cuesta %d hojas" % [animales_de(especie), ANIMALES_POR_ESPECIE, costo]
 		animales.add_child(_tarjeta(especie, dato["nombre"], {}, nota, "COMPRAR", not lleno and Juego.hojas >= costo,
 			int(dato["nivel"]), func(): comprar_animal(especie); abrir_tianguis(), dato["dato"] + " " + da))
 	_contenido.add_child(_texto("Semillas", 28, Color(0.99, 0.86, 0.45)))

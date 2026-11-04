@@ -16,8 +16,13 @@ const PUERTA_CASA := Vector2(1615, 905)
 const MILPA := Vector2(1556, 294)
 const COLUMNAS_MILPA := 4
 const SEPARACION_MILPA := Vector2(136, 96)
-## Centro del corral si el jugador no lo ha movido (ver Corral).
+## Centro del corral de las gallinas si el jugador no lo ha movido; los corrales de las otras especies
+## buscan un lugar libre cerca de aquí (ver Corral).
 const CORRAL := Vector2(1375, 1195)
+const ADORNOS_MOVIBLES := ["ArbustoFlores", "Encino", "Oyamel", "Piedras", "RocaGrande", "Sabino", "Tocon"]
+## Lo que se puede quitar para hacerle lugar a un corral nuevo (los árboles y las rocas grandes no).
+const ADORNOS_CHICOS := ["ArbustoFlores", "Piedras", "Tocon"]
+const ADORNO := preload("res://scripts/valle/adorno.gd")
 const MUELLE := Vector2(800, 760)
 ## Puesto del tianguis, junto al cruce de caminos.
 const TIANGUIS := Vector2(1690, 1075)
@@ -65,7 +70,8 @@ var _noche: CanvasModulate
 var _luz_casa: PointLight2D
 var _aviso_hambre := false
 var _suelo_milpa: MilpaSuelo
-var corral: Corral
+## Un corral por especie (especie -> Corral).
+var corrales: Dictionary = {}
 var decorador: Decorador
 
 
@@ -138,6 +144,12 @@ func _ready() -> void:
 func _crear_granja() -> void:
 	if not Juego.zona_esta_completa("rio"):
 		return
+	# Los árboles, arbustos y rocas del valle se pueden mover en el modo decorar (dentro de la granja).
+	for nodo in $Objetos.get_children():
+		if nodo is StaticBody2D and String(nodo.name).rstrip("0123456789") in ADORNOS_MOVIBLES:
+			nodo.position = Granja.posicion("adorno:" + nodo.name, nodo.position)
+			nodo.set_script(ADORNO)
+			nodo.add_to_group(&"movible")
 	# Partidas de antes de la granja: se les dan las semillas de las zonas que ya restauraron.
 	for zona in Juego.zonas_completadas:
 		Granja.dar_semillas_de(zona)
@@ -147,13 +159,6 @@ func _crear_granja() -> void:
 		if nodo is StaticBody2D and milpa.has_point(nodo.position):
 			nodo.queue_free()
 	_poner_parcelas()
-	# Corral (donde lo dejó el jugador). Los adornos del valle que le caen encima se quitan.
-	corral = Corral.new()
-	corral.name = "Corral"
-	corral.position = Granja.posicion("corral", CORRAL)
-	_quitar_adornos(corral.huella().grow(30))
-	$Objetos.add_child(corral)
-	_poner_corral()
 	var muelle: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 	muelle.name = "Pescar"
 	muelle.texto_aviso = "E  Pescar"
@@ -221,9 +226,11 @@ func _crear_granja() -> void:
 	terrenos.decorador = decorador
 	add_child(terrenos)
 	move_child(terrenos, $Objetos.get_index())
+	_poner_corral()
 	_actualizar_prohibido()
 	_poner_silvestres()
 	Granja.corral_cambio.connect(_poner_corral)
+	Juego.noche_cambio.connect(_dormir_aves)
 	Juego.dia_cambio.connect(_al_cambiar_dia)
 	Granja.nivel_subio.connect(_al_subir_nivel)
 
@@ -252,45 +259,117 @@ func _poner_parcelas() -> void:
 		$Objetos.add_child(parcela)
 
 
-## Los animales del corral (ver Granja.animales_del_corral): los regalados al subir de nivel y los que
-## se compran en el tianguis. El corral crece cuando son más.
+## Los animales de la granja (ver Granja.animales_del_corral): los regalados al subir de nivel y los
+## que se compran en el tianguis. Cada especie tiene su corral; el de una especie nueva busca solo un
+## lugar libre dentro de la granja.
 func _poner_corral() -> void:
 	var lista := Granja.animales_del_corral()
-	# Primero crece el corral, para repartir a los animales en todo su espacio.
-	var antes := corral.huella()
-	corral.ajustar(lista.size())
-	for i in lista.size():
-		var id := lista[i]
-		var especie := Granja.especie_de(id)
-		var cuadros := Granja.CUADROS_ANIMAL % especie
-		if $Objetos.has_node(id.to_pascal_case()) or not ResourceLoader.exists(cuadros):
+	for especie in Granja.datos["corral"]:
+		var ids := lista.filter(func(id): return Granja.especie_de(id) == especie)
+		if ids.is_empty() or not ResourceLoader.exists(Granja.CUADROS_ANIMAL % especie):
 			continue
-		var dato: Dictionary = Granja.datos["corral"][especie]
-		var animal: AnimalValle = ESCENA_ANIMAL.instantiate()
-		animal.name = id.to_pascal_case()
-		animal.set_meta(&"corral", id)
-		animal.especie = especie
-		animal.cuadros = load(cuadros)
-		animal.anim_quieto = &"idle"
-		animal.anim_caminar = &"caminar"
-		animal.escala = float(dato["escala"])
-		animal.velocidad = 30.0
-		# Cada uno empieza en otro lugar del corral para que no se encimen.
-		var paseo := corral.paseo()
-		animal.position = paseo.position + paseo.size * Vector2(randf_range(0.1, 0.9), randf_range(0.15, 0.85))
-		animal.texto_aviso = "E  " + dato["nombre"]
-		animal.hablaron.connect(_atender_corral)
-		corral.agregar(animal)
-		$Objetos.add_child(animal)
-	if corral.huella() != antes:
-		_quitar_adornos(corral.huella().grow(30))
-		_al_mover_en_granja(corral)
-		_avisar_si_no_cabe()
+		var corral: Corral = corrales.get(especie)
+		if corral == null:
+			corral = Corral.new()
+			corral.especie = especie
+			corral.name = "Corral_" + especie
+			corral.base = float(Granja.datos["corral"][especie].get("corral", 1.0))
+			corral.con_gallinero = especie in ["gallina", "guajolote"]
+			corral.ajustar(ids.size())
+			corrales[especie] = corral
+			var guardado := Juego.posiciones.has(corral.clave)
+			corral.position = Granja.posicion(corral.clave, CORRAL)
+			$Objetos.add_child(corral)
+			if not guardado and especie != "gallina":
+				await _buscar_lugar(corral)
+				_quitar_adornos(corral.huella(), ADORNOS_CHICOS)
+			else:
+				_quitar_adornos(corral.huella().grow(30))
+			_al_mover_en_granja(corral)
+		var antes := corral.huella()
+		corral.ajustar(ids.size())
+		for i in ids.size():
+			_poner_animal(ids[i], corral)
+		if corral.huella() != antes:
+			_quitar_adornos(corral.huella().grow(30))
+			_al_mover_en_granja(corral)
+			_avisar_si_no_cabe(corral)
 	_actualizar_corral()
+	_dormir_aves(Juego.es_de_noche, true)
+
+
+func _poner_animal(id: String, corral: Corral) -> void:
+	if $Objetos.has_node(id.to_pascal_case()):
+		return
+	var especie := Granja.especie_de(id)
+	var dato: Dictionary = Granja.datos["corral"][especie]
+	var animal: AnimalValle = ESCENA_ANIMAL.instantiate()
+	animal.name = id.to_pascal_case()
+	animal.set_meta(&"corral", id)
+	animal.especie = especie
+	animal.cuadros = load(Granja.CUADROS_ANIMAL % especie)
+	animal.anim_quieto = &"idle"
+	animal.anim_caminar = &"caminar"
+	animal.escala = float(dato["escala"])
+	animal.velocidad = 30.0
+	# Cada uno empieza en otro lugar del corral para que no se encimen.
+	var paseo := corral.paseo()
+	animal.position = paseo.position + paseo.size * Vector2(randf_range(0.1, 0.9), randf_range(0.15, 0.85))
+	animal.texto_aviso = "E  " + dato["nombre"]
+	animal.hablaron.connect(_atender_corral)
+	corral.agregar(animal)
+	$Objetos.add_child(animal)
+
+
+## Busca en toda la granja, empezando cerca del corral de las gallinas, el primer lugar donde cabe un
+## corral nuevo.
+func _buscar_lugar(corral: Corral) -> void:
+	await get_tree().physics_frame
+	var lugares: Array[Vector2] = []
+	for x in range(0, int(TAMANO.x), 50):
+		for y in range(0, int(TAMANO.y), 50):
+			lugares.append(Vector2(x, y))
+	lugares.sort_custom(func(a: Vector2, b: Vector2): return a.distance_squared_to(CORRAL) < b.distance_squared_to(CORRAL))
+	# Primero donde no hay nada; si no, donde solo estorban arbustos, tocones o piedras chicas.
+	for ignorar in [[], ADORNOS_CHICOS]:
+		for lugar in lugares:
+			corral.mover_a(lugar)
+			if decorador.cabe(corral, ignorar):
+				Granja.fijar_posicion(corral.clave, corral.global_position)
+				return
+	corral.mover_a(CORRAL + Vector2(0, 280))
+	avisar("Ya no hay lugar libre en tu granja: elige dónde va el corral nuevo, o expande tu granja.")
+	decorador.acomodar(corral)
+
+
+## De noche las aves se meten a su gallinero y en la mañana salen (los demás se quedan en su corral).
+func _dormir_aves(es_noche: bool, al_instante := false) -> void:
+	for corral: Corral in corrales.values():
+		if not corral.con_gallinero:
+			continue
+		var puerta := corral.global_position + corral.puerta_local()
+		for animal in corral.animales:
+			if es_noche == not animal.visible:
+				continue
+			if es_noche:
+				animal.esperar()
+				animal.monitoring = false
+				gara.quitar_interactuable(animal)
+				if al_instante:
+					animal.visible = false
+					continue
+				var entrar := animal.create_tween()
+				entrar.tween_property(animal, "global_position", puerta, randf_range(1.2, 2.2))
+				entrar.tween_callback(func(): animal.visible = false)
+			else:
+				animal.global_position = puerta
+				animal.visible = true
+				animal.monitoring = true
+				animal.volver_a_pasear()
 
 
 ## Los árboles que quitó el corral al crecer desaparecen hasta el siguiente cuadro de física.
-func _avisar_si_no_cabe() -> void:
+func _avisar_si_no_cabe(corral: Corral) -> void:
 	await get_tree().physics_frame
 	if decorador and not decorador.cabe(corral):
 		avisar("¡Tu corral creció! Si quedó encimado con algo, muévelo con el modo decorar (C).")
@@ -298,21 +377,23 @@ func _avisar_si_no_cabe() -> void:
 
 func _al_subir_nivel(nivel: int, texto: String) -> void:
 	_poner_parcelas()
-	_poner_corral()
+	if decorador:
+		_poner_corral()
 	hud.mostrar_objetivo("¡Subiste al nivel %d!%s" % [nivel, "  Desbloqueaste: " + texto if not texto.is_empty() else ""], 7.0)
 
 
-## Quita los adornos del valle (árboles, arbustos, rocas) cuyo pie cae en `zona`.
-func _quitar_adornos(zona: Rect2) -> void:
+## Quita los adornos del valle (árboles, arbustos, rocas) cuyo pie cae en `zona`; con `solo`, nada más
+## los de esos tipos.
+func _quitar_adornos(zona: Rect2, solo: Array = []) -> void:
 	for nodo in $Objetos.get_children():
-		if nodo is StaticBody2D and not nodo.name.begins_with("Casa") and zona.has_point(nodo.position):
+		if nodo is StaticBody2D and not nodo.name.begins_with("Casa") and zona.has_point(nodo.position) 				and (solo.is_empty() or String(nodo.name).rstrip("0123456789") in solo):
 			nodo.queue_free()
 
 
 ## Donde no se puede poner nada en el modo decorar: la milpa, frente a la casa, el tianguis, el muelle,
 ## el estanque de Achi y las entradas a las zonas.
 func lugares_fijos() -> Array[Rect2]:
-	var lugares: Array[Rect2] = [_rect_milpa().grow(20), Rect2(PUERTA_CASA - Vector2(90, 30), Vector2(180, 110)),
+	var lugares: Array[Rect2] = [_rect_milpa().grow(20), Rect2(PUERTA_CASA - Vector2(190, 330), Vector2(380, 440)),
 		Rect2(TIANGUIS - Vector2(130, 130), Vector2(260, 160)), Rect2(MUELLE - Vector2(110, 90), Vector2(220, 180)),
 		Rect2($Objetos/Achi.position - Vector2(170, 110), Vector2(340, 200))]
 	for entrada in entradas():
@@ -324,11 +405,18 @@ func _rect_milpa() -> Rect2:
 	return Rect2(MILPA - SEPARACION_MILPA / 2.0, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, Granja.PARCELAS_MAX / COLUMNAS_MILPA))
 
 
-## Los animales del valle no pisan la milpa, el corral ni los talleres (estén donde estén).
+func _animales_de_corral() -> Array[AnimalValle]:
+	var lista: Array[AnimalValle] = []
+	for corral: Corral in corrales.values():
+		lista.append_array(corral.animales)
+	return lista
+
+
+## Los animales del valle no pisan la milpa, los corrales ni los talleres (estén donde estén).
 func _actualizar_prohibido() -> void:
 	var zonas: Array[Rect2] = [_rect_milpa().grow(16)]
 	for nodo in get_tree().get_nodes_in_group(&"movible"):
-		if not nodo is Decoracion:
+		if nodo is Corral or nodo is Taller:
 			zonas.append(nodo.huella().grow(30))
 	for animal in animales:
 		animal.prohibido = zonas.duplicate()
@@ -408,7 +496,7 @@ func _atender_corral(animal: AnimalValle) -> void:
 
 ## Globitos sobre los animales: comida si no han comido hoy, y lo que dan cuando ya está listo.
 func _actualizar_corral() -> void:
-	for animal in corral.animales:
+	for animal in _animales_de_corral():
 		var estado: Dictionary = Juego.corral.get(animal.get_meta(&"corral"), {"comio": -1, "listo": false})
 		var producto: String = Granja.datos["corral"][animal.especie]["producto"]
 		if estado["listo"] and not producto.is_empty():

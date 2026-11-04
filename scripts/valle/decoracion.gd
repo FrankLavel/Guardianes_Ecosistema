@@ -9,6 +9,13 @@ var id := "cempasuchil"
 ## Lo que quedó guardado en Juego.decoraciones["puestas"] ({} mientras todavía está en la mano).
 var puesta: Dictionary = {}
 
+## Volteada como en un espejo (botón GIRAR del modo decorar).
+var girada := false:
+	set(valor):
+		girada = valor
+		if _dibujo:
+			_dibujo.flip_h = valor
+
 var _dibujo: Sprite2D
 var _luz: PointLight2D
 
@@ -20,6 +27,7 @@ func _ready() -> void:
 	_dibujo.scale = Vector2.ONE * _ancho() / _dibujo.texture.get_width()
 	_dibujo.offset = Vector2(0, -_dibujo.texture.get_height() / 2.0)
 	add_child(_dibujo)
+	girada = bool(puesta.get("girada", girada))
 	if id == "farol":
 		var degradado := Gradient.new()
 		degradado.set_color(0, Color(1, 0.85, 0.5, 1))

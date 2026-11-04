@@ -313,7 +313,7 @@ func test_el_corral_tiene_limite() -> void:
 	Juego.dar_hojas(100)
 	for i in 20:
 		Granja.comprar_animal("gallina")
-	assert_eq(Granja.animales_del_corral().size(), Granja.ANIMALES_MAX)
+	assert_eq(Granja.animales_de("gallina"), Granja.ANIMALES_POR_ESPECIE, "Cada corral tiene su límite")
 
 
 func test_el_abono_hace_crecer_mas_rapido_y_el_caballo_corre() -> void:
