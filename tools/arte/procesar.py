@@ -808,7 +808,8 @@ def animales_granja():
     for nombre in ["vaca", "cerdo", "borrego", "caballo"]:
         if not (arte.FUENTE / f"granja_{nombre}.png").exists():
             continue
-        rgba = quitar_fondo(cargar(f"granja_{nombre}.png"))
+        # Sin quitar huecos: lo blanco de adentro (manchas de la vaca, lana) es del animal.
+        rgba = quitar_fondo(cargar(f"granja_{nombre}.png"), huecos=False)
         cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
         construir_atlas(
             cuadros, {"idle": ([4], 1.0, True), "caminar": ([0, 1, 2, 3], 7.0, True)},
@@ -822,7 +823,7 @@ def animales_granja():
             primero = Image.open(atlas).convert("RGBA").crop((0, 0) + cuadro)
             guardar(primero.crop(primero.getbbox()), ASSETS / "ui/granja" / f"{nombre}.png")
     if (arte.FUENTE / "granja_iconos3.png").exists():
-        objetos("granja_iconos3.png", ["abono", "lana"], "ui/granja")
+        objetos("granja_iconos3.png", ["abono", "lana"], "ui/granja", huecos=False)
 
 
 GRUPOS = {"animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}

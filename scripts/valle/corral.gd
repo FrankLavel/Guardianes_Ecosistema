@@ -5,7 +5,7 @@ extends Node2D
 
 const CERCA := preload("res://assets/maps/valle/objetos/cerca.png")
 ## Por donde caminan los animales, alrededor del centro.
-const PASEO := Vector2(240, 120)
+const PASEO := Vector2(270, 130)
 
 ## Con qué nombre se guarda dónde quedó (ver Granja.posicion).
 const clave := "corral"
