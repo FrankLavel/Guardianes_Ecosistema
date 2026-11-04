@@ -1,32 +1,36 @@
-[gd_resource type="SpriteFrames" load_steps=7 format=3]
+[gd_resource type="SpriteFrames" load_steps=8 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/characters/animales/valle/borrego_atlas.png" id="1_atlas"]
 
 [sub_resource type="AtlasTexture" id="c0"]
 atlas = ExtResource("1_atlas")
-region = Rect2(0, 0, 420, 320)
+region = Rect2(0, 0, 426, 333)
 
 [sub_resource type="AtlasTexture" id="c1"]
 atlas = ExtResource("1_atlas")
-region = Rect2(420, 0, 420, 320)
+region = Rect2(426, 0, 426, 333)
 
 [sub_resource type="AtlasTexture" id="c2"]
 atlas = ExtResource("1_atlas")
-region = Rect2(840, 0, 420, 320)
+region = Rect2(852, 0, 426, 333)
 
 [sub_resource type="AtlasTexture" id="c3"]
 atlas = ExtResource("1_atlas")
-region = Rect2(1260, 0, 420, 320)
+region = Rect2(1278, 0, 426, 333)
 
 [sub_resource type="AtlasTexture" id="c4"]
 atlas = ExtResource("1_atlas")
-region = Rect2(0, 320, 420, 320)
+region = Rect2(0, 333, 426, 333)
+
+[sub_resource type="AtlasTexture" id="c5"]
+atlas = ExtResource("1_atlas")
+region = Rect2(426, 333, 426, 333)
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c4")
+"texture": SubResource("c5")
 }],
 "loop": true,
 "name": &"idle",
@@ -44,6 +48,9 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("c4")
 }],
 "loop": true,
 "name": &"caminar",

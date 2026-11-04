@@ -787,47 +787,62 @@ def granja() -> None:
     objetos("granja_tianguis.jpg", ["tianguis"], "maps/valle/objetos")
 
 
+def en_orden(rgba: np.ndarray) -> list[dict]:
+    """Objetos de una hoja en orden de lectura: por filas de arriba abajo y en cada fila de izquierda a derecha."""
+    filas: list[list[dict]] = []
+    for o in sorted(separar_objetos(rgba), key=lambda o: o["caja"][1]):
+        centro = (o["caja"][1] + o["caja"][3]) / 2
+        if filas and filas[-1][0]["caja"][1] <= centro <= filas[-1][0]["caja"][3]:
+            filas[-1].append(o)
+        else:
+            filas.append([o])
+    return [o for fila in filas for o in sorted(fila, key=lambda o: o["caja"][0])]
+
+
 def decoraciones():
-    """Fase 3: decoraciones de la granja (sprite en el valle e ícono del panel) y el guajolote del corral."""
-    # Orden en que separar_objetos encuentra las piezas de la hoja.
-    nombres = ["espantapajaros", "farol", "cempasuchil", "banca", "olla_barro", "bebedero"]
-    for nombre, pieza in objetos("granja_decoraciones.png", nombres, "maps/valle/decoraciones", orilla_blanca=True).items():
-        guardar(pieza, ASSETS / "ui/granja" / f"{nombre}.png")
-    # Guajolote: 4 cuadros caminando y uno quieto, como la cabra.
-    rgba = sin_orilla_blanca(quitar_fondo(cargar("granja_guajolote.png")))
-    cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
-    destino = ASSETS / "characters/animales/valle"
-    construir_atlas(
-        cuadros, {"idle": ([4], 1.0, True), "caminar": ([0, 1, 2, 3], 7.0, True)},
-        (360, 300), destino / "guajolote_atlas.png", destino / "guajolote_frames.tres",
-        "res://assets/characters/animales/valle/guajolote_atlas.png", por_fila=4,
-    )
+    """Fase 3: decoraciones de la granja (sprite en el valle e ícono del panel), de una hoja en fondo magenta.
+    La hoja trae la olla dos veces: la segunda se ignora."""
+    rgba = quitar_fondo(cargar("granja_decoraciones.png"))
+    nombres = ["cempasuchil", "banca", "espantapajaros", "olla_barro", None, "farol", "bebedero"]
+    objs = en_orden(rgba)
+    if len(objs) != len(nombres):
+        raise SystemExit(f"granja_decoraciones.png: se esperaban {len(nombres)} objetos y se encontraron {len(objs)}")
+    for nombre, o in zip(nombres, objs):
+        if nombre:
+            pieza = recortar(rgba, o)
+            guardar(pieza, ASSETS / "maps/valle/decoraciones" / f"{nombre}.png")
+            guardar(pieza, ASSETS / "ui/granja" / f"{nombre}.png")
+
+
+## Alto en pixeles de cada animal en su atlas: así se ven del mismo tamaño en el juego aunque la hoja
+## nueva venga a otra escala (las escalas de data/granja.json se calibraron con estos altos).
+ALTO_ANIMAL = {"vaca": 252, "cerdo": 165, "borrego": 313, "caballo": 232, "guajolote": 292}
 
 
 def animales_granja():
-    """Animales que se compran en el tianguis (vaca, cerdo, borrego, caballo): 4 cuadros caminando y uno
-    quieto, como el guajolote; los que todavía no tienen hoja se saltan. También el ícono de cada animal
-    del corral (su primer cuadro) y los de abono y lana."""
+    """Animales del corral con hoja en fondo magenta (guajolote, vaca, cerdo, borrego, caballo): todos los
+    cuadros caminan menos el último, que es el quieto. También el ícono de cada animal del corral (su
+    primer cuadro) y los de abono y lana."""
     destino = ASSETS / "characters/animales/valle"
-    for nombre in ["vaca", "cerdo", "borrego", "caballo"]:
+    for nombre, alto in ALTO_ANIMAL.items():
         if not (arte.FUENTE / f"granja_{nombre}.png").exists():
             continue
-        # Sin quitar huecos: lo blanco de adentro (manchas de la vaca, lana) es del animal.
-        rgba = sin_orilla_blanca(quitar_fondo(cargar(f"granja_{nombre}.png"), huecos=False))
-        cuadros = [recortar(rgba, o) for o in separar_objetos(rgba)]
+        rgba = quitar_fondo(cargar(f"granja_{nombre}.png"))
+        cuadros = [recortar(rgba, o) for o in en_orden(rgba)]
+        escala = alto / max(c.height for c in cuadros)
+        cuadros = [c.resize((round(c.width * escala), round(c.height * escala)), Image.Resampling.LANCZOS) for c in cuadros]
+        celda = (max(c.width for c in cuadros) + 20, max(c.height for c in cuadros) + 20)
         construir_atlas(
-            cuadros, {"idle": ([4], 1.0, True), "caminar": ([0, 1, 2, 3], 7.0, True)},
-            (420, 320), destino / f"{nombre}_atlas.png", destino / f"{nombre}_frames.tres",
+            cuadros, {"idle": ([len(cuadros) - 1], 1.0, True), "caminar": (list(range(len(cuadros) - 1)), 7.0, True)},
+            celda, destino / f"{nombre}_atlas.png", destino / f"{nombre}_frames.tres",
             f"res://assets/characters/animales/valle/{nombre}_atlas.png", por_fila=4,
         )
-    for nombre, cuadro in {"gallina": (360, 260), "cabra": (360, 300), "guajolote": (360, 300), "vaca": (420, 320),
-                           "cerdo": (420, 320), "borrego": (420, 320), "caballo": (420, 320)}.items():
-        atlas = destino / f"{nombre}_atlas.png"
-        if atlas.exists():
-            primero = Image.open(atlas).convert("RGBA").crop((0, 0) + cuadro)
-            guardar(primero.crop(primero.getbbox()), ASSETS / "ui/granja" / f"{nombre}.png")
+        guardar(cuadros[0], ASSETS / "ui/granja" / f"{nombre}.png")
+    for nombre, cuadro in {"gallina": (360, 260), "cabra": (360, 300)}.items():
+        primero = Image.open(destino / f"{nombre}_atlas.png").convert("RGBA").crop((0, 0) + cuadro)
+        guardar(primero.crop(primero.getbbox()), ASSETS / "ui/granja" / f"{nombre}.png")
     if (arte.FUENTE / "granja_iconos3.png").exists():
-        objetos("granja_iconos3.png", ["abono", "lana"], "ui/granja", huecos=False, orilla_blanca=True)
+        objetos("granja_iconos3.png", ["abono", "lana"], "ui/granja")
 
 
 GRUPOS = {"animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
