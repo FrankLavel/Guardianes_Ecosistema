@@ -215,6 +215,12 @@ func _crear_granja() -> void:
 	boton.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	boton.pressed.connect(func(): decorador.salir() if decorador.activo else decorador.entrar())
 	hud.add_child(boton)
+	# Terrenos: la cuadrícula del modo decorar y los que se pueden comprar.
+	var terrenos := Terrenos.new()
+	terrenos.name = "Terrenos"
+	terrenos.decorador = decorador
+	add_child(terrenos)
+	move_child(terrenos, $Objetos.get_index())
 	_actualizar_prohibido()
 	_poner_silvestres()
 	Granja.corral_cambio.connect(_poner_corral)

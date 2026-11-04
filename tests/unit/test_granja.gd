@@ -332,6 +332,28 @@ func test_el_abono_hace_crecer_mas_rapido_y_el_caballo_corre() -> void:
 	assert_gt(Granja.factor_velocidad(), lento)
 
 
+func test_la_granja_se_expande_por_terrenos() -> void:
+	var lejos := Vector2i(7, 5)
+	var junto := Vector2i(7, 2)
+	assert_true(Granja.terreno_abierto(Vector2i(4, 2)), "La granja empieza en el centro")
+	assert_false(Granja.se_puede_expandir(lejos) and Granja.se_puede_expandir(Vector2i(0, 0)), "Solo los de al lado")
+	assert_true(Granja.se_puede_expandir(junto))
+	assert_false(Granja.expandir(junto), "Hace falta nivel, hojas y leña")
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][1]))
+	Juego.dar_hojas(8)
+	Granja.dar("lena", 2)
+	assert_true(Granja.expandir(junto))
+	assert_eq(Juego.hojas, 0)
+	assert_true(Granja.terreno_abierto(junto))
+	assert_gt(int(Granja.costo_expansion()["hojas"]), 8, "El siguiente cuesta más")
+	assert_true(Granja.en_la_granja(Rect2(Vector2(2460, 610), Vector2(80, 30))))
+	assert_false(Granja.en_la_granja(Rect2(Vector2(2460, 950), Vector2(80, 30))), "Fuera de tus terrenos no se pone nada")
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_true(Granja.terreno_abierto(junto))
+
+
 func test_el_guajolote_llega_en_el_nivel_5() -> void:
 	assert_false(Granja.desbloqueado("guajolote", false))
 	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][4]))

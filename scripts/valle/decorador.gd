@@ -144,6 +144,9 @@ func _agarrar(punto: Vector2) -> void:
 	if elegido:
 		_tomar(elegido, false)
 		_agarre = elegido.global_position - punto
+	elif Granja.se_puede_expandir(Granja.celda_de(punto)):
+		Sonido.efecto("boton")
+		Granja.abrir_expandir(Granja.celda_de(punto))
 
 
 func _tomar(nodo: Node2D, nueva: bool) -> void:
@@ -223,13 +226,13 @@ func _actualizar_barra() -> void:
 	if _cargando:
 		_texto.text = "Clic para soltar donde esté verde.  Clic derecho o Esc: regresar."
 	else:
-		_texto.text = "Modo decorar: haz clic en una decoración, el corral o un taller para moverlo."
+		_texto.text = "Modo decorar: haz clic en una decoración, el corral o un taller para moverlo, o en un terreno azul para expandir la granja."
 
 
 ## Si `nodo` cabe donde está ahora.
 func cabe(nodo: Node2D) -> bool:
 	var huella: Rect2 = nodo.huella()
-	if not Rect2(Vector2(60, 60), tamano - Vector2(120, 120)).encloses(huella):
+	if not Rect2(Vector2(60, 60), tamano - Vector2(120, 120)).encloses(huella) or not Granja.en_la_granja(huella):
 		return false
 	for zona in valle.lugares_fijos():
 		if zona.intersects(huella):

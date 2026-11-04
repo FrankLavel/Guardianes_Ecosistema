@@ -100,6 +100,8 @@ var fogon: Dictionary = {"prendido": false, "horas": 0.0}
 var decoraciones: Dictionary = {"puestas": [], "guardadas": {}}
 ## Dónde puso el jugador el corral y los talleres (id -> [x, y]); si no está, va en su lugar de siempre.
 var posiciones: Dictionary = {}
+## Terrenos del valle que se compraron para agrandar la granja ("columna,fila"; ver Granja.expandir).
+var terrenos: Array[String] = []
 ## Experiencia de la granja (el nivel se calcula con Granja.nivel()) y pedidos del tianguis.
 var xp := 0
 var tianguis: Array = []
@@ -143,6 +145,7 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	fogon = {"prendido": false, "horas": 0.0}
 	decoraciones = {"puestas": [], "guardadas": {}}
 	posiciones.clear()
+	terrenos.clear()
 	pesca = {"dia": 0, "veces": 0}
 	silvestres.clear()
 	silvestres_dia = 0
@@ -358,6 +361,7 @@ func a_diccionario() -> Dictionary:
 		"fogon": fogon,
 		"decoraciones": decoraciones,
 		"posiciones": posiciones,
+		"terrenos": terrenos,
 		"pesca": pesca,
 		"silvestres": silvestres.map(func(s): return {"tipo": s["tipo"], "pos": [s["pos"].x, s["pos"].y]}),
 		"silvestres_dia": silvestres_dia,
@@ -405,6 +409,7 @@ func desde_diccionario(datos: Dictionary) -> void:
 	for id in deco.get("lugares", {}).values():
 		decoraciones["guardadas"][id] = int(decoraciones["guardadas"].get(id, 0)) + 1
 	posiciones = datos.get("posiciones", {}).duplicate(true) if datos.get("posiciones") is Dictionary else {}
+	terrenos.assign(datos.get("terrenos", []))
 	pesca = datos.get("pesca", {"dia": 0, "veces": 0}) if datos.get("pesca") is Dictionary else {"dia": 0, "veces": 0}
 	silvestres = datos.get("silvestres", []).map(func(s): return {"tipo": s["tipo"], "pos": Vector2(s["pos"][0], s["pos"][1])})
 	silvestres_dia = int(datos.get("silvestres_dia", 0))

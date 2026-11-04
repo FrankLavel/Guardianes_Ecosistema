@@ -17,6 +17,7 @@ signal parcelas_cambio
 signal talleres_cambio
 signal fogon_cambio
 signal corral_cambio
+signal terrenos_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
@@ -36,6 +37,13 @@ const TANDAS_MAX := 3
 const ANIMALES_MAX := 9
 const VELOCIDAD_CABALLO := 1.35
 const CUADROS_ANIMAL := "res://assets/characters/animales/valle/%s_frames.tres"
+## El valle (2800 x 1800) en terrenos de 350 x 300. La granja empieza con los del centro (donde están la
+## casa, la milpa, el corral, los talleres y el tianguis) y crece comprando los de al lado.
+const TERRENO := Vector2(350, 300)
+const COLUMNAS_TERRENO := 8
+const FILAS_TERRENO := 6
+const TERRENOS_INICIALES := Rect2i(2, 0, 5, 5)
+const HOJA := preload("res://assets/ui/iconos/escalado/icono_hoja.png")
 ## Horas de juego que arde un leño (4 h = 2 minutos reales) y cuántos caben en el fogón.
 const HORAS_POR_LENO := 4.0
 const LENOS_MAX := 3
@@ -771,6 +779,126 @@ func abrir_tienda_decoraciones(al_elegir: Callable) -> void:
 				al_elegir.call(id)
 		rejilla.add_child(_tarjeta(id, dato["nombre"], {}, nota, "PONER" if tiene > 0 else "COMPRAR",
 			tiene > 0 or Juego.hojas >= costo, int(dato["nivel"]), elegir, dato["dato"]))
+
+
+# ---------------------------------------------------------------- Terrenos (expandir la granja)
+
+func terreno_abierto(celda: Vector2i) -> bool:
+	return TERRENOS_INICIALES.has_point(celda) or ("%d,%d" % [celda.x, celda.y]) in Juego.terrenos
+
+
+func dentro_del_valle(celda: Vector2i) -> bool:
+	return Rect2i(0, 0, COLUMNAS_TERRENO, FILAS_TERRENO).has_point(celda)
+
+
+## Se puede comprar si está pegado (no en diagonal) a un terreno que ya es de la granja.
+func se_puede_expandir(celda: Vector2i) -> bool:
+	if not dentro_del_valle(celda) or terreno_abierto(celda):
+		return false
+	for lado in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		if terreno_abierto(celda + lado):
+			return true
+	return false
+
+
+func celda_de(punto: Vector2) -> Vector2i:
+	return Vector2i(floori(punto.x / TERRENO.x), floori(punto.y / TERRENO.y))
+
+
+func rect_de_terreno(celda: Vector2i) -> Rect2:
+	return Rect2(Vector2(celda) * TERRENO, TERRENO)
+
+
+## Si todo `zona` cae en terrenos de la granja (para poner o mover algo ahí).
+func en_la_granja(zona: Rect2) -> bool:
+	var desde := celda_de(zona.position)
+	var hasta := celda_de(zona.end - Vector2(0.01, 0.01))
+	for c in range(desde.x, hasta.x + 1):
+		for f in range(desde.y, hasta.y + 1):
+			if not terreno_abierto(Vector2i(c, f)):
+				return false
+	return true
+
+
+## Cada terreno cuesta un poco más que el anterior: nivel, hojas y leña.
+func costo_expansion() -> Dictionary:
+	var n := Juego.terrenos.size()
+	return {"nivel": mini(2 + n / 2, datos["niveles"]["xp"].size()), "hojas": 8 + 4 * n, "lena": 2 + n}
+
+
+func puede_expandir(celda: Vector2i) -> bool:
+	var costo := costo_expansion()
+	return se_puede_expandir(celda) and nivel() >= int(costo["nivel"]) and Juego.hojas >= int(costo["hojas"]) \
+		and cantidad("lena") >= int(costo["lena"])
+
+
+func expandir(celda: Vector2i) -> bool:
+	if not puede_expandir(celda):
+		return false
+	var costo := costo_expansion()
+	Juego.gastar_hojas(int(costo["hojas"]))
+	quitar("lena", int(costo["lena"]))
+	Juego.terrenos.append("%d,%d" % [celda.x, celda.y])
+	Sonido.efecto("zona_restaurada")
+	dar_xp(5)
+	terrenos_cambio.emit()
+	return true
+
+
+## Panel para comprar un terreno: tres círculos con lo que cuesta (verde si ya lo tienes, rojo si no).
+func abrir_expandir(celda: Vector2i) -> void:
+	_abrir("expandir", "Expandir la granja")
+	var costo := costo_expansion()
+	_contenido.add_child(_texto("Con este terreno tu granja crece y tienes más lugar para tus animales y decoraciones.",
+		24, Color(0.85, 0.95, 0.8)))
+	var fila := HBoxContainer.new()
+	fila.alignment = BoxContainer.ALIGNMENT_CENTER
+	fila.add_theme_constant_override("separation", 40)
+	_contenido.add_child(fila)
+	fila.add_child(_circulo_costo(null, "Nivel %d" % int(costo["nivel"]), "Tu nivel: %d" % nivel(), nivel() >= int(costo["nivel"])))
+	fila.add_child(_circulo_costo(HOJA, "%d hojas" % int(costo["hojas"]), "Tienes %d" % Juego.hojas, Juego.hojas >= int(costo["hojas"])))
+	fila.add_child(_circulo_costo(icono("lena"), "%d de leña" % int(costo["lena"]), "Tienes %d" % cantidad("lena"),
+		cantidad("lena") >= int(costo["lena"])))
+	_contenido.add_child(_texto("Aquí no se tala: los árboles se quedan, porque dan sombra y son la casa de muchos animales.",
+		22, Color(0.99, 0.86, 0.45)))
+	var boton := _boton("EXPANDIR", puede_expandir(celda), func():
+		expandir(celda)
+		cerrar())
+	boton.custom_minimum_size = Vector2(260, 60)
+	boton.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_contenido.add_child(boton)
+
+
+func _circulo_costo(dibujo: Texture2D, texto: String, nota: String, alcanza: bool) -> VBoxContainer:
+	var columna := VBoxContainer.new()
+	columna.add_theme_constant_override("separation", 6)
+	var circulo := PanelContainer.new()
+	var estilo := StyleBoxFlat.new()
+	estilo.bg_color = Color(0.75, 0.3, 0.12) if not alcanza else Color(0.3, 0.55, 0.2)
+	estilo.border_color = Color(0.45, 0.85, 0.3) if alcanza else Color(1, 0.55, 0.4)
+	estilo.set_border_width_all(8)
+	estilo.set_corner_radius_all(70)
+	estilo.set_content_margin_all(28)
+	circulo.add_theme_stylebox_override("panel", estilo)
+	circulo.custom_minimum_size = Vector2(140, 140)
+	circulo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	if dibujo:
+		var imagen := TextureRect.new()
+		imagen.texture = dibujo
+		imagen.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		imagen.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		imagen.custom_minimum_size = Vector2(80, 80)
+		circulo.add_child(imagen)
+	else:
+		var estrella := _texto("★", 64, Color(1, 0.86, 0.3))
+		estrella.autowrap_mode = TextServer.AUTOWRAP_OFF
+		estrella.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		estrella.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		circulo.add_child(estrella)
+	columna.add_child(circulo)
+	columna.add_child(_texto(texto, 26, Color(0.7, 1, 0.6) if alcanza else Color(1, 0.65, 0.55)))
+	columna.add_child(_texto(nota, 20, Color(0.85, 0.95, 0.8)))
+	return columna
 
 
 # ---------------------------------------------------------------- Menús (mochila, semillas, cocina)
