@@ -892,7 +892,8 @@ def frutales():
     if (arte.FUENTE / "granja_frutas.png").exists():
         objetos("granja_frutas.png", ["aguacate", "guayaba", "limon"], "ui/granja")
     if (arte.FUENTE / "granja_platillos2.png").exists():
-        objetos("granja_platillos2.png", ["ate_guayaba", "guacamole", "agua_limon"], "ui/granja")
+        # Orden en que separar_objetos encuentra las piezas de la hoja.
+        objetos("granja_platillos2.png", ["guacamole", "agua_limon", "ate_guayaba"], "ui/granja")
 
 
 GRUPOS = {"frutales": frutales, "caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}

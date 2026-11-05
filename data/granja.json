@@ -178,19 +178,19 @@
 		},
 		"ate_guayaba": {
 			"nombre": "Ate de guayaba",
-			"icono": "guayaba",
+			"icono": "ate_guayaba",
 			"energia": 20,
 			"valor": 6
 		},
 		"guacamole": {
 			"nombre": "Guacamole",
-			"icono": "aguacate",
+			"icono": "guacamole",
 			"energia": 25,
 			"valor": 7
 		},
 		"agua_limon": {
 			"nombre": "Agua de limón",
-			"icono": "limon",
+			"icono": "agua_limon",
 			"energia": 10,
 			"valor": 4
 		}
