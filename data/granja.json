@@ -175,6 +175,24 @@
 			"icono": "limon",
 			"energia": 4,
 			"valor": 2
+		},
+		"ate_guayaba": {
+			"nombre": "Ate de guayaba",
+			"icono": "guayaba",
+			"energia": 20,
+			"valor": 6
+		},
+		"guacamole": {
+			"nombre": "Guacamole",
+			"icono": "aguacate",
+			"energia": 25,
+			"valor": 7
+		},
+		"agua_limon": {
+			"nombre": "Agua de limón",
+			"icono": "limon",
+			"energia": 10,
+			"valor": 4
 		}
 	},
 	"zonas_semillas": {
@@ -378,6 +396,46 @@
 				"escena": "leche",
 				"texto": "Revuelve la leche con la miel, despacito."
 			}
+		},
+		{
+			"id": "ate_guayaba",
+			"ingredientes": {
+				"guayaba": 3
+			},
+			"nivel": 3,
+			"dato": "El ate de Morelia es un dulce de fruta cocida muy espesa; se hace en Michoacán desde hace siglos.",
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Revuelve la guayaba en el cazo hasta que espese."
+			}
+		},
+		{
+			"id": "guacamole",
+			"ingredientes": {
+				"aguacate": 2,
+				"limon": 1
+			},
+			"nivel": 4,
+			"dato": "El guacamole se prepara en molcajete, un mortero de piedra volcánica que se usa en México desde hace miles de años.",
+			"juego": {
+				"tipo": "machacar",
+				"escena": "molcajete",
+				"texto": "Machaca el aguacate con el limón en el molcajete."
+			}
+		},
+		{
+			"id": "agua_limon",
+			"ingredientes": {
+				"limon": 2
+			},
+			"nivel": 4,
+			"dato": "Una agua fresca de limón quita la sed, y el limón tiene vitamina C, que ayuda a tus defensas.",
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Exprime los limones y revuelve el agua."
+			}
 		}
 	],
 	"silvestres": [
@@ -484,11 +542,11 @@
 			},
 			"3": {
 				"cabra": true,
-				"texto": "La cabra, la quesería, las quesadillas y el pescado asado"
+				"texto": "La cabra, la quesería, las quesadillas, el pescado asado y el ate de guayaba"
 			},
 			"4": {
 				"surcos": 12,
-				"texto": "3 surcos más en tu milpa y la receta de sopa tarasca"
+				"texto": "3 surcos más en tu milpa y las recetas de sopa tarasca, guacamole y agua de limón"
 			},
 			"5": {
 				"pedidos": 4,

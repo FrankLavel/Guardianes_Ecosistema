@@ -79,6 +79,8 @@ var tiene_posicion_valle := false
 ## de ayuda en curso ({} si no hay).
 var hojas := 0
 var ayudas: Dictionary = {}
+## Logros de la granja para las insignias (cosechas, frutas, pedidos...; ver Granja.INSIGNIAS).
+var logros: Dictionary = {}
 var muebles: Array[String] = []
 var pedido: Dictionary = {}
 ## Hora del juego (ver horas_totales) en que un animal vuelve a pedir ayuda; -1 si no se ha decidido.
@@ -145,6 +147,7 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	posicion_valle = Vector2.ZERO
 	hojas = 0
 	ayudas.clear()
+	logros.clear()
 	muebles.clear()
 	siguiente_pedido = -1.0
 	pedido.clear()
@@ -398,6 +401,7 @@ func a_diccionario() -> Dictionary:
 		"posicion_valle": [posicion_valle.x, posicion_valle.y] if tiene_posicion_valle else null,
 		"hojas": hojas,
 		"ayudas": ayudas,
+		"logros": logros,
 		"muebles": muebles,
 		"siguiente_pedido": siguiente_pedido,
 		"pedido": pedido,
@@ -443,6 +447,7 @@ func desde_diccionario(datos: Dictionary) -> void:
 	# Partidas de antes de la versión 4 no tienen estos datos.
 	hojas = int(datos.get("hojas", 0))
 	ayudas = datos.get("ayudas", {}) if datos.get("ayudas") is Dictionary else {}
+	logros = datos.get("logros", {}).duplicate() if datos.get("logros") is Dictionary else {}
 	muebles.assign(datos.get("muebles", []))
 	siguiente_pedido = float(datos.get("siguiente_pedido", -1.0))
 	pedido = datos.get("pedido", {}) if datos.get("pedido") is Dictionary else {}

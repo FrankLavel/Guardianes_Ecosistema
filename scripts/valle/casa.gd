@@ -304,12 +304,35 @@ func _llenar_trofeos() -> void:
 	_contenido.add_child(_texto("Insignias por ayudar a los animales (%d ayudas):" % Juego.total_ayudas(), 30, Color(0.99, 0.86, 0.45)))
 	for tipo in INSIGNIAS:
 		var veces := int(Juego.ayudas.get(tipo, 0))
+		# Los animales ya no piden recoger basura ni plantar árboles: solo se ven si ya se ganaron.
+		if tipo in ["basura", "plantar"] and veces == 0:
+			continue
 		var nivel := "Aún no la tienes"
 		for n in NIVELES:
 			if veces >= n[0]:
 				nivel = n[1]
 				break
 		_contenido.add_child(_texto("•  %s: %s  (%d)" % [INSIGNIAS[tipo], nivel, veces], 26))
+	if Granja.granja_abierta():
+		_contenido.add_child(_texto("Insignias de tu granja:", 30, Color(0.99, 0.86, 0.45)))
+		var insignias := HBoxContainer.new()
+		insignias.alignment = BoxContainer.ALIGNMENT_CENTER
+		insignias.add_theme_constant_override("separation", 26)
+		for id in Granja.INSIGNIAS:
+			var dato: Array = Granja.INSIGNIAS[id]
+			var medalla := Granja.medalla(id)
+			var columna := VBoxContainer.new()
+			columna.add_child(_icono(Granja.ICONO % dato[1], 84, medalla == 0))
+			for linea in [[dato[0], 20, Color(1, 0.96, 0.86)],
+					[Granja.MEDALLAS[medalla], 22, [Color(0.7, 0.65, 0.6), Color(0.85, 0.55, 0.3), Color(0.85, 0.88, 0.95), Color(1, 0.85, 0.3)][medalla]],
+					["%d / %d" % [Granja.cuenta_insignia(id), int(dato[2][mini(medalla, 2)])], 18, Color(0.85, 0.95, 0.8)]]:
+				var etiqueta := _texto(linea[0], linea[1], linea[2])
+				etiqueta.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				etiqueta.custom_minimum_size.x = 190
+				etiqueta.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				columna.add_child(etiqueta)
+			insignias.add_child(columna)
+		_contenido.add_child(insignias)
 	_contenido.add_child(_texto("Hojas: %d" % Juego.hojas, 28, Color(0.8, 1, 0.7)))
 
 

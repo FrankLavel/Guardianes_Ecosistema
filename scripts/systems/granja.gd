@@ -53,6 +53,15 @@ const COLUMNAS_TERRENO := 8
 const FILAS_TERRENO := 6
 const TERRENOS_INICIALES := Rect2i(2, 0, 5, 5)
 const HOJA := preload("res://assets/ui/iconos/escalado/icono_hoja.png")
+## Insignias de la granja: nombre, ícono y cuántas veces hace falta para bronce, plata y oro.
+const INSIGNIAS := {
+	"cosechas": ["Agricultura de la milpa", "maiz", [1, 10, 30]],
+	"recetas": ["Cocina michoacana", "corundas", [1, 6, 15]],
+	"animales": ["Cuidado de animales", "gallina", [1, 7, 15]],
+	"frutas": ["Huerto frutal", "aguacate", [1, 10, 30]],
+	"pedidos": ["Ayuda en el tianguis", "tortillas", [1, 10, 25]],
+}
+const MEDALLAS := ["Aún no la tienes", "Bronce", "Plata", "Oro"]
 ## Caminos: cuadritos de 50 px (los mismos de la cuadrícula del modo decorar). El de tierra es gratis y el
 ## de piedra cuesta una hoja por cuadrito.
 const CELDA_CAMINO := 50.0
@@ -404,6 +413,7 @@ func cosechar(i: int) -> Dictionary:
 	p["horas"] = 0.0
 	Sonido.efecto("recoger")
 	dar_xp(int(datos["xp"]["cosechar"]))
+	sumar_logro("cosechas")
 	parcelas_cambio.emit()
 	return cosecha
 
@@ -456,6 +466,7 @@ func comprar_animal(especie: String) -> bool:
 			or not Juego.gastar_hojas(int(dato["costo"])):
 		return false
 	Juego.comprados.append(especie)
+	_revisar_medalla("animales")
 	Sonido.efecto("zona_restaurada")
 	dar_xp(int(datos["xp"]["comprar_animal"]))
 	corral_cambio.emit()
@@ -627,6 +638,7 @@ func cocinar(id_receta: String) -> bool:
 	dar(id_receta)
 	if id_receta not in Juego.recetario:
 		Juego.recetario.append(id_receta)
+		_revisar_medalla("recetas")
 	Sonido.efecto("zona_restaurada")
 	dar_xp(int(datos["xp"]["cocinar"]))
 	return true
@@ -810,6 +822,7 @@ func entregar(i: int) -> bool:
 		return false
 	for id in pedido["cosas"]:
 		quitar(id, int(pedido["cosas"][id]))
+	sumar_logro("pedidos")
 	Juego.dar_hojas(int(pedido["hojas"]))
 	Juego.tianguis[i] = nuevo_pedido()
 	Sonido.efecto("correcto")
@@ -918,6 +931,50 @@ func abrir_tienda_decoraciones(al_elegir: Callable) -> void:
 			dato["dato"] + " Crece, da %d frutas y vuelve a dar." % int(dato["cantidad"])))
 
 
+# ---------------------------------------------------------------- Insignias de la granja
+
+## Cuánto se lleva de una insignia (las recetas y los animales se cuentan de lo que ya tienes).
+func cuenta_insignia(id: String) -> int:
+	match id:
+		"recetas":
+			return Juego.recetario.size()
+		"animales":
+			return animales_del_corral().size()
+	return int(Juego.logros.get(id, 0))
+
+
+## 0 = todavía no, 1 = bronce, 2 = plata, 3 = oro.
+func medalla(id: String) -> int:
+	var cuenta := cuenta_insignia(id)
+	var nivel := 0
+	for meta in INSIGNIAS[id][2]:
+		if cuenta >= int(meta):
+			nivel += 1
+	return nivel
+
+
+func sumar_logro(id: String, n := 1) -> void:
+	var antes := medalla(id)
+	Juego.logros[id] = int(Juego.logros.get(id, 0)) + n
+	_avisar_medalla(id, antes)
+
+
+## Para las que se cuentan solas: avisa si con lo último que pasó se ganó una medalla.
+func _revisar_medalla(id: String) -> void:
+	var cuenta := cuenta_insignia(id)
+	var antes := 0
+	for meta in INSIGNIAS[id][2]:
+		if cuenta - 1 >= int(meta):
+			antes += 1
+	_avisar_medalla(id, antes)
+
+
+func _avisar_medalla(id: String, antes: int) -> void:
+	if medalla(id) > antes:
+		Sonido.efecto("zona_restaurada")
+		avisar_logro(INSIGNIAS[id][1], "¡Insignia %s: %s! Mírala en tu casa." % [INSIGNIAS[id][0], MEDALLAS[medalla(id)]])
+
+
 # ---------------------------------------------------------------- Árboles frutales
 
 func comprar_frutal(id: String) -> bool:
@@ -994,6 +1051,7 @@ func cosechar_frutal(arbol: Dictionary) -> Dictionary:
 	arbol["horas"] = 0.0
 	arbol["abonado"] = false
 	dar(dato["fruto"], int(dato["cantidad"]))
+	sumar_logro("frutas", int(dato["cantidad"]))
 	Sonido.efecto("recoger")
 	dar_xp(int(datos["xp"]["cosechar"]))
 	frutales_cambio.emit()

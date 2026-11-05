@@ -416,6 +416,30 @@ func test_el_comedero_alimenta_a_todos_y_recoge_lo_listo() -> void:
 	assert_eq(Granja.cantidad("huevo"), 2)
 
 
+func test_las_recetas_con_fruta() -> void:
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][3]))
+	Granja.dar("aguacate", 2)
+	Granja.dar("limon", 1)
+	Granja.dar("lena")
+	Granja.prender_fogon()
+	assert_true(Granja.cocinar("guacamole"))
+	assert_eq(Granja.cantidad("guacamole"), 1)
+	assert_eq(Granja.cantidad("aguacate"), 0)
+
+
+func test_las_insignias_de_la_granja_suben_de_medalla() -> void:
+	assert_eq(Granja.medalla("cosechas"), 0)
+	Granja.sumar_logro("cosechas")
+	assert_eq(Granja.medalla("cosechas"), 1, "Bronce con la primera cosecha")
+	Granja.sumar_logro("cosechas", 9)
+	assert_eq(Granja.medalla("cosechas"), 2, "Plata con 10")
+	assert_eq(Granja.medalla("animales"), 1, "La gallina de regalo ya cuenta")
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_eq(Granja.cuenta_insignia("cosechas"), 10)
+
+
 func test_la_granja_tiene_su_bienvenida() -> void:
 	assert_true(Dialogo.existe("don_chucho_granja"))
 	assert_true(Dialogo.existe("don_chucho_granja_repetir"))

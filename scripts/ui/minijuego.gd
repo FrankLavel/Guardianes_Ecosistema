@@ -232,6 +232,8 @@ func _dibujar_escena() -> void:
 			_olla(c)
 		"comal":
 			_comal(c)
+		"molcajete":
+			_molcajete(c)
 		"agua":
 			_agua(c)
 		"panal":
@@ -295,6 +297,22 @@ func _olla(c: Vector2) -> void:
 	var mango := centro + Vector2(hacia * 50.0, -40)
 	_dibujo.draw_line(mango, mango + Vector2(hacia * 70.0, -150), Color(0.55, 0.35, 0.17), 12.0)
 	_elipse(mango, Vector2(22, 9), Color(0.5, 0.32, 0.15))
+
+
+## Molcajete de piedra volcánica con su tejolote, que machaca en cada golpe; lo de adentro se va haciendo pasta.
+func _molcajete(c: Vector2) -> void:
+	var centro := c + Vector2(0, 50)
+	_elipse(centro + Vector2(0, 60), Vector2(150, 30), Color(0, 0, 0, 0.3))
+	for pata in [-80.0, 0.0, 80.0]:
+		_dibujo.draw_rect(Rect2(centro + Vector2(pata - 14, 30), Vector2(28, 36)), Color(0.27, 0.25, 0.25))
+	_elipse(centro, Vector2(150, 70), Color(0.33, 0.31, 0.31))
+	_elipse(centro + Vector2(0, -20), Vector2(130, 40), Color(0.2, 0.19, 0.19))
+	var hecho := minf(float(progreso) / meta, 1.0)
+	_elipse(centro + Vector2(0, -18), Vector2(110 * (0.5 + hecho * 0.5), 30), Color(0.5, 0.7, 0.25).lerp(Color(0.55, 0.75, 0.3), hecho))
+	_icono(0, centro + Vector2(-40, -30), 60.0 * (1.0 - hecho * 0.7))
+	var mano := centro + Vector2(30, -70 + _golpe * 40.0)
+	_dibujo.draw_line(mano, mano + Vector2(50, -110), Color(0.3, 0.28, 0.28), 30.0)
+	_elipse(mano, Vector2(24, 18), Color(0.36, 0.34, 0.34))
 
 
 ## Comal sobre el fuego: lo de arriba brinca y se voltea en cada acierto.
