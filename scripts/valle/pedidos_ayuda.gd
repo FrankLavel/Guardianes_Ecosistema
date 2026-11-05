@@ -184,9 +184,9 @@ func _aparecer_cria(mama: AnimalValle) -> void:
 	cria.velocidad = mama.velocidad
 	cria.texto_aviso = "E  Llamar a la cría"
 	var lugar := mama.global_position
-	for intento in 30:
+	for intento in 60:
 		lugar = Vector2(randf_range(AREA.position.x, AREA.end.x), randf_range(AREA.position.y, AREA.end.y))
-		if lugar.distance_to(mama.global_position) > 700.0:
+		if lugar.distance_to(mama.global_position) > 700.0 and libre(lugar):
 			break
 	cria.position = lugar
 	cria.zona_paseo = Rect2(lugar - Vector2(80, 60), Vector2(160, 120))
@@ -213,9 +213,34 @@ func _lugar_cerca(centro: Vector2, ocupados: Array[Vector2]) -> Vector2:
 		var angulo := randf() * TAU
 		lugar = centro + Vector2(cos(angulo), sin(angulo)) * randf_range(140.0, 300.0)
 		lugar = lugar.clamp(AREA.position, AREA.end)
-		if ocupados.all(func(o: Vector2): return o.distance_to(lugar) > 90.0):
+		if ocupados.all(func(o: Vector2): return o.distance_to(lugar) > 90.0) and libre(lugar):
 			break
 	return lugar
+
+
+## Si en `punto` se puede poner la cría o una flor: que no choque con nada (casa, árboles, río) y que no
+## quede dentro de la milpa, un corral, un taller o algo fijo de la granja.
+func libre(punto: Vector2) -> bool:
+	var zona := Rect2(punto - Vector2(40, 30), Vector2(80, 50))
+	var valle := contenedor.get_parent() if contenedor else null
+	if valle and valle.has_method("lugares_fijos"):
+		for fijo in valle.lugares_fijos():
+			if fijo.intersects(zona):
+				return false
+	if contenedor == null:
+		return true
+	for nodo in contenedor.get_tree().get_nodes_in_group(&"movible"):
+		if nodo.huella().grow(20).intersects(zona):
+			return false
+	var forma := CircleShape2D.new()
+	forma.radius = 36.0
+	var consulta := PhysicsShapeQueryParameters2D.new()
+	consulta.shape = forma
+	consulta.transform = Transform2D(0.0, punto)
+	for choque in contenedor.get_world_2d().direct_space_state.intersect_shape(consulta, 8):
+		if not choque["collider"] is CharacterBody2D:
+			return false
+	return true
 
 
 ## Un objetivo más cumplido (una basura, un arbolito o la cría de vuelta).

@@ -58,6 +58,21 @@ func test_hay_tres_entradas_y_solo_el_rio_esta_abierto() -> void:
 	assert_eq(_entrada("lago").get_node("Estado").text, "Bloqueado")
 
 
+func test_atras_cierra_el_panel_abierto_sin_abrir_la_pausa() -> void:
+	# (Se prueba lo que cierra "atrás"; _atras completo cambiaría la escena de las pruebas.)
+	Granja.abrir_mochila()
+	assert_true(Juego._cerrar_lo_abierto(valle), "Cierra la mochila en lugar de abrir la pausa")
+	await wait_process_frames(3)
+	assert_eq(Granja.abierto, "")
+	assert_false(Juego._cerrar_lo_abierto(valle), "Sin nada abierto, toca abrir la pausa")
+
+
+func test_la_cria_no_aparece_dentro_de_la_casa() -> void:
+	await wait_physics_frames(2)
+	assert_false(valle.pedidos.libre(Vector2(1680, 870)), "La casa no es lugar libre")
+	assert_true(valle.pedidos.libre(Vector2(2050, 1250)), "El pasto sí")
+
+
 func test_la_entrada_desaparece_al_restaurar_su_zona() -> void:
 	Juego.completar_zona("rio")
 	valle.actualizar_mundo()

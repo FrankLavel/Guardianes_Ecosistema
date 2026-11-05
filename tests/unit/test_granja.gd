@@ -440,6 +440,19 @@ func test_las_insignias_de_la_granja_suben_de_medalla() -> void:
 	assert_eq(Granja.cuenta_insignia("cosechas"), 10)
 
 
+func test_al_subir_de_nivel_la_milpa_crece_sola() -> void:
+	for zona in ["rio", "bosque", "lago"]:
+		Juego.completar_zona(zona)
+	Juego.dialogos_vistos.append("don_chucho_granja")
+	var valle = preload("res://scenes/valle/Valle.tscn").instantiate()
+	add_child_autofree(valle)
+	await wait_physics_frames(3)
+	assert_eq(Granja.celdas_milpa().size(), 6)
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][1]))
+	await wait_physics_frames(3)
+	assert_eq(Granja.celdas_milpa().size(), Granja.surcos(), "Los 3 cuadros nuevos aparecen pegados a la milpa")
+
+
 func test_la_granja_tiene_su_bienvenida() -> void:
 	assert_true(Dialogo.existe("don_chucho_granja"))
 	assert_true(Dialogo.existe("don_chucho_granja_repetir"))

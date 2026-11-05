@@ -244,6 +244,7 @@ func _crear_granja() -> void:
 	Granja.corral_cambio.connect(_poner_corral)
 	Juego.noche_cambio.connect(_dormir_aves)
 	_bienvenida_granja()
+	_crecer_milpa()
 	Juego.dia_cambio.connect(_al_cambiar_dia)
 	Granja.nivel_subio.connect(_al_subir_nivel)
 
@@ -427,10 +428,40 @@ func _avisar_si_no_cabe(corral: Corral) -> void:
 
 
 func _al_subir_nivel(nivel: int, texto: String) -> void:
-	_poner_parcelas()
 	if decorador:
 		_poner_corral()
-	hud.mostrar_objetivo("¡Subiste al nivel %d!%s" % [nivel, "  Desbloqueaste: " + texto if not texto.is_empty() else ""], 7.0)
+	var nuevos: int = await _crecer_milpa()
+	var extra := ""
+	if nuevos > 0:
+		extra = "  Tu milpa creció %d cuadros: muévelos en DECORAR → MILPA." % nuevos
+	elif Granja.celdas_milpa().size() < Granja.surcos():
+		extra = "  Agrega tus cuadros nuevos en DECORAR → MILPA."
+	hud.mostrar_objetivo("¡Subiste al nivel %d!%s%s" % [nivel, "  Desbloqueaste: " + texto if not texto.is_empty() else "", extra], 8.0)
+
+
+## Pone los cuadros de milpa que da el nivel y todavía no están, pegados a la milpa que ya hay, donde no
+## estorben nada. Devuelve cuántos puso.
+func _crecer_milpa() -> int:
+	if decorador == null:
+		return 0
+	await get_tree().physics_frame
+	var puestos := 0
+	var antes := decorador.pintar
+	decorador.pintar = "milpa"
+	var vueltas := 0
+	while Granja.celdas_milpa().size() < Granja.surcos() and vueltas < 12:
+		vueltas += 1
+		var elegido := Vector2i(-999, -999)
+		var celdas := Granja.celdas_milpa()
+		for celda in celdas:
+			for lado in [Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
+				if elegido == Vector2i(-999, -999) and decorador.se_puede_arar(celda + lado):
+					elegido = celda + lado
+		if elegido == Vector2i(-999, -999) or not Granja.poner_milpa(elegido):
+			break
+		puestos += 1
+	decorador.pintar = antes
+	return puestos
 
 
 ## Quita los adornos del valle (árboles, arbustos, rocas) cuyo pie cae en `zona`; con `solo`, nada más

@@ -370,22 +370,46 @@ func _notification(que: int) -> void:
 			_atras()
 
 
-## Botón "atrás" de Android: en el juego hace lo mismo que Esc (cierra lo abierto o abre la pausa); en el
-## menú principal sale del juego.
+## Botón "atrás" de Android: en el juego cierra lo que esté abierto (un minijuego, un panel de la granja o
+## de la casa) y si no hay nada abre la pausa. Fuera del juego (elegir personaje, opciones, el final)
+## regresa al menú principal, y en el menú principal sale.
+const ESCENA_MENU := "res://scenes/menu/menu_principal.tscn"
+
+
 func _atras() -> void:
-	var escena := get_tree().current_scene
-	if escena == null or not escena.is_in_group(&"jugable"):
-		if partida_activa:
-			guardar()
-		get_tree().quit()
-		return
 	if partida_activa:
 		guardar()
+	var escena := get_tree().current_scene
+	if escena == null or escena.scene_file_path == ESCENA_MENU:
+		get_tree().quit()
+		return
+	if not escena.is_in_group(&"jugable"):
+		if not Transicion.en_curso:
+			Transicion.ir_a(ESCENA_MENU)
+		return
+	if _cerrar_lo_abierto(escena):
+		return
 	for presionado in [true, false]:
 		var evento := InputEventAction.new()
 		evento.action = &"pausa"
 		evento.pressed = presionado
 		Input.parse_input_event(evento)
+
+
+## Lo que se cierra con "atrás" antes de llegar a la pausa. Devuelve si cerró algo.
+func _cerrar_lo_abierto(escena: Node) -> bool:
+	for hijo in Granja.get_children():
+		if hijo is Minijuego:
+			hijo._terminar(false)
+			return true
+	if not Granja.abierto.is_empty():
+		Granja.cerrar()
+		return true
+	var panel: Variant = escena.get("panel_abierto")
+	if panel is String and not panel.is_empty():
+		escena.cerrar_panel()
+		return true
+	return false
 
 
 func a_diccionario() -> Dictionary:
