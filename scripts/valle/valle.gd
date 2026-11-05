@@ -212,7 +212,7 @@ func _crear_granja() -> void:
 	add_child(decorador)
 	decorador.movido.connect(_al_mover_en_granja)
 	var boton := Button.new()
-	boton.text = "DECORAR (C)"
+	boton.text = "DECORAR" if Tactil.activo else "DECORAR (C)"
 	boton.add_theme_font_size_override("font_size", 24)
 	boton.focus_mode = Control.FOCUS_NONE
 	boton.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 24)

@@ -26,6 +26,7 @@ var _capa: CanvasLayer
 var _texto: Label
 var _guardar: Button
 var _girar: Button
+var _regresar: Button
 ## Con qué se están pintando caminos ("arena", "piedra", "quitar"; "" = no se pinta).
 var pintar := ""
 var _arrastrando := false
@@ -62,10 +63,13 @@ func _ready() -> void:
 	fila.add_child(_texto)
 	fila.add_child(_boton("TIENDA", _abrir_tienda))
 	fila.add_child(_boton("CAMINOS", _abrir_caminos))
-	_girar = _boton("GIRAR (R)", girar)
+	_girar = _boton("GIRAR" if Tactil.activo else "GIRAR (R)", girar)
 	fila.add_child(_girar)
 	_guardar = _boton("GUARDAR", _guardar_cargada)
 	fila.add_child(_guardar)
+	# En el celular no hay clic derecho: este botón hace lo mismo (regresar lo que va en la mano).
+	_regresar = _boton("REGRESAR", _regresar_o_terminar)
+	fila.add_child(_regresar)
 	fila.add_child(_boton("LISTO", salir))
 
 
@@ -117,6 +121,9 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if evento is InputEventMouseButton and evento.pressed:
 		if evento.button_index == MOUSE_BUTTON_LEFT:
 			if _cargando:
+				# Con el dedo no hay "pasar el mouse": primero se lleva a donde se tocó.
+				_mover(_cargando, get_global_mouse_position() + _agarre)
+				_cabe = cabe(_cargando)
 				_soltar()
 			else:
 				_agarrar(get_global_mouse_position())
@@ -217,6 +224,15 @@ func _cancelar() -> void:
 	else:
 		_mover(_cargando, _origen)
 	_soltar_de_la_mano()
+
+
+func _regresar_o_terminar() -> void:
+	if _cargando:
+		_cancelar()
+	pintar = ""
+	_arrastrando = false
+	queue_redraw()
+	_actualizar_barra()
 
 
 ## Voltea la decoración que va en la mano (como en un espejo).
@@ -322,11 +338,12 @@ func _draw() -> void:
 func _actualizar_barra() -> void:
 	_guardar.visible = _cargando is Decoracion
 	_girar.visible = _cargando is Decoracion
+	_regresar.visible = _cargando != null or not pintar.is_empty()
 	if not pintar.is_empty():
 		var que: String = "quitando camino" if pintar == "quitar" else "pintando " + Granja.CAMINOS[pintar]["nombre"].to_lower()
-		_texto.text = "Estás %s: haz clic o arrastra sobre la cuadrícula. Clic derecho o Esc: terminar." % que
+		_texto.text = "Estás %s: toca o arrastra sobre la cuadrícula. REGRESAR para terminar." % que
 	elif _cargando:
-		_texto.text = "Clic para soltar donde esté verde.  Clic derecho o Esc: regresar."
+		_texto.text = "Toca donde esté verde para soltarlo.  REGRESAR: dejarlo donde estaba."
 	else:
 		_texto.text = "Modo decorar: haz clic en una decoración, el corral o un taller para moverlo, o en un terreno azul para expandir la granja."
 

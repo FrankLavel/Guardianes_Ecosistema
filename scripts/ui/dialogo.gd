@@ -80,7 +80,8 @@ func avanzar() -> void:
 
 
 func _input(evento: InputEvent) -> void:
-	if activo and (evento.is_action_pressed("interactuar") or evento.is_action_pressed("ui_accept")):
+	var toque: bool = evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_LEFT
+	if activo and (toque or evento.is_action_pressed("interactuar") or evento.is_action_pressed("ui_accept")):
 		get_viewport().set_input_as_handled()
 		avanzar()
 

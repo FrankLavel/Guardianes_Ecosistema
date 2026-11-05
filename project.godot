@@ -23,6 +23,7 @@ Dialogo="*res://scenes/ui/Dialogo.tscn"
 Sonido="*res://scripts/systems/sonido.gd"
 Bitacora="*res://scenes/ui/Bitacora.tscn"
 Granja="*res://scripts/systems/granja.gd"
+Tactil="*res://scripts/ui/tactil.gd"
 
 [display]
 
@@ -32,6 +33,7 @@ window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/handheld/orientation=4
 
 [editor_plugins]
 
