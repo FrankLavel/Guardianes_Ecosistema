@@ -8,6 +8,8 @@ extends CanvasLayer
 ## Para probar en la computadora: TACTIL=1 en el entorno.
 var activo := false
 
+## El joystick es flotante: aparece donde se pone el pulgar en la mitad izquierda de la pantalla (lejos
+## de la orilla y de la funda del teléfono); sin tocar, espera un poco más adentro de la esquina.
 ## Radio del joystick y cuánto hay que moverlo para que cuente.
 const RADIO := 110.0
 const ZONA_MUERTA := 0.22
@@ -18,6 +20,7 @@ var _joystick: Control
 var _palanca := Vector2.ZERO
 var _dedo := -1
 var _centro := Vector2.ZERO
+var _reposo := Vector2.ZERO
 var _botones: Dictionary = {}
 
 
@@ -29,8 +32,8 @@ func _ready() -> void:
 		return
 	_joystick = Control.new()
 	_joystick.name = "Joystick"
-	# Detiene el "clic" que el toque simula, para que el dedo del joystick no toque nada del mundo.
-	_joystick.mouse_filter = Control.MOUSE_FILTER_STOP
+	# Ocupa toda la pantalla solo para dibujar; los toques los lee _input.
+	_joystick.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_joystick.draw.connect(_dibujar_joystick)
 	add_child(_joystick)
 	for datos in [
@@ -80,18 +83,26 @@ func _circulo(radio: float, relleno: Color, borde: Color) -> ImageTexture:
 	return ImageTexture.create_from_image(imagen)
 
 
-## Abajo a la izquierda el joystick; abajo a la derecha E y saltar; arriba de ellos, en columna, pausa,
-## bitácora y mochila (debajo del letrero del objetivo).
+## El joystick espera a la izquierda, separado de la orilla; abajo a la derecha E y saltar, también
+## separados de la orilla; arriba de ellos, en columna, pausa, bitácora y mochila.
 func _acomodar() -> void:
 	var tam := get_viewport().get_visible_rect().size
-	_centro = Vector2(70 + RADIO, tam.y - 70 - RADIO)
-	_joystick.position = _centro - Vector2.ONE * RADIO * 1.6
-	_joystick.size = Vector2.ONE * RADIO * 3.2
-	_poner("interactuar", Vector2(tam.x - 120, tam.y - 260))
-	_poner("saltar", Vector2(tam.x - 290, tam.y - 130))
-	_poner("pausa", Vector2(tam.x - 80, 230))
-	_poner("bitacora", Vector2(tam.x - 80, 370))
-	_poner("mochila", Vector2(tam.x - 80, 510))
+	_reposo = Vector2(150 + RADIO, tam.y - 120 - RADIO)
+	_joystick.position = Vector2.ZERO
+	_joystick.size = tam
+	if _dedo < 0:
+		_centro = _reposo
+	_poner("interactuar", Vector2(tam.x - 270, tam.y - 290))
+	_poner("saltar", Vector2(tam.x - 480, tam.y - 170))
+	_poner("pausa", Vector2(tam.x - 170, 230))
+	_poner("bitacora", Vector2(tam.x - 170, 370))
+	_poner("mochila", Vector2(tam.x - 170, 510))
+
+
+## Dónde se puede poner el pulgar para el joystick: la mitad izquierda, debajo del letrero del valle.
+func _zona_joystick(punto: Vector2) -> bool:
+	var tam := get_viewport().get_visible_rect().size
+	return punto.x < tam.x * 0.45 and punto.y > tam.y * 0.28
 
 
 func _poner(accion: String, centro: Vector2) -> void:
@@ -107,10 +118,12 @@ func _process(_delta: float) -> void:
 	var jugando := escena != null and escena.is_in_group(&"jugable") and not get_tree().paused \
 		and not Juego.entrada_bloqueada and not Dialogo.activo and not Transicion.en_curso
 	var en_valle := jugando and escena.is_in_group(&"con_reloj")
-	_joystick.visible = jugando
+	var decorador = escena.get("decorador") if escena else null
+	var decorando: bool = decorador != null and decorador.activo
+	_joystick.visible = jugando and not decorando
 	_botones["interactuar"].visible = jugando
 	_botones["saltar"].visible = jugando and not en_valle
-	_botones["mochila"].visible = en_valle and Juego.zona_esta_completa("rio")
+	_botones["mochila"].visible = en_valle and Granja.granja_abierta()
 	_botones["bitacora"].visible = jugando
 	_botones["pausa"].visible = jugando
 	if not jugando and _dedo >= 0:
@@ -126,8 +139,10 @@ func _input(evento: InputEvent) -> void:
 	if not activo or not _joystick.visible:
 		return
 	if evento is InputEventScreenTouch:
-		if evento.pressed and _dedo < 0 and evento.position.distance_to(_centro) < RADIO * 1.6:
+		if evento.pressed and _dedo < 0 and _zona_joystick(evento.position):
 			_dedo = evento.index
+			var tam := get_viewport().get_visible_rect().size
+			_centro = evento.position.clamp(Vector2(RADIO + 40, RADIO + 40), tam - Vector2(RADIO + 40, RADIO + 40))
 			_mover_palanca(evento.position)
 			get_viewport().set_input_as_handled()
 		elif not evento.pressed and evento.index == _dedo:
@@ -158,6 +173,7 @@ func _presionar(accion: String, fuerza: float) -> void:
 func _soltar_joystick() -> void:
 	_dedo = -1
 	_palanca = Vector2.ZERO
+	_centro = _reposo
 	for accion in ["mover_derecha", "mover_izquierda", "mover_abajo", "mover_arriba"]:
 		Input.action_release(accion)
 	_joystick.queue_redraw()
@@ -165,7 +181,9 @@ func _soltar_joystick() -> void:
 
 func _dibujar_joystick() -> void:
 	var c := _centro - _joystick.position
-	_joystick.draw_circle(c, RADIO, COLOR_BASE)
-	_joystick.draw_arc(c, RADIO, 0, TAU, 64, COLOR_BORDE, 4.0)
-	_joystick.draw_circle(c + _palanca * RADIO, RADIO * 0.45, Color(0.75, 1, 0.6, 0.75))
-	_joystick.draw_arc(c + _palanca * RADIO, RADIO * 0.45, 0, TAU, 48, Color(1, 1, 0.85, 0.9), 3.0)
+	# Sin tocar se ve más tenue: es solo una pista de dónde va el pulgar.
+	var a := 1.0 if _dedo >= 0 else 0.55
+	_joystick.draw_circle(c, RADIO, Color(COLOR_BASE, COLOR_BASE.a * a))
+	_joystick.draw_arc(c, RADIO, 0, TAU, 64, Color(COLOR_BORDE, COLOR_BORDE.a * a), 4.0)
+	_joystick.draw_circle(c + _palanca * RADIO, RADIO * 0.45, Color(0.75, 1, 0.6, 0.75 * a))
+	_joystick.draw_arc(c + _palanca * RADIO, RADIO * 0.45, 0, TAU, 48, Color(1, 1, 0.85, 0.9 * a), 3.0)

@@ -102,6 +102,11 @@ var decoraciones: Dictionary = {"puestas": [], "guardadas": {}}
 var posiciones: Dictionary = {}
 ## Terrenos del valle que se compraron para agrandar la granja ("columna,fila"; ver Granja.expandir).
 var terrenos: Array[String] = []
+## Cuadros de la milpa que puso el jugador ("columna,fila"; la parcela i está en el cuadro i) y si ya
+## se pusieron los de siempre. Árboles frutales plantados ({"id", "x", "y", "etapa", "horas", "abonado"}).
+var milpa: Array[String] = []
+var milpa_lista := false
+var frutales: Array = []
 ## Caminos que pintó el jugador ("columna,fila" -> "arena" o "piedra"; ver Granja.poner_camino) y si ya
 ## se pusieron los caminos rectos de siempre (al crear la granja).
 var caminos: Dictionary = {}
@@ -150,6 +155,9 @@ func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := ""
 	decoraciones = {"puestas": [], "guardadas": {}}
 	posiciones.clear()
 	terrenos.clear()
+	milpa.clear()
+	milpa_lista = false
+	frutales.clear()
 	caminos.clear()
 	caminos_listos = false
 	pesca = {"dia": 0, "veces": 0}
@@ -368,6 +376,9 @@ func a_diccionario() -> Dictionary:
 		"decoraciones": decoraciones,
 		"posiciones": posiciones,
 		"terrenos": terrenos,
+		"milpa": milpa,
+		"milpa_lista": milpa_lista,
+		"frutales": frutales,
 		"caminos": caminos,
 		"caminos_listos": caminos_listos,
 		"pesca": pesca,
@@ -418,6 +429,9 @@ func desde_diccionario(datos: Dictionary) -> void:
 		decoraciones["guardadas"][id] = int(decoraciones["guardadas"].get(id, 0)) + 1
 	posiciones = datos.get("posiciones", {}).duplicate(true) if datos.get("posiciones") is Dictionary else {}
 	terrenos.assign(datos.get("terrenos", []))
+	milpa.assign(datos.get("milpa", []))
+	milpa_lista = bool(datos.get("milpa_lista", false))
+	frutales = datos.get("frutales", []).duplicate(true) if datos.get("frutales") is Array else []
 	caminos = datos.get("caminos", {}).duplicate() if datos.get("caminos") is Dictionary else {}
 	caminos_listos = bool(datos.get("caminos_listos", false))
 	pesca = datos.get("pesca", {"dia": 0, "veces": 0}) if datos.get("pesca") is Dictionary else {"dia": 0, "veces": 0}

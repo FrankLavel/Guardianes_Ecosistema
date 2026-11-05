@@ -876,7 +876,24 @@ def caminos():
         guardar(icono, ASSETS / "ui/granja" / f"camino_{nombre}.png")
 
 
-GRUPOS = {"caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+def frutales():
+    """Árboles frutales: una hoja por fruta (granja_frutal_<fruta>.png) con 4 dibujos en orden de lectura
+    (arbolito, joven, adulto, con fruta), y los íconos de las frutas (granja_frutas.png)."""
+    for nombre in ["aguacate", "guayaba", "limon"]:
+        fuente = f"granja_frutal_{nombre}.png"
+        if not (arte.FUENTE / fuente).exists():
+            continue
+        rgba = quitar_fondo(cargar(fuente))
+        objs = en_orden(rgba)
+        if len(objs) != 4:
+            raise SystemExit(f"{fuente}: se esperaban 4 dibujos y se encontraron {len(objs)}")
+        for etapa, o in enumerate(objs):
+            guardar(recortar(rgba, o), ASSETS / "objects/frutales" / f"{nombre}_{etapa}.png")
+    if (arte.FUENTE / "granja_frutas.png").exists():
+        objetos("granja_frutas.png", ["aguacate", "guayaba", "limon"], "ui/granja")
+
+
+GRUPOS = {"frutales": frutales, "caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:

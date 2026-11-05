@@ -110,13 +110,15 @@ func test_la_granja_se_guarda() -> void:
 	assert_has(Juego.recetario, "elote_asado")
 
 
-func test_la_milpa_aparece_al_restaurar_el_rio() -> void:
+func test_la_granja_aparece_al_restaurar_las_tres_zonas() -> void:
+	Juego.completar_zona("rio")
 	var valle = preload("res://scenes/valle/Valle.tscn").instantiate()
 	add_child_autofree(valle)
 	await wait_process_frames(2)
-	assert_null(valle.get_node_or_null("Objetos/Parcela0"), "Antes del río no hay milpa")
+	assert_null(valle.get_node_or_null("Objetos/Parcela0"), "Con solo el río todavía no hay granja")
 	valle.free()
-	Juego.completar_zona("rio")
+	Juego.completar_zona("bosque")
+	Juego.completar_zona("lago")
 	valle = preload("res://scenes/valle/Valle.tscn").instantiate()
 	add_child_autofree(valle)
 	await wait_process_frames(2)
@@ -370,6 +372,41 @@ func test_los_caminos_se_pintan_rectos_y_la_piedra_cuesta() -> void:
 	Juego.nueva_partida(RANURA)
 	assert_true(Juego.cargar(RANURA))
 	assert_eq(Granja.camino_en(Vector2i(31, 20)), "piedra")
+
+
+func test_la_milpa_se_pone_cuadro_por_cuadro() -> void:
+	assert_eq(Granja.celdas_milpa().size(), Granja.surcos(), "Al principio, los cuadros de siempre")
+	assert_false(Granja.poner_milpa(Vector2i(6, 6)), "No pasa de los que da el nivel")
+	assert_true(Granja.quitar_milpa(Vector2i(0, 0)))
+	assert_true(Granja.poner_milpa(Vector2i(6, 6)), "Se pone donde quiera el jugador")
+	Granja.dar("semilla_maiz")
+	var i := Granja.celdas_milpa().find(Vector2i(6, 6))
+	Granja.plantar(i, "maiz")
+	assert_false(Granja.quitar_milpa(Vector2i(6, 6)), "Con algo sembrado no se quita")
+	Juego.guardar()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_has(Granja.celdas_milpa(), Vector2i(6, 6))
+	assert_eq(Granja.parcela(Granja.celdas_milpa().find(Vector2i(6, 6)))["cultivo"], "maiz")
+
+
+func test_el_arbol_frutal_crece_da_fruta_y_el_abono_lo_acelera() -> void:
+	Juego.dar_hojas(20)
+	assert_false(Granja.comprar_frutal("aguacate"), "El aguacate es del nivel 2")
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][1]))
+	assert_true(Granja.comprar_frutal("aguacate"))
+	var arbol := Granja.plantar_frutal("aguacate", Vector2(1700, 900))
+	var horas: Array = Granja.datos["frutales"]["aguacate"]["horas"]
+	Granja.dar("abono")
+	assert_true(Granja.abonar_frutal(arbol))
+	Granja.avanzar_frutales(float(horas[0]) / 2.0)
+	assert_eq(int(arbol["etapa"]), 1, "Con abono creció en la mitad del tiempo")
+	Granja.avanzar_frutales(float(horas[1]))
+	assert_eq(int(arbol["etapa"]), Granja.ADULTO)
+	assert_true(Granja.cosechar_frutal(arbol).is_empty(), "Todavía no tiene fruta")
+	Granja.avanzar_frutales(float(Granja.datos["frutales"]["aguacate"]["horas_fruto"]))
+	assert_eq(Granja.cosechar_frutal(arbol), {"aguacate": 2})
+	assert_eq(int(arbol["etapa"]), Granja.ADULTO, "Vuelve a dar fruta después")
 
 
 func test_el_guajolote_llega_en_el_nivel_5() -> void:

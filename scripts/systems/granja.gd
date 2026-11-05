@@ -19,12 +19,21 @@ signal fogon_cambio
 signal corral_cambio
 signal terrenos_cambio
 signal caminos_cambio
+signal milpa_cambio
+signal frutales_cambio
 
 const RUTA := "res://data/granja.json"
 const ICONO := "res://assets/ui/granja/%s.png"
 const PLANTA := "res://assets/objects/granja/%s_%d.png"
 ## Surcos de la milpa: se empieza con 6 y se desbloquean más al subir de nivel.
 const PARCELAS_MAX := 12
+## La milpa son cuadros de 136 x 96 que pone el jugador (cuántos, según su nivel). La cuadrícula empieza
+## donde estaba la milpa de siempre, así los primeros cuadros quedan en el mismo lugar.
+const CELDA_MILPA := Vector2(136, 96)
+const ORIGEN_MILPA := Vector2(1488, 246)
+## Etapas de los árboles frutales: 0 arbolito, 1 joven, 2 adulto, 3 con fruta.
+const ADULTO := 2
+const CON_FRUTA := 3
 ## Etapa final de un cultivo (0 sembrado, 1 y 2 creciendo, 3 listo para cosechar).
 const LISTO := 3
 const PESCA_POR_DIA := 3
@@ -105,6 +114,7 @@ func _process(delta: float) -> void:
 		crecer(delta / Juego.SEGUNDOS_POR_HORA)
 		avanzar_talleres(delta / Juego.SEGUNDOS_POR_HORA)
 		quemar_lena(delta / Juego.SEGUNDOS_POR_HORA)
+		avanzar_frutales(delta / Juego.SEGUNDOS_POR_HORA)
 
 
 # ---------------------------------------------------------------- Inventario
@@ -215,6 +225,88 @@ func parcela(i: int) -> Dictionary:
 	while Juego.parcelas.size() < PARCELAS_MAX:
 		Juego.parcelas.append({"cultivo": "", "etapa": 0, "regada": false, "horas": 0.0})
 	return Juego.parcelas[i]
+
+
+## La granja (milpa, corral, talleres, tianguis) aparece cuando el valle ya está restaurado: las tres zonas.
+func granja_abierta() -> bool:
+	return Juego.juego_terminado()
+
+
+# ---------------------------------------------------------------- Cuadros de la milpa
+
+## Los cuadros de la milpa en orden (el de la parcela i es el i). La primera vez se ponen los de siempre,
+## tantos como permite el nivel (así las partidas viejas no pierden lo sembrado).
+func celdas_milpa() -> Array[Vector2i]:
+	if not Juego.milpa_lista:
+		Juego.milpa_lista = true
+		if Juego.milpa.is_empty():
+			for i in surcos():
+				Juego.milpa.append("%d,%d" % [i % 4, i / 4])
+	var lista: Array[Vector2i] = []
+	for clave in Juego.milpa:
+		var p := clave.split(",")
+		lista.append(Vector2i(int(p[0]), int(p[1])))
+	return lista
+
+
+func celda_milpa_de(punto: Vector2) -> Vector2i:
+	return Vector2i(((punto - ORIGEN_MILPA) / CELDA_MILPA).floor())
+
+
+func rect_de_milpa(celda: Vector2i) -> Rect2:
+	return Rect2(ORIGEN_MILPA + Vector2(celda) * CELDA_MILPA, CELDA_MILPA)
+
+
+func centro_de_milpa(celda: Vector2i) -> Vector2:
+	return rect_de_milpa(celda).get_center()
+
+
+## Si algún cuadro de la milpa toca `zona`.
+func milpa_toca(zona: Rect2) -> bool:
+	for celda in celdas_milpa():
+		if rect_de_milpa(celda).intersects(zona):
+			return true
+	return false
+
+
+## Pone un cuadro de tierra (el modo decorar revisa que no estorbe nada).
+func poner_milpa(celda: Vector2i) -> bool:
+	var celdas := celdas_milpa()
+	if celdas.size() >= surcos() or celda in celdas or not en_la_granja(rect_de_milpa(celda)):
+		return false
+	parcela(celdas.size())
+	Juego.milpa.append("%d,%d" % [celda.x, celda.y])
+	Sonido.efecto("recoger")
+	milpa_cambio.emit()
+	return true
+
+
+## Quita un cuadro de tierra, solo si no tiene nada sembrado.
+func quitar_milpa(celda: Vector2i) -> bool:
+	var i := celdas_milpa().find(celda)
+	if i < 0 or not parcela(i)["cultivo"].is_empty():
+		return false
+	Juego.milpa.remove_at(i)
+	Juego.parcelas.remove_at(i)
+	parcela(0)
+	Sonido.efecto("boton")
+	milpa_cambio.emit()
+	return true
+
+
+## Elegir si se agrega o se quita tierra: `al_elegir(tipo)` recibe "milpa" o "quitar_milpa".
+func abrir_milpa(al_elegir: Callable) -> void:
+	_abrir("milpa", "Tu milpa")
+	var hay := celdas_milpa().size()
+	var nota := "Tienes %d de %d cuadros." % [hay, surcos()]
+	if surcos() < PARCELAS_MAX:
+		nota += " En el nivel %d puedes tener más." % nivel_del_surco(surcos())
+	_contenido.add_child(_texto(nota + " Pon la tierra donde quieras, cuadro por cuadro.", 24, Color(0.85, 0.95, 0.8)))
+	var rejilla := _rejilla()
+	rejilla.add_child(_tarjeta("semilla_maiz", "Agregar tierra", {}, "%d disponibles" % (surcos() - hay), "AGREGAR",
+		hay < surcos(), 1, func(): cerrar(); al_elegir.call("milpa"), "Toca o arrastra sobre el pasto para arar un cuadro nuevo."))
+	rejilla.add_child(_tarjeta("camino_quitar", "Quitar tierra", {}, "", "QUITAR", true, 1,
+		func(): cerrar(); al_elegir.call("quitar_milpa"), "Solo se quitan los cuadros que no tienen nada sembrado."))
 
 
 func surcos() -> int:
@@ -668,6 +760,10 @@ func nuevo_pedido() -> Dictionary:
 	for id in datos["talleres"]:
 		if taller_abierto(id):
 			posibles.append_array(datos["talleres"][id]["salida"].keys())
+	for arbol in Juego.frutales:
+		var fruto: String = datos["frutales"][arbol["id"]]["fruto"]
+		if int(arbol["etapa"]) >= ADULTO and fruto not in posibles:
+			posibles.append(fruto)
 	for receta in Juego.recetario:
 		posibles.append(receta)
 	posibles.shuffle()
@@ -786,6 +882,102 @@ func abrir_tienda_decoraciones(al_elegir: Callable) -> void:
 				al_elegir.call(id)
 		rejilla.add_child(_tarjeta(id, dato["nombre"], {}, nota, "PONER" if tiene > 0 else "COMPRAR",
 			tiene > 0 or Juego.hojas >= costo, int(dato["nivel"]), elegir, dato["dato"]))
+	_contenido.add_child(_texto("Árboles frutales", 28, Color(0.99, 0.86, 0.45)))
+	var arboles := _rejilla()
+	for id in datos["frutales"]:
+		var dato: Dictionary = datos["frutales"][id]
+		var costo := int(dato["costo"])
+		var tiene := guardadas(id)
+		var nota := "Tienes %d arbolito%s" % [tiene, "" if tiene == 1 else "s"] if tiene > 0 else "Cuesta %d hojas" % costo
+		var elegir := func():
+			if guardadas(id) > 0 or comprar_frutal(id):
+				cerrar()
+				al_elegir.call(id)
+		arboles.add_child(_tarjeta(dato["fruto"], "Arbolito de " + dato["nombre"].to_lower(), {}, nota,
+			"PLANTAR" if tiene > 0 else "COMPRAR", tiene > 0 or Juego.hojas >= costo, int(dato["nivel"]), elegir,
+			dato["dato"] + " Crece, da %d frutas y vuelve a dar." % int(dato["cantidad"])))
+
+
+# ---------------------------------------------------------------- Árboles frutales
+
+func comprar_frutal(id: String) -> bool:
+	var dato: Dictionary = datos["frutales"][id]
+	if nivel() < int(dato["nivel"]) or not Juego.gastar_hojas(int(dato["costo"])):
+		return false
+	Juego.decoraciones["guardadas"][id] = guardadas(id) + 1
+	Sonido.efecto("recoger")
+	return true
+
+
+## Planta un arbolito comprado. Devuelve lo plantado ({} si no había).
+func plantar_frutal(id: String, pos: Vector2) -> Dictionary:
+	if guardadas(id) <= 0:
+		return {}
+	Juego.decoraciones["guardadas"][id] = guardadas(id) - 1
+	var arbol := {"id": id, "x": pos.x, "y": pos.y, "etapa": 0, "horas": 0.0, "abonado": false}
+	Juego.frutales.append(arbol)
+	dar_xp(int(datos["xp"]["frutal"]))
+	Sonido.efecto("correcto")
+	frutales_cambio.emit()
+	return arbol
+
+
+## Horas que le faltan a la etapa en que va (crecer o volver a dar fruta).
+func _horas_de_etapa(arbol: Dictionary) -> float:
+	var dato: Dictionary = datos["frutales"][arbol["id"]]
+	var etapa := int(arbol["etapa"])
+	return float(dato["horas"][etapa]) if etapa < ADULTO else float(dato["horas_fruto"])
+
+
+## Crecen con el tiempo; ya adultos, dan fruta cada tanto (y esperan a que la cosechen). Con abono, el doble de rápido.
+func avanzar_frutales(horas: float) -> void:
+	var cambio := false
+	for arbol in Juego.frutales:
+		if int(arbol["etapa"]) >= CON_FRUTA:
+			continue
+		arbol["horas"] = float(arbol["horas"]) + horas * (2.0 if arbol["abonado"] else 1.0)
+		if arbol["horas"] >= _horas_de_etapa(arbol):
+			arbol["horas"] = 0.0
+			arbol["etapa"] = int(arbol["etapa"]) + 1
+			arbol["abonado"] = false
+			cambio = true
+	if cambio:
+		frutales_cambio.emit()
+
+
+func minutos_frutal(arbol: Dictionary) -> int:
+	if int(arbol["etapa"]) >= CON_FRUTA:
+		return 0
+	var falta := (_horas_de_etapa(arbol) - float(arbol["horas"])) / (2.0 if arbol["abonado"] else 1.0)
+	return maxi(ceili(falta * Juego.SEGUNDOS_POR_HORA / 60.0), 1)
+
+
+func puede_abonar_frutal(arbol: Dictionary) -> bool:
+	return int(arbol["etapa"]) < CON_FRUTA and not arbol["abonado"] and cantidad("abono") > 0
+
+
+func abonar_frutal(arbol: Dictionary) -> bool:
+	if not puede_abonar_frutal(arbol):
+		return false
+	quitar("abono")
+	arbol["abonado"] = true
+	Sonido.efecto("recoger")
+	frutales_cambio.emit()
+	return true
+
+
+func cosechar_frutal(arbol: Dictionary) -> Dictionary:
+	if int(arbol["etapa"]) < CON_FRUTA:
+		return {}
+	var dato: Dictionary = datos["frutales"][arbol["id"]]
+	arbol["etapa"] = ADULTO
+	arbol["horas"] = 0.0
+	arbol["abonado"] = false
+	dar(dato["fruto"], int(dato["cantidad"]))
+	Sonido.efecto("recoger")
+	dar_xp(int(datos["xp"]["cosechar"]))
+	frutales_cambio.emit()
+	return {dato["fruto"]: int(dato["cantidad"])}
 
 
 # ---------------------------------------------------------------- Terrenos (expandir la granja)
@@ -1004,7 +1196,9 @@ func _para_que_sirve(id: String) -> String:
 		return "Un platillo: cómetelo o entrégalo en el tianguis."
 	match id:
 		"abono":
-			return "Échalo a la milpa para que crezca el doble de rápido."
+			return "Échalo a la milpa o a un árbol frutal para que crezca el doble de rápido."
+		"aguacate", "guayaba", "limon":
+			return "Fruta de tus árboles: cómetela o entrégala en el tianguis."
 		"lena":
 			return "Para prender el fogón y para expandir la granja."
 		"masa", "queso", "miel", "leche", "huevo":

@@ -21,7 +21,7 @@ func actualizar_energia(valor: float) -> void:
 
 ## Nivel de la granja (aparece cuando la granja existe, al restaurar el río).
 func actualizar_nivel() -> void:
-	%Nivel.visible = Juego.zona_esta_completa("rio")
+	%Nivel.visible = Granja.granja_abierta()
 	var avance: Array = Granja.progreso_nivel()
 	%Nivel.text = "Nivel %d  ·  %d / %d exp." % [Granja.nivel(), avance[0], avance[1]]
 

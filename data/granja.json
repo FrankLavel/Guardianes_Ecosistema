@@ -157,6 +157,24 @@
 			"nombre": "Lana",
 			"icono": "lana",
 			"valor": 3
+		},
+		"aguacate": {
+			"nombre": "Aguacate",
+			"icono": "aguacate",
+			"energia": 12,
+			"valor": 3
+		},
+		"guayaba": {
+			"nombre": "Guayaba",
+			"icono": "guayaba",
+			"energia": 8,
+			"valor": 2
+		},
+		"limon": {
+			"nombre": "Limón",
+			"icono": "limon",
+			"energia": 4,
+			"valor": 2
 		}
 	},
 	"zonas_semillas": {
@@ -495,7 +513,8 @@
 		"ayudar_animal": 10,
 		"taller": 2,
 		"decorar": 2,
-		"comprar_animal": 3
+		"comprar_animal": 3,
+		"frutal": 3
 	},
 	"talleres": {
 		"molino": {
@@ -591,6 +610,47 @@
 			"nivel": 5,
 			"ancho": 76,
 			"dato": "En tiempo de secas, un poco de agua limpia ayuda a las aves del valle."
+		}
+	},
+	"frutales": {
+		"aguacate": {
+			"nombre": "Aguacate",
+			"costo": 8,
+			"nivel": 2,
+			"fruto": "aguacate",
+			"cantidad": 2,
+			"horas": [
+				6,
+				10
+			],
+			"horas_fruto": 10,
+			"dato": "Michoacán es el lugar del mundo donde más aguacate se cultiva, sobre todo cerca de Uruapan."
+		},
+		"guayaba": {
+			"nombre": "Guayaba",
+			"costo": 6,
+			"nivel": 3,
+			"fruto": "guayaba",
+			"cantidad": 3,
+			"horas": [
+				5,
+				8
+			],
+			"horas_fruto": 8,
+			"dato": "La guayaba tiene más vitamina C que la naranja. En Zitácuaro y Jungapeo se cultiva mucha."
+		},
+		"limon": {
+			"nombre": "Limón",
+			"costo": 5,
+			"nivel": 4,
+			"fruto": "limon",
+			"cantidad": 3,
+			"horas": [
+				4,
+				7
+			],
+			"horas_fruto": 6,
+			"dato": "En la Tierra Caliente de Michoacán, como en Apatzingán, se cultiva mucho limón."
 		}
 	}
 }

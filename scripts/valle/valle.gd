@@ -11,11 +11,8 @@ const ESCENA_PUERTA := preload("res://scenes/valle/ZonaInteraccion.tscn")
 ## Frente a la puerta de la casa de adobe (dónde se entra y dónde se aparece al salir).
 const PUERTA_CASA := Vector2(1615, 905)
 
-## Granja (aparece cuando el río se restaura): milpa arriba de la casa (4x3), corral, muelle
-## para pescar y zona donde salen plantas silvestres y leña.
-const MILPA := Vector2(1556, 294)
-const COLUMNAS_MILPA := 4
-const SEPARACION_MILPA := Vector2(136, 96)
+## Granja (aparece cuando las tres zonas están restauradas): milpa (ver Granja.celdas_milpa), corrales,
+## muelle para pescar y zona donde salen plantas silvestres y leña.
 ## Centro del corral de las gallinas si el jugador no lo ha movido; los corrales de las otras especies
 ## buscan un lugar libre cerca de aquí (ver Corral).
 const CORRAL := Vector2(1375, 1195)
@@ -142,7 +139,7 @@ func _ready() -> void:
 
 
 func _crear_granja() -> void:
-	if not Juego.zona_esta_completa("rio"):
+	if not Granja.granja_abierta():
 		return
 	# Los árboles, arbustos y rocas del valle se pueden mover en el modo decorar (dentro de la granja).
 	for nodo in $Objetos.get_children():
@@ -153,12 +150,11 @@ func _crear_granja() -> void:
 	# Partidas de antes de la granja: se les dan las semillas de las zonas que ya restauraron.
 	for zona in Juego.zonas_completadas:
 		Granja.dar_semillas_de(zona)
-	# Los adornos del valle que caen donde va la milpa completa (12 surcos) se quitan.
-	var milpa := Rect2(MILPA, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA - 1, Granja.PARCELAS_MAX / COLUMNAS_MILPA - 1)).grow(140)
-	for nodo in $Objetos.get_children():
-		if nodo is StaticBody2D and milpa.has_point(nodo.position):
-			nodo.queue_free()
+	# Los adornos del valle que caen en la milpa se quitan (los cuadros nuevos ya no se encima con nada).
+	for celda in Granja.celdas_milpa():
+		_quitar_adornos(Granja.rect_de_milpa(celda).grow(40))
 	_poner_parcelas()
+	Granja.milpa_cambio.connect(_al_cambiar_milpa)
 	var muelle: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 	muelle.name = "Pescar"
 	muelle.texto_aviso = "E  Pescar"
@@ -198,6 +194,8 @@ func _crear_granja() -> void:
 		taller.position = pos
 		_zona_de(taller, 95.0)
 		$Objetos.add_child(taller)
+	for arbol in Juego.frutales:
+		nuevo_frutal(arbol["id"], arbol)
 	for puesta in Juego.decoraciones["puestas"]:
 		var decoracion := Decoracion.new()
 		decoracion.id = puesta["id"]
@@ -215,7 +213,8 @@ func _crear_granja() -> void:
 	boton.text = "DECORAR" if Tactil.activo else "DECORAR (C)"
 	boton.add_theme_font_size_override("font_size", 24)
 	boton.focus_mode = Control.FOCUS_NONE
-	boton.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 24)
+	# En el celular, lejos de la orilla (la funda del teléfono estorba en las esquinas).
+	boton.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 80 if Tactil.activo else 24)
 	boton.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	boton.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	boton.pressed.connect(func(): decorador.salir() if decorador.activo else decorador.entrar())
@@ -248,28 +247,49 @@ func _crear_granja() -> void:
 	Granja.nivel_subio.connect(_al_subir_nivel)
 
 
-## Los 12 surcos de la milpa (COLUMNAS_MILPA por fila); los que faltan por desbloquear dicen en qué nivel se abren.
+## Un surco por cada cuadro de la milpa que puso el jugador (ver Granja.celdas_milpa).
 func _poner_parcelas() -> void:
 	if _suelo_milpa == null:
 		_suelo_milpa = MilpaSuelo.new()
 		_suelo_milpa.name = "SueloMilpa"
 		add_child(_suelo_milpa)
 		move_child(_suelo_milpa, $Objetos.get_index())
-	_suelo_milpa.tam = SEPARACION_MILPA
-	_suelo_milpa.posiciones.clear()
-	for i in Granja.PARCELAS_MAX:
-		_suelo_milpa.posiciones.append(MILPA + Vector2(i % COLUMNAS_MILPA, i / COLUMNAS_MILPA) * SEPARACION_MILPA)
 	_suelo_milpa.queue_redraw()
-	for i in Granja.PARCELAS_MAX:
-		if $Objetos.has_node("Parcela%d" % i):
-			continue
+	for nodo in $Objetos.get_children():
+		if nodo is Parcela:
+			gara.quitar_interactuable(nodo)
+			$Objetos.remove_child(nodo)
+			nodo.queue_free()
+	var celdas := Granja.celdas_milpa()
+	for i in celdas.size():
 		var parcela := Parcela.new()
 		parcela.name = "Parcela%d" % i
 		parcela.indice = i
-		parcela.position = MILPA + Vector2(i % COLUMNAS_MILPA, i / COLUMNAS_MILPA) * SEPARACION_MILPA
+		parcela.position = Granja.centro_de_milpa(celdas[i])
 		_zona_de(parcela, 55.0)
 		parcela.aviso.connect(avisar)
 		$Objetos.add_child(parcela)
+
+
+func _al_cambiar_milpa() -> void:
+	_poner_parcelas()
+	_actualizar_prohibido()
+	for planta in get_tree().get_nodes_in_group(&"silvestre"):
+		if Granja.milpa_toca(Rect2(planta.position - Vector2(20, 20), Vector2(40, 40))):
+			Juego.silvestres.erase(planta.get_meta(&"dato"))
+			planta.queue_free()
+
+
+## Un árbol frutal en el valle (ya plantado o, con `puesta` vacía, en la mano del modo decorar).
+func nuevo_frutal(id: String, puesta: Dictionary = {}) -> Frutal:
+	var arbol := Frutal.new()
+	arbol.id = id
+	arbol.puesta = puesta
+	if not puesta.is_empty():
+		arbol.position = Vector2(float(puesta["x"]), float(puesta["y"]))
+	_zona_de(arbol, 70.0)
+	$Objetos.add_child(arbol)
+	return arbol
 
 
 ## Los animales de la granja (ver Granja.animales_del_corral): los regalados al subir de nivel y los
@@ -408,21 +428,15 @@ func _quitar_adornos(zona: Rect2, solo: Array = []) -> void:
 ## cuenta la base de cada cosa (lo que pisa), no su dibujo completo: el techo o un arco pueden tapar
 ## algo que está detrás sin estorbarle. La casa y el puesto ya chocan con su propia base.
 func lugares_fijos() -> Array[Rect2]:
-	var lugares: Array[Rect2] = [_rect_milpa().grow(20), Rect2(PUERTA_CASA - Vector2(55, 20), Vector2(110, 90)),
+	var lugares: Array[Rect2] = [Rect2(PUERTA_CASA - Vector2(55, 20), Vector2(110, 90)),
 		Rect2(TIANGUIS - Vector2(110, 30), Vector2(220, 80)), Rect2(MUELLE - Vector2(80, 50), Vector2(160, 100)),
 		Rect2($Objetos/Achi.position - Vector2(170, 110), Vector2(340, 200))]
 	for entrada in entradas():
 		if entrada.visible:
 			lugares.append(Rect2(entrada.position - Vector2(100, 50), Vector2(200, 100)))
+	for celda in Granja.celdas_milpa():
+		lugares.append(Granja.rect_de_milpa(celda).grow(10))
 	return lugares
-
-
-func rect_milpa() -> Rect2:
-	return _rect_milpa()
-
-
-func _rect_milpa() -> Rect2:
-	return Rect2(MILPA - SEPARACION_MILPA / 2.0, SEPARACION_MILPA * Vector2(COLUMNAS_MILPA, Granja.PARCELAS_MAX / COLUMNAS_MILPA))
 
 
 func _animales_de_corral() -> Array[AnimalValle]:
@@ -434,7 +448,9 @@ func _animales_de_corral() -> Array[AnimalValle]:
 
 ## Los animales del valle no pisan la milpa, los corrales ni los talleres (estén donde estén).
 func _actualizar_prohibido() -> void:
-	var zonas: Array[Rect2] = [_rect_milpa().grow(16)]
+	var zonas: Array[Rect2] = []
+	for celda in Granja.celdas_milpa():
+		zonas.append(Granja.rect_de_milpa(celda).grow(16))
 	for nodo in get_tree().get_nodes_in_group(&"movible"):
 		if nodo is Corral or nodo is Taller:
 			zonas.append(nodo.huella().grow(30))
@@ -474,10 +490,12 @@ func _poner_silvestres() -> void:
 	for hijo in $Objetos.get_children():
 		if hijo.is_in_group(&"silvestre"):
 			hijo.queue_free()
-	var ocupado: Array[Rect2] = [_rect_milpa().grow(60),
+	var ocupado: Array[Rect2] = [
 		Rect2($Objetos/Achi.position - Vector2(220, 160), Vector2(440, 280)), Rect2(PUERTA_CASA - Vector2(150, 250), Vector2(300, 300))]
 	for nodo in get_tree().get_nodes_in_group(&"movible"):
 		ocupado.append(nodo.huella().grow(60))
+	for celda in Granja.celdas_milpa():
+		ocupado.append(Granja.rect_de_milpa(celda).grow(60))
 	for dato in Granja.silvestres_de_hoy(AREA_SILVESTRES, ocupado):
 		var planta: ZonaInteraccion = ESCENA_PUERTA.instantiate()
 		planta.add_to_group(&"silvestre")
