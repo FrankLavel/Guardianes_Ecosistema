@@ -30,6 +30,11 @@ var _regresar: Button
 ## Con qué se están pintando caminos ("arena", "piedra", "quitar"; "" = no se pinta).
 var pintar := ""
 var _arrastrando := false
+## Arrastrar el mapa mueve la cámara; arrastrar lo que va en la mano lo suelta al levantar el dedo.
+var _presionado := false
+var _movido := false
+var _inicio_toque := Vector2.ZERO
+const ARRASTRE_MIN := 14.0
 var _sin_hojas := false
 
 
@@ -101,6 +106,11 @@ func entrar() -> void:
 func salir() -> void:
 	if _cargando:
 		_cancelar()
+	_presionado = false
+	# La cámara vuelve a seguir al guardián.
+	var camara := _camara()
+	if camara:
+		create_tween().tween_property(camara, "offset", Vector2.ZERO, 0.35).set_trans(Tween.TRANS_SINE)
 	pintar = ""
 	_arrastrando = false
 	queue_redraw()
@@ -119,8 +129,11 @@ func _unhandled_input(evento: InputEvent) -> void:
 	if not pintar.is_empty():
 		_pintar_input(evento)
 		return
-	if evento is InputEventMouseButton and evento.pressed:
-		if evento.button_index == MOUSE_BUTTON_LEFT:
+	if evento is InputEventMouseButton and evento.button_index == MOUSE_BUTTON_LEFT:
+		if evento.pressed:
+			_presionado = true
+			_movido = false
+			_inicio_toque = evento.position
 			if _cargando:
 				# Con el dedo no hay "pasar el mouse": primero se lleva a donde se tocó.
 				_mover(_cargando, get_global_mouse_position() + _agarre)
@@ -128,8 +141,23 @@ func _unhandled_input(evento: InputEvent) -> void:
 				_soltar()
 			else:
 				_agarrar(get_global_mouse_position())
-		elif evento.button_index == MOUSE_BUTTON_RIGHT and _cargando:
-			_cancelar()
+		else:
+			_presionado = false
+			if _cargando and _movido:
+				# Se arrastró con el dedo: al levantarlo se suelta (si no cabe, se queda en la mano).
+				_soltar()
+			elif not _cargando and not _movido and Granja.se_puede_expandir(Granja.celda_de(get_global_mouse_position())):
+				Sonido.efecto("boton")
+				Granja.abrir_expandir(Granja.celda_de(get_global_mouse_position()))
+		get_viewport().set_input_as_handled()
+	elif evento is InputEventMouseButton and evento.pressed and evento.button_index == MOUSE_BUTTON_RIGHT and _cargando:
+		_cancelar()
+		get_viewport().set_input_as_handled()
+	elif evento is InputEventMouseMotion and _presionado:
+		if evento.position.distance_to(_inicio_toque) > ARRASTRE_MIN:
+			_movido = true
+		if _movido and _cargando == null:
+			_mover_camara(-evento.relative)
 		get_viewport().set_input_as_handled()
 	elif evento is InputEventKey and evento.pressed and not evento.echo and evento.physical_keycode == KEY_R:
 		girar()
@@ -186,9 +214,6 @@ func _agarrar(punto: Vector2) -> void:
 	if elegido:
 		_tomar(elegido, false)
 		_agarre = elegido.global_position - punto
-	elif Granja.se_puede_expandir(Granja.celda_de(punto)):
-		Sonido.efecto("boton")
-		Granja.abrir_expandir(Granja.celda_de(punto))
 
 
 func _tomar(nodo: Node2D, nueva: bool) -> void:
@@ -264,6 +289,21 @@ func _guardar_cargada() -> void:
 	_cargando = null
 	valle.avisar("La guardaste. Está en la tienda para ponerla otra vez.")
 	_actualizar_barra()
+
+
+func _camara() -> Camera2D:
+	return valle.gara.camara if valle and valle.get("gara") else null
+
+
+## Mueve la cámara (en pixeles de pantalla) sin salirse del valle.
+func _mover_camara(pantalla: Vector2) -> void:
+	var camara := _camara()
+	if camara == null:
+		return
+	var mitad := get_viewport_rect().size / camara.zoom / 2.0
+	var centro := camara.get_screen_center_position()
+	var destino := (centro + pantalla / camara.zoom).clamp(mitad, tamano - mitad)
+	camara.offset += destino - centro
 
 
 func _soltar_de_la_mano() -> void:
@@ -404,7 +444,7 @@ func _actualizar_barra() -> void:
 	elif _cargando:
 		_texto.text = "Toca donde esté verde para soltarlo.  REGRESAR: dejarlo donde estaba."
 	else:
-		_texto.text = "Modo decorar: haz clic en una decoración, el corral o un taller para moverlo, o en un terreno azul para expandir la granja."
+		_texto.text = "Modo decorar: toca algo para moverlo o un terreno azul para expandir. Arrastra el mapa para ver más."
 
 
 ## Si `nodo` cabe donde está ahora. `ignorar`: adornos del valle (por nombre, p. ej. "Tocon") que no

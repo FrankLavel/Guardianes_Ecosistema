@@ -243,8 +243,21 @@ func _crear_granja() -> void:
 	_poner_silvestres()
 	Granja.corral_cambio.connect(_poner_corral)
 	Juego.noche_cambio.connect(_dormir_aves)
+	_bienvenida_granja()
 	Juego.dia_cambio.connect(_al_cambiar_dia)
 	Granja.nivel_subio.connect(_al_subir_nivel)
+
+
+## La primera vez que aparece la granja, Don Chucho explica cómo funciona.
+func _bienvenida_granja() -> void:
+	if "don_chucho_granja" in Juego.dialogos_vistos:
+		return
+	await get_tree().create_timer(1.2).timeout
+	while Dialogo.activo or Transicion.en_curso:
+		await get_tree().process_frame
+	if "don_chucho_granja" not in Juego.dialogos_vistos and is_inside_tree():
+		await Dialogo.mostrar("don_chucho_granja")
+		hud.mostrar_objetivo("Siembra en tu milpa y alimenta a tus animales en el comedero.", 6.0)
 
 
 ## Un surco por cada cuadro de la milpa que puso el jugador (ver Granja.celdas_milpa).
@@ -308,6 +321,11 @@ func _poner_corral() -> void:
 			corral.name = "Corral_" + especie
 			corral.base = float(Granja.datos["corral"][especie].get("corral", 1.0))
 			corral.con_gallinero = especie in ["gallina", "guajolote"]
+			var comedero := Comedero.new()
+			comedero.name = "Comedero"
+			_zona_de(comedero, 60.0)
+			comedero.usado.connect(func(_c): _atender_corral_entero(corral))
+			corral.comedero = comedero
 			corral.ajustar(ids.size())
 			corrales[especie] = corral
 			var guardado := Juego.posiciones.has(corral.clave)
@@ -530,6 +548,23 @@ func _atender_corral(animal: AnimalValle) -> void:
 		Granja.mostrar_recogida(producto, Granja.cantidad(producto) - antes, animal.global_position + Vector2(0, -40))
 	else:
 		avisar(texto)
+	_actualizar_corral()
+
+
+## El comedero: a todos los animales del corral se les da de comer y se recoge lo que ya dieron.
+func _atender_corral_entero(corral: Corral) -> void:
+	var ids: Array[String] = []
+	for animal in corral.animales:
+		ids.append(animal.get_meta(&"corral"))
+	var hecho := Granja.atender_todos(ids)
+	var fila := 0
+	for producto in hecho["recogido"]:
+		Granja.mostrar_recogida(producto, int(hecho["recogido"][producto]), corral.comedero.global_position + Vector2(0, -40), fila)
+		fila += 1
+	if int(hecho["comieron"]) > 0:
+		avisar("Les diste de comer a %d. Mañana tendrán más." % int(hecho["comieron"]))
+	elif hecho["recogido"].is_empty():
+		avisar("Ya comieron hoy. Vuelve mañana para recoger lo que den.")
 	_actualizar_corral()
 
 

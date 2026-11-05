@@ -404,6 +404,23 @@ func test_se_puede_arar_junto_a_otro_cuadro_en_el_modo_decorar() -> void:
 	assert_false(valle.decorador.se_puede_arar(Granja.celda_milpa_de(Vector2(1680, 880))), "Encima de la casa no")
 
 
+func test_el_comedero_alimenta_a_todos_y_recoge_lo_listo() -> void:
+	Juego.dar_hojas(10)
+	Granja.comprar_animal("gallina")
+	var ids: Array[String] = ["gallina", "gallina_2"]
+	assert_eq(Granja.atender_todos(ids)["comieron"], 2, "Comen las dos de un jalón")
+	_dia_siguiente()
+	var hecho := Granja.atender_todos(ids)
+	assert_eq(hecho["recogido"], {"huevo": 2}, "Se recogen los dos huevos")
+	assert_eq(hecho["comieron"], 2, "Y vuelven a comer para mañana")
+	assert_eq(Granja.cantidad("huevo"), 2)
+
+
+func test_la_granja_tiene_su_bienvenida() -> void:
+	assert_true(Dialogo.existe("don_chucho_granja"))
+	assert_true(Dialogo.existe("don_chucho_granja_repetir"))
+
+
 func test_el_arbol_frutal_crece_da_fruta_y_el_abono_lo_acelera() -> void:
 	Juego.dar_hojas(20)
 	assert_false(Granja.comprar_frutal("aguacate"), "El aguacate es del nivel 2")

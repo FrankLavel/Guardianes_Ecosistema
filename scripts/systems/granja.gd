@@ -462,6 +462,26 @@ func comprar_animal(especie: String) -> bool:
 	return true
 
 
+## El comedero de un corral: a cada animal se le recoge lo que tenga listo y se le da de comer si no ha
+## comido hoy. Devuelve {"recogido": {producto: cantidad}, "comieron": cuántos comieron}.
+func atender_todos(animales: Array[String]) -> Dictionary:
+	var recogido := {}
+	var comieron := 0
+	for animal in animales:
+		var producto: String = datos["corral"][especie_de(animal)]["producto"]
+		var antes := cantidad(producto) if not producto.is_empty() else 0
+		var estado: Dictionary = Juego.corral.get(animal, {"comio": -1, "listo": false})
+		var comio_antes := int(estado["comio"]) == Juego.dia
+		atender(animal)
+		if not producto.is_empty() and cantidad(producto) > antes:
+			recogido[producto] = int(recogido.get(producto, 0)) + cantidad(producto) - antes
+			# Si se recogió, también come (así con un solo toque queda listo para mañana).
+			atender(animal)
+		if not comio_antes and int(Juego.corral[animal]["comio"]) == Juego.dia:
+			comieron += 1
+	return {"recogido": recogido, "comieron": comieron}
+
+
 ## Hablar con un animal del corral: si tiene huevo, leche, abono o lana se recoge; si no ha comido hoy
 ## se le da de comer (al día siguiente tendrá). Devuelve el texto que se le muestra al jugador.
 func atender(animal: String) -> String:

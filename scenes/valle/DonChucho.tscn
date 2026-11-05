@@ -15,7 +15,7 @@ collision_mask = 2
 monitorable = false
 script = ExtResource("1_script")
 texto_aviso = "E  Hablar"
-dialogos = Array[PackedStringArray]([PackedStringArray("zona:rio", "don_chucho_rio_limpio"), PackedStringArray("visto:don_chucho_filtro", "don_chucho_filtro_repetir"), PackedStringArray("marca:rio_nivel", "don_chucho_filtro"), PackedStringArray("visto:don_chucho_inicio", "don_chucho_repetir"), PackedStringArray("siempre", "don_chucho_inicio")])
+dialogos = Array[PackedStringArray]([PackedStringArray("visto:don_chucho_granja", "don_chucho_granja_repetir"), PackedStringArray("zona:lago", "don_chucho_granja"), PackedStringArray("zona:rio", "don_chucho_rio_limpio"), PackedStringArray("visto:don_chucho_filtro", "don_chucho_filtro_repetir"), PackedStringArray("marca:rio_nivel", "don_chucho_filtro"), PackedStringArray("visto:don_chucho_inicio", "don_chucho_repetir"), PackedStringArray("siempre", "don_chucho_inicio")])
 
 [node name="Sombra" type="Polygon2D" parent="."]
 color = Color(0, 0, 0, 0.28)

@@ -20,6 +20,12 @@ var animales: Array[AnimalValle] = []
 var base := 1.0
 var tamano := 1.0
 var con_gallinero := false
+## El comedero va en la orilla de enfrente (lo pone el valle; ver Comedero).
+var comedero: Comedero:
+	set(valor):
+		comedero = valor
+		add_child(comedero)
+		_acomodar_comedero()
 
 ## Con qué nombre se guarda dónde quedó (el de la gallina usa el nombre de cuando había un solo corral).
 var clave: String:
@@ -36,7 +42,9 @@ func _ready() -> void:
 
 func _poner_cerca() -> void:
 	for hijo in get_children():
-		hijo.queue_free()
+		if hijo != comedero:
+			hijo.queue_free()
+	_acomodar_comedero()
 	for tramo in [[Vector2(-140, -22), false], [Vector2(140, -22), true], [Vector2(-140, 150), true], [Vector2(140, 150), false]]:
 		var cerca := Sprite2D.new()
 		cerca.texture = CERCA
@@ -53,6 +61,11 @@ func _poner_cerca() -> void:
 		gallinero.offset = Vector2(0, -gallinero.texture.get_height() / 2.0)
 		gallinero.position = LUGAR_GALLINERO * tamano
 		add_child(gallinero)
+
+
+func _acomodar_comedero() -> void:
+	if comedero:
+		comedero.position = Vector2(60, 150) * tamano
 
 
 ## El pie de la rampa del gallinero.
