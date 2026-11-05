@@ -12,6 +12,39 @@ func after_each() -> void:
 	Juego.borrar_partida(RANURA)
 
 
+func test_el_guardado_deja_respaldo_y_lo_usa_si_la_partida_se_dana() -> void:
+	Juego.nueva_partida(RANURA)
+	Juego.dar_hojas(3)
+	Juego.guardar()
+	Juego.dar_hojas(4)
+	Juego.guardar()
+	assert_true(FileAccess.file_exists(Juego.ruta_ranura(RANURA) + ".bak"), "Queda la partida anterior")
+	assert_false(FileAccess.file_exists(Juego.ruta_ranura(RANURA) + ".tmp"))
+	# La app se cerró a medio guardar: el archivo bueno quedó roto.
+	var roto := FileAccess.open(Juego.ruta_ranura(RANURA), FileAccess.WRITE)
+	roto.store_string("{\"hojas\": 7")
+	roto.close()
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA), "Se carga el respaldo")
+	assert_eq(Juego.hojas, 3)
+	Juego.borrar_partida(RANURA)
+	assert_false(Juego.existe_partida(RANURA), "Se borran también el respaldo y el temporal")
+
+
+func test_se_guarda_al_mandar_la_app_a_segundo_plano() -> void:
+	Juego.nueva_partida(RANURA)
+	Juego.dar_hojas(9)
+	Juego.notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	Juego.nueva_partida(RANURA)
+	assert_true(Juego.cargar(RANURA))
+	assert_eq(Juego.hojas, 9)
+	Juego.borrar_partida(RANURA)
+
+
+func test_el_boton_atras_no_cierra_el_juego() -> void:
+	assert_false(ProjectSettings.get_setting("application/config/quit_on_go_back"), "Lo maneja el juego (pausa)")
+
+
 func test_solo_el_rio_empieza_desbloqueado() -> void:
 	assert_true(Juego.zona_desbloqueada("rio"))
 	assert_false(Juego.zona_desbloqueada("bosque"))

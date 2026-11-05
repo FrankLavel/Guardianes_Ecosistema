@@ -427,15 +427,16 @@ func _quitar_adornos(zona: Rect2, solo: Array = []) -> void:
 ## el frente del tianguis y del muelle, el estanque de Achi y el pie de las entradas a las zonas. Solo
 ## cuenta la base de cada cosa (lo que pisa), no su dibujo completo: el techo o un arco pueden tapar
 ## algo que está detrás sin estorbarle. La casa y el puesto ya chocan con su propia base.
-func lugares_fijos() -> Array[Rect2]:
+func lugares_fijos(con_milpa := true) -> Array[Rect2]:
 	var lugares: Array[Rect2] = [Rect2(PUERTA_CASA - Vector2(55, 20), Vector2(110, 90)),
 		Rect2(TIANGUIS - Vector2(110, 30), Vector2(220, 80)), Rect2(MUELLE - Vector2(80, 50), Vector2(160, 100)),
 		Rect2($Objetos/Achi.position - Vector2(170, 110), Vector2(340, 200))]
 	for entrada in entradas():
 		if entrada.visible:
 			lugares.append(Rect2(entrada.position - Vector2(100, 50), Vector2(200, 100)))
-	for celda in Granja.celdas_milpa():
-		lugares.append(Granja.rect_de_milpa(celda).grow(10))
+	if con_milpa:
+		for celda in Granja.celdas_milpa():
+			lugares.append(Granja.rect_de_milpa(celda).grow(10))
 	return lugares
 
 

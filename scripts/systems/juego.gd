@@ -56,6 +56,11 @@ const PALABRAS := {
 }
 
 var ranura := 1
+## Hay una partida en juego (empezada o cargada): solo entonces se guarda sola (ver _notification).
+var partida_activa := false
+## Cada cuánto se guarda sola mientras se juega en el valle o la casa (segundos reales).
+const GUARDADO_AUTOMATICO := 60.0
+var _desde_guardado := 0.0
 ## "nino" o "nina".
 var genero := "nino"
 var nombre := ""
@@ -128,6 +133,7 @@ var entrada_bloqueada := false
 
 func nueva_partida(nueva_ranura := 1, nuevo_genero := "nino", nuevo_nombre := "") -> void:
 	ranura = nueva_ranura
+	partida_activa = true
 	genero = nuevo_genero if nuevo_genero in PERSONAJES else "nino"
 	nombre = nuevo_nombre.strip_edges()
 	zonas_completadas.clear()
@@ -216,6 +222,9 @@ func reloj_corre() -> bool:
 func _process(delta: float) -> void:
 	if not reloj_corre():
 		return
+	_desde_guardado += delta
+	if _desde_guardado >= GUARDADO_AUTOMATICO:
+		guardar()
 	avanzar_hora(delta / SEGUNDOS_POR_HORA)
 	# Después del final el guardián se cansa poco a poco (comer recupera la energía).
 	if juego_terminado():
@@ -344,7 +353,36 @@ static func ruta_ranura(numero: int) -> String:
 
 
 static func existe_partida(numero := 1) -> bool:
-	return FileAccess.file_exists(ruta_ranura(numero))
+	return FileAccess.file_exists(ruta_ranura(numero)) or FileAccess.file_exists(ruta_ranura(numero) + ".bak")
+
+
+## En el celular la app se puede cerrar en cualquier momento: se guarda al mandarla a segundo plano,
+## al cerrarla y con el botón "atrás" (que abre la pausa en lugar de salir del juego).
+func _notification(que: int) -> void:
+	match que:
+		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST:
+			if partida_activa:
+				guardar()
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			_atras()
+
+
+## Botón "atrás" de Android: en el juego hace lo mismo que Esc (cierra lo abierto o abre la pausa); en el
+## menú principal sale del juego.
+func _atras() -> void:
+	var escena := get_tree().current_scene
+	if escena == null or not escena.is_in_group(&"jugable"):
+		if partida_activa:
+			guardar()
+		get_tree().quit()
+		return
+	if partida_activa:
+		guardar()
+	for presionado in [true, false]:
+		var evento := InputEventAction.new()
+		evento.action = &"pausa"
+		evento.pressed = presionado
+		Input.parse_input_event(evento)
 
 
 func a_diccionario() -> Dictionary:
@@ -441,28 +479,56 @@ func desde_diccionario(datos: Dictionary) -> void:
 	tianguis = datos.get("tianguis", []).duplicate(true)
 
 
+## Se escribe primero un archivo aparte y luego se cambia por el bueno; el anterior queda de respaldo
+## (.bak). Así, si la app se cierra a medio guardar, la partida no se pierde.
 func guardar() -> bool:
-	var archivo := FileAccess.open(ruta_ranura(ranura), FileAccess.WRITE)
+	_desde_guardado = 0.0
+	var ruta := ruta_ranura(ranura)
+	var archivo := FileAccess.open(ruta + ".tmp", FileAccess.WRITE)
 	if archivo == null:
 		push_error("No se pudo guardar la partida: %s" % FileAccess.get_open_error())
 		return false
 	archivo.store_string(JSON.stringify(a_diccionario(), "\t"))
+	archivo.close()
+	var global := ProjectSettings.globalize_path(ruta)
+	if FileAccess.file_exists(ruta):
+		DirAccess.remove_absolute(global + ".bak")
+		DirAccess.rename_absolute(global, global + ".bak")
+	if DirAccess.rename_absolute(global + ".tmp", global) != OK:
+		push_error("No se pudo guardar la partida en %s" % ruta)
+		return false
 	return true
 
 
 func cargar(numero := 1) -> bool:
 	if not existe_partida(numero):
 		return false
-	var datos = JSON.parse_string(FileAccess.get_file_as_string(ruta_ranura(numero)))
+	var datos = _leer(ruta_ranura(numero))
+	if not datos is Dictionary:
+		# Si la partida se dañó, se usa la que se guardó antes.
+		datos = _leer(ruta_ranura(numero) + ".bak")
 	if not datos is Dictionary:
 		push_error("Partida dañada en la ranura %d" % numero)
 		return false
 	ranura = numero
+	partida_activa = true
 	desde_diccionario(datos)
 	partida_cargada.emit()
 	return true
 
 
+func _leer(ruta: String) -> Variant:
+	if not FileAccess.file_exists(ruta):
+		return null
+	# Sin aviso de error en la consola: que la partida esté dañada se maneja usando el respaldo.
+	var json := JSON.new()
+	return json.data if json.parse(FileAccess.get_file_as_string(ruta)) == OK else null
+
+
 func borrar_partida(numero := 1) -> void:
-	if existe_partida(numero):
-		DirAccess.remove_absolute(ProjectSettings.globalize_path(ruta_ranura(numero)))
+	var global := ProjectSettings.globalize_path(ruta_ranura(numero))
+	for final in ["", ".bak", ".tmp"]:
+		if FileAccess.file_exists(ruta_ranura(numero) + final):
+			DirAccess.remove_absolute(global + final)
+	if numero == ranura:
+		partida_activa = false

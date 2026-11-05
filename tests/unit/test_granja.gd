@@ -390,6 +390,20 @@ func test_la_milpa_se_pone_cuadro_por_cuadro() -> void:
 	assert_eq(Granja.parcela(Granja.celdas_milpa().find(Vector2i(6, 6)))["cultivo"], "maiz")
 
 
+func test_se_puede_arar_junto_a_otro_cuadro_en_el_modo_decorar() -> void:
+	for zona in ["rio", "bosque", "lago"]:
+		Juego.completar_zona(zona)
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][3]))
+	var valle = preload("res://scenes/valle/Valle.tscn").instantiate()
+	add_child_autofree(valle)
+	await wait_physics_frames(3)
+	Granja.quitar_milpa(Vector2i(3, 1))
+	valle.decorador.pintar = "milpa"
+	assert_true(valle.decorador.se_puede_arar(Vector2i(3, 1)), "Se vuelve a poner el que se quitó, pegado a los demás")
+	assert_false(valle.decorador.se_puede_arar(Vector2i(0, 0)), "Encima de uno que ya existe no")
+	assert_false(valle.decorador.se_puede_arar(Granja.celda_milpa_de(Vector2(1680, 880))), "Encima de la casa no")
+
+
 func test_el_arbol_frutal_crece_da_fruta_y_el_abono_lo_acelera() -> void:
 	Juego.dar_hojas(20)
 	assert_false(Granja.comprar_frutal("aguacate"), "El aguacate es del nivel 2")

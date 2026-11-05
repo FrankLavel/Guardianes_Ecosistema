@@ -343,7 +343,9 @@ func se_puede_arar(celda: Vector2i) -> bool:
 	if pintar == "quitar_milpa":
 		var i := Granja.celdas_milpa().find(celda)
 		return i >= 0 and Granja.parcela(i)["cultivo"].is_empty()
-	return Granja.celdas_milpa().size() < Granja.surcos() and _cabe_rect(Granja.rect_de_milpa(celda).grow(-4), null)
+	# Pegado a otros cuadros sí se puede (así crece la milpa); encima de uno que ya existe no.
+	return Granja.celdas_milpa().size() < Granja.surcos() and celda not in Granja.celdas_milpa() \
+		and _cabe_rect(Granja.rect_de_milpa(celda).grow(-4), null, [], false)
 
 
 func _pintar_en(punto: Vector2) -> void:
@@ -412,10 +414,10 @@ func cabe(nodo: Node2D, ignorar: Array = []) -> bool:
 
 
 ## Si en `huella` no hay nada (más que `nodo`, que es lo que se está acomodando).
-func _cabe_rect(huella: Rect2, nodo: Node2D, ignorar: Array = []) -> bool:
+func _cabe_rect(huella: Rect2, nodo: Node2D, ignorar: Array = [], con_milpa := true) -> bool:
 	if not Rect2(Vector2(60, 60), tamano - Vector2(120, 120)).encloses(huella) or not Granja.en_la_granja(huella):
 		return false
-	for zona in valle.lugares_fijos():
+	for zona in valle.lugares_fijos(con_milpa):
 		if zona.intersects(huella):
 			return false
 	for otro in get_tree().get_nodes_in_group(&"movible"):
