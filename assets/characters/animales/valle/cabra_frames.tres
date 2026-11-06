@@ -1,0 +1,66 @@
+[gd_resource type="SpriteFrames" load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/animales/valle/cabra_atlas.png" id="1_atlas"]
+
+[sub_resource type="AtlasTexture" id="c0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 0, 360, 300)
+
+[sub_resource type="AtlasTexture" id="c1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(360, 0, 360, 300)
+
+[sub_resource type="AtlasTexture" id="c2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(720, 0, 360, 300)
+
+[sub_resource type="AtlasTexture" id="c3"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1080, 0, 360, 300)
+
+[sub_resource type="AtlasTexture" id="c4"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 300, 360, 300)
+
+[sub_resource type="AtlasTexture" id="c5"]
+atlas = ExtResource("1_atlas")
+region = Rect2(360, 300, 360, 300)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c4")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c0")
+}, {
+"duration": 1.0,
+"texture": SubResource("c1")
+}, {
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c3")
+}],
+"loop": true,
+"name": &"caminar",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c5")
+}, {
+"duration": 1.0,
+"texture": SubResource("c4")
+}],
+"loop": true,
+"name": &"comer",
+"speed": 1.2
+}]

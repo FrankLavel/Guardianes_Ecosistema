@@ -13,7 +13,9 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	AudioServer.set_bus_volume_db(_bus_master(), _volumen_original_db)
+	# Las opciones se guardan en disco: se dejan como estaban.
+	Sonido.fijar_volumen("Master", db_to_linear(_volumen_original_db))
+	Sonido.guardar_opciones()
 
 
 func _bus_master() -> int:

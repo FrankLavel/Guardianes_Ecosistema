@@ -1,0 +1,161 @@
+[gd_resource type="SpriteFrames" load_steps=19 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/gara/aerea/gara_aerea_atlas.png" id="1_atlas"]
+
+[sub_resource type="AtlasTexture" id="c0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 0, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(128, 0, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(256, 0, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c3"]
+atlas = ExtResource("1_atlas")
+region = Rect2(384, 0, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c4"]
+atlas = ExtResource("1_atlas")
+region = Rect2(512, 0, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c5"]
+atlas = ExtResource("1_atlas")
+region = Rect2(640, 0, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c6"]
+atlas = ExtResource("1_atlas")
+region = Rect2(768, 0, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c7"]
+atlas = ExtResource("1_atlas")
+region = Rect2(896, 0, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c8"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c9"]
+atlas = ExtResource("1_atlas")
+region = Rect2(128, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c10"]
+atlas = ExtResource("1_atlas")
+region = Rect2(256, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c11"]
+atlas = ExtResource("1_atlas")
+region = Rect2(384, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c12"]
+atlas = ExtResource("1_atlas")
+region = Rect2(512, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c13"]
+atlas = ExtResource("1_atlas")
+region = Rect2(640, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c14"]
+atlas = ExtResource("1_atlas")
+region = Rect2(768, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c15"]
+atlas = ExtResource("1_atlas")
+region = Rect2(896, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c16"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 416, 128, 208)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c0")
+}],
+"loop": true,
+"name": &"idle_abajo",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c1")
+}],
+"loop": true,
+"name": &"idle_arriba",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c2")
+}],
+"loop": true,
+"name": &"idle_izquierda",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c0")
+}, {
+"duration": 1.0,
+"texture": SubResource("c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("c4")
+}, {
+"duration": 1.0,
+"texture": SubResource("c5")
+}],
+"loop": true,
+"name": &"caminar_abajo",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c6")
+}, {
+"duration": 1.0,
+"texture": SubResource("c7")
+}, {
+"duration": 1.0,
+"texture": SubResource("c8")
+}],
+"loop": true,
+"name": &"caminar_izquierda",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c9")
+}, {
+"duration": 1.0,
+"texture": SubResource("c10")
+}, {
+"duration": 1.0,
+"texture": SubResource("c11")
+}, {
+"duration": 1.0,
+"texture": SubResource("c12")
+}, {
+"duration": 1.0,
+"texture": SubResource("c13")
+}, {
+"duration": 1.0,
+"texture": SubResource("c14")
+}, {
+"duration": 1.0,
+"texture": SubResource("c15")
+}, {
+"duration": 1.0,
+"texture": SubResource("c16")
+}],
+"loop": true,
+"name": &"caminar_arriba",
+"speed": 12.0
+}]

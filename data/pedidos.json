@@ -1,0 +1,71 @@
+{
+	"saludos": {
+		"venado": [
+			"El bosque de oyamel volvió a crecer. Ahora tengo sombra y comida.",
+			"Me gusta comer hojas tiernas y bellotas del encino. ¡Gracias por cuidar el bosque, {nombre}!"
+		],
+		"garza": [
+			"Desde que el río está limpio, hay peces y acociles para comer.",
+			"Me paro en una sola pata para no gastar calor. ¿Sabías?"
+		],
+		"pato_mexicano": [
+			"Cuac. El lago está mucho mejor sin tanto lirio.",
+			"Los patos mexicanos solo vivimos en México. ¡Cuida nuestros lagos!"
+		],
+		"monarca": [
+			"Vengo volando desde Canadá cada invierno. ¡Son miles de kilómetros!",
+			"Los oyameles nos protegen del frío. ¡Gracias por plantarlos!"
+		]
+	},
+	"pedidos": {
+		"cria": {
+			"recompensa": 8,
+			"meta": 1,
+			"animales": [
+				"venado",
+				"pato_mexicano"
+			],
+			"objetivo": "Busca a la cría {del_animal} y tráela",
+			"pedir": [
+				"¡{nombre}, ayúdame! ¡No encuentro a mi cría!",
+				"Se fue a explorar por el valle y no regresó.",
+				"Búscala, por favor. Cuando la encuentres, te seguirá hasta mí."
+			],
+			"recordar": [
+				"Mi cría es pequeña y se asusta fácil. Búscala por todo el valle."
+			],
+			"gracias": [
+				"¡Mi cría! ¡Gracias, {guardian}!",
+				"Las crías se pierden cuando el ruido o la basura las asustan. Tú las cuidas.",
+				"Toma estas hojas, te las ganaste."
+			]
+		},
+		"flores": {
+			"recompensa": 6,
+			"meta": 3,
+			"animales": [
+				"monarca"
+			],
+			"objetivo": "Planta 3 flores cerca {del_animal}",
+			"pedir": [
+				"¡Hola, {nombre}! Pronto empieza mi viaje y necesito mucha energía.",
+				"Las mariposas tomamos néctar de las flores, pero aquí ya casi no hay.",
+				"¿Plantas 3 flores en la tierra suelta? ¡Así podré volar muy lejos!"
+			],
+			"recordar": [
+				"Todavía faltan flores. La tierra suelta está aquí cerca."
+			],
+			"gracias": [
+				"¡Qué ricas flores! Con su néctar tengo energía para mi viaje.",
+				"Las flores también ayudan a las abejas y a los colibríes. ¡Gracias, {guardian}!",
+				"Toma estas hojas para tu casa."
+			]
+		}
+	},
+	"nombres": {
+		"venado": "del venado",
+		"garza": "de la garza",
+		"pato_mexicano": "del pato",
+		"monarca": "de la mariposa monarca"
+	}
+}

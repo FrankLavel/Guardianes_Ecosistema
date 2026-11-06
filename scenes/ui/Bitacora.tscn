@@ -1,0 +1,260 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/bitacora.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/tema.tres" id="2_tema"]
+[ext_resource type="Texture2D" path="res://assets/ui/iconos/escalado/icono_bitacora.png" id="3_icono"]
+
+[sub_resource type="StyleBoxFlat" id="Pagina"]
+bg_color = Color(0.95, 0.89, 0.74, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.45, 0.3, 0.16, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 30.0
+content_margin_top = 24.0
+content_margin_right = 30.0
+content_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxFlat" id="Aviso"]
+bg_color = Color(0.1, 0.18, 0.1, 0.9)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.99, 0.86, 0.45, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+
+[node name="Bitacora" type="CanvasLayer"]
+layer = 45
+script = ExtResource("1_script")
+
+[node name="Libro" type="Control" parent="."]
+unique_name_in_owner = true
+texture_filter = 2
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_tema")
+
+[node name="Oscurecer" type="ColorRect" parent="Libro"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="PanelContainer" parent="Libro"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -880.0
+offset_top = -510.0
+offset_right = 880.0
+offset_bottom = 510.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margen" type="MarginContainer" parent="Libro/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 40
+
+[node name="VBox" type="VBoxContainer" parent="Libro/Panel/Margen"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Encabezado" type="HBoxContainer" parent="Libro/Panel/Margen/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Icono" type="TextureRect" parent="Libro/Panel/Margen/VBox/Encabezado"]
+layout_mode = 2
+texture = ExtResource("3_icono")
+stretch_mode = 5
+
+[node name="Titulo" type="Label" parent="Libro/Panel/Margen/VBox/Encabezado"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 40
+text = "Bitácora del guardián"
+
+[node name="Espacio" type="Control" parent="Libro/Panel/Margen/VBox/Encabezado"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Contador" type="Label" parent="Libro/Panel/Margen/VBox/Encabezado"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 28
+text = "Especies descubiertas: 0 / 0"
+
+[node name="Pestanas" type="HBoxContainer" parent="Libro/Panel/Margen/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PestanaRio" type="Button" parent="Libro/Panel/Margen/VBox/Pestanas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 62)
+layout_mode = 2
+toggle_mode = true
+text = "RÍO"
+
+[node name="PestanaBosque" type="Button" parent="Libro/Panel/Margen/VBox/Pestanas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 62)
+layout_mode = 2
+toggle_mode = true
+text = "BOSQUE"
+
+[node name="PestanaLago" type="Button" parent="Libro/Panel/Margen/VBox/Pestanas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 62)
+layout_mode = 2
+toggle_mode = true
+text = "LAGO"
+
+[node name="Paginas" type="HBoxContainer" parent="Libro/Panel/Margen/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+
+[node name="Izquierda" type="PanelContainer" parent="Libro/Panel/Margen/VBox/Paginas"]
+custom_minimum_size = Vector2(640, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("Pagina")
+
+[node name="Rejilla" type="GridContainer" parent="Libro/Panel/Margen/VBox/Paginas/Izquierda"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/h_separation = 18
+theme_override_constants/v_separation = 18
+columns = 4
+
+[node name="Derecha" type="PanelContainer" parent="Libro/Panel/Margen/VBox/Paginas"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("Pagina")
+
+[node name="Ficha" type="VBoxContainer" parent="Libro/Panel/Margen/VBox/Paginas/Derecha"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ImagenGrande" type="TextureRect" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 190)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="NombreEspecie" type="Label" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.32, 0.2, 0.08, 1)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 38
+text = "Nombre"
+horizontal_alignment = 1
+
+[node name="Cientifico" type="Label" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.35, 0.22, 1)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 26
+text = "Nombre científico"
+horizontal_alignment = 1
+
+[node name="Estado" type="Label" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 28
+text = "Estado"
+horizontal_alignment = 1
+
+[node name="Dato" type="Label" parent="Libro/Panel/Margen/VBox/Paginas/Derecha/Ficha"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.25, 0.17, 0.08, 1)
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 25
+text = "Dato"
+autowrap_mode = 3
+
+[node name="BtnCerrarBitacora" type="Button" parent="Libro/Panel/Margen/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 70)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "CERRAR"
+
+[node name="Aviso" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -620.0
+offset_top = -190.0
+offset_right = -30.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Aviso")
+
+[node name="HBox" type="HBoxContainer" parent="Aviso"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="AvisoImagen" type="TextureRect" parent="Aviso/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="Aviso/HBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Titulo" type="Label" parent="Aviso/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 26
+text = "¡Nueva especie en tu bitácora!"
+
+[node name="AvisoNombre" type="Label" parent="Aviso/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Especie"
+
+[node name="Ayuda" type="Label" parent="Aviso/HBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Tab: abrir la bitácora"

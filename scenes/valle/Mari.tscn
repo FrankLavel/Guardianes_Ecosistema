@@ -1,0 +1,40 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/valle/personaje_valle.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/mari/mari_frames.tres" id="2_frames"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hablar"]
+radius = 100.0
+
+[node name="Mari" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_script")
+texto_aviso = "E  Hablar con Mari"
+dialogos = Array[PackedStringArray]([PackedStringArray("zona:bosque", "mari_bosque_vivo"), PackedStringArray("visto:mari_habitat", "mari_habitat_repetir"), PackedStringArray("marca:bosque_nivel", "mari_habitat"), PackedStringArray("zona:rio", "mari_inicio"), PackedStringArray("siempre", "mari_espera")])
+aleteo = true
+
+[node name="Sombra" type="Polygon2D" parent="."]
+color = Color(0, 0, 0, 0.2)
+polygon = PackedVector2Array(-16, 0, -12, -4, 0, -6, 12, -4, 16, 0, 12, 4, 0, 6, -12, 4)
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -20)
+scale = Vector2(0.13, 0.13)
+sprite_frames = ExtResource("2_frames")
+animation = &"idle"
+autoplay = "idle"
+offset = Vector2(0, -300)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_hablar")
+
+[node name="Aviso" type="Label" parent="."]
+offset_left = -150.0
+offset_top = -175.0
+offset_right = 150.0
+offset_bottom = -137.0
+theme_override_font_sizes/font_size = 26
+text = "E"
+horizontal_alignment = 1

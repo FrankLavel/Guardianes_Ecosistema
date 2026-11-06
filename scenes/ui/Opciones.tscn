@@ -1,8 +1,17 @@
-[gd_scene format=3 uid="uid://chbxtouk1sqj0"]
+[gd_scene load_steps=6 format=3 uid="uid://chbxtouk1sqj0"]
 
 [ext_resource type="Script" uid="uid://usbtiqkn8sw1" path="res://scripts/opciones.gd" id="1_t6ffu"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/cielo.png" id="2_cielo"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/montanas.png" id="3_montanas"]
+[ext_resource type="Texture2D" path="res://assets/maps/zona1/fondos/arboles.png" id="4_arboles"]
 
-[node name="Opciones" type="Control" unique_id=1455601878]
+[sub_resource type="LabelSettings" id="Fila"]
+font_size = 36
+outline_size = 8
+outline_color = Color(0.2, 0.12, 0.05, 1)
+
+[node name="Opciones" type="Control"]
+texture_filter = 2
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,66 +20,130 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_t6ffu")
 
-[node name="ColorRect" type="ColorRect" parent="." unique_id=48756736]
+[node name="Cielo" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.09019608, 0.23137255, 0.16470589, 1)
+texture = ExtResource("2_cielo")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="TituloOpciones" type="Label" parent="." unique_id=931924553]
-layout_mode = 0
-offset_left = 390.0
-offset_top = 60.0
-offset_right = 890.0
-offset_bottom = 130.0
-theme_override_font_sizes/font_size = 40
+[node name="Montanas" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -760.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("3_montanas")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Arboles" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -560.0
+grow_horizontal = 2
+grow_vertical = 0
+texture = ExtResource("4_arboles")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -560.0
+offset_top = -400.0
+offset_right = 560.0
+offset_bottom = 400.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 26
+
+[node name="TituloOpciones" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 60
 text = "OPCIONES"
 horizontal_alignment = 1
 
-[node name="LblVolumen" type="Label" parent="." unique_id=1253682135]
-layout_mode = 0
-offset_left = 300.0
-offset_top = 180.0
-offset_right = 600.0
-offset_bottom = 230.0
-theme_override_font_sizes/font_size = 24
-text = "VOLUMEN GENERAL"
+[node name="Filas" type="GridContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 40
+theme_override_constants/v_separation = 28
+columns = 2
 
-[node name="SliderVolumen" type="HSlider" parent="." unique_id=1277258126]
-layout_mode = 0
-offset_left = 390.0
-offset_top = 230.0
-offset_right = 890.0
-offset_bottom = 270.0
+[node name="LblVolumen" type="Label" parent="Panel/VBox/Filas"]
+layout_mode = 2
+text = "Volumen general"
+label_settings = SubResource("Fila")
+
+[node name="SliderVolumen" type="HSlider" parent="Panel/VBox/Filas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(460, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
 value = 80.0
 
-[node name="LblPantallaCompleta" type="Label" parent="." unique_id=401478756]
-layout_mode = 0
-offset_left = 300.0
-offset_top = 320.0
-offset_right = 600.0
-offset_bottom = 370.0
-theme_override_font_sizes/font_size = 24
-text = "PANTALLA COMPLETA"
+[node name="LblMusica" type="Label" parent="Panel/VBox/Filas"]
+layout_mode = 2
+text = "Sonidos de la naturaleza"
+label_settings = SubResource("Fila")
 
-[node name="CheckPantallaCompleta" type="CheckButton" parent="." unique_id=857134447]
-layout_mode = 0
-offset_left = 700.0
-offset_top = 320.0
-offset_right = 744.0
-offset_bottom = 344.0
+[node name="SliderMusica" type="HSlider" parent="Panel/VBox/Filas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(460, 50)
+layout_mode = 2
+size_flags_vertical = 4
+value = 70.0
 
-[node name="BtnVolver" type="Button" parent="." unique_id=461854809]
-layout_mode = 0
-offset_left = 530.0
-offset_top = 450.0
-offset_right = 750.0
-offset_bottom = 510.0
+[node name="LblEfectos" type="Label" parent="Panel/VBox/Filas"]
+layout_mode = 2
+text = "Efectos de sonido"
+label_settings = SubResource("Fila")
+
+[node name="SliderEfectos" type="HSlider" parent="Panel/VBox/Filas"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(460, 50)
+layout_mode = 2
+size_flags_vertical = 4
+value = 90.0
+
+[node name="LblPantallaCompleta" type="Label" parent="Panel/VBox/Filas"]
+layout_mode = 2
+text = "Pantalla completa"
+label_settings = SubResource("Fila")
+
+[node name="CheckPantallaCompleta" type="CheckButton" parent="Panel/VBox/Filas"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/check_v_offset = 0
+
+[node name="BtnVolver" type="Button" parent="Panel/VBox"]
+custom_minimum_size = Vector2(360, 86)
+layout_mode = 2
+size_flags_horizontal = 4
 text = "VOLVER"
 
-[connection signal="value_changed" from="SliderVolumen" to="." method="_on_slider_volumen_value_changed"]
-[connection signal="toggled" from="CheckPantallaCompleta" to="." method="_on_check_pantalla_completa_toggled"]
-[connection signal="pressed" from="BtnVolver" to="." method="_on_btn_volver_pressed"]
+[connection signal="value_changed" from="Panel/VBox/Filas/SliderVolumen" to="." method="_on_slider_volumen_value_changed"]
+[connection signal="toggled" from="Panel/VBox/Filas/CheckPantallaCompleta" to="." method="_on_check_pantalla_completa_toggled"]
+[connection signal="pressed" from="Panel/VBox/BtnVolver" to="." method="_on_btn_volver_pressed"]

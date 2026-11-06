@@ -1,0 +1,67 @@
+[gd_resource type="SpriteFrames" load_steps=10 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/animales/valle/monarca_atlas.png" id="1_atlas"]
+
+[sub_resource type="AtlasTexture" id="c0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 0, 380, 340)
+
+[sub_resource type="AtlasTexture" id="c1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(380, 0, 380, 340)
+
+[sub_resource type="AtlasTexture" id="c2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(760, 0, 380, 340)
+
+[sub_resource type="AtlasTexture" id="c3"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1140, 0, 380, 340)
+
+[sub_resource type="AtlasTexture" id="c4"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 340, 380, 340)
+
+[sub_resource type="AtlasTexture" id="c5"]
+atlas = ExtResource("1_atlas")
+region = Rect2(380, 340, 380, 340)
+
+[sub_resource type="AtlasTexture" id="c6"]
+atlas = ExtResource("1_atlas")
+region = Rect2(760, 340, 380, 340)
+
+[sub_resource type="AtlasTexture" id="c7"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1140, 340, 380, 340)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c0")
+}, {
+"duration": 1.0,
+"texture": SubResource("c1")
+}, {
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("c4")
+}, {
+"duration": 1.0,
+"texture": SubResource("c5")
+}, {
+"duration": 1.0,
+"texture": SubResource("c6")
+}, {
+"duration": 1.0,
+"texture": SubResource("c7")
+}],
+"loop": true,
+"name": &"volar",
+"speed": 12.0
+}]

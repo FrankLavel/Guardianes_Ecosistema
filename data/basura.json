@@ -1,0 +1,22 @@
+{
+  "botella": {
+    "nombre": "Botella de plástico",
+    "dato": "Una botella de plástico puede tardar cientos de años en desaparecer. ¡Mejor reutilízala o recíclala!"
+  },
+  "lata": {
+    "nombre": "Lata",
+    "dato": "Las latas se pueden reciclar muchas veces para fabricar latas nuevas."
+  },
+  "bolsa": {
+    "nombre": "Bolsa de plástico",
+    "dato": "Los peces y las tortugas pueden confundir las bolsas con comida y enfermarse."
+  },
+  "pila": {
+    "nombre": "Pila",
+    "dato": "Una pila tirada al agua suelta sustancias tóxicas que dañan a las plantas y a los animales."
+  },
+  "unicel": {
+    "nombre": "Vaso de unicel",
+    "dato": "El unicel se rompe en pedacitos muy pequeños que los animales se comen por error."
+  }
+}

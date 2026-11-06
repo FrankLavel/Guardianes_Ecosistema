@@ -1,16 +1,31 @@
 extends Control
+## Opciones: volumen general, de música y de efectos, y pantalla completa.
+## Se guardan en user://opciones.cfg (las aplica el autoload Sonido al iniciar el juego).
 
 const ESCENA_MENU := "res://scenes/menu/menu_principal.tscn"
 
+@onready var _general: HSlider = %SliderVolumen
+@onready var _musica: HSlider = %SliderMusica
+@onready var _efectos: HSlider = %SliderEfectos
+@onready var _pantalla: CheckButton = %CheckPantallaCompleta
 
-# Called when the node enters the scene tree for the first time.
+
 func _ready() -> void:
-	pass # Replace with function body.
+	Sonido.musica("valle")
+	_general.set_value_no_signal(Sonido.opciones["Master"] * 100.0)
+	_musica.set_value_no_signal(Sonido.opciones["Musica"] * 100.0)
+	_efectos.set_value_no_signal(Sonido.opciones["Efectos"] * 100.0)
+	_pantalla.set_pressed_no_signal(DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN)
+	_musica.value_changed.connect(func(v): _cambiar("Musica", v))
+	_efectos.value_changed.connect(func(v):
+		_cambiar("Efectos", v)
+		Sonido.efecto("recoger"))
+	_general.grab_focus()
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func _cambiar(bus: String, valor: float) -> void:
+	Sonido.fijar_volumen(bus, valor / 100.0)
+	Sonido.guardar_opciones()
 
 
 func _on_check_pantalla_completa_toggled(toggled_on: bool) -> void:
@@ -21,11 +36,8 @@ func _on_check_pantalla_completa_toggled(toggled_on: bool) -> void:
 
 
 func _on_slider_volumen_value_changed(value: float) -> void:
-	AudioServer.set_bus_volume_db(
-	AudioServer.get_bus_index("Master"),
-	linear_to_db(value / 100.0)
-)
+	_cambiar("Master", value)
 
 
 func _on_btn_volver_pressed() -> void:
-	get_tree().change_scene_to_file(ESCENA_MENU)
+	Transicion.ir_a(ESCENA_MENU)
