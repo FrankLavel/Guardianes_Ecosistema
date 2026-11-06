@@ -1,0 +1,47 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/valle/personaje_valle.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://assets/characters/don_chucho/don_chucho_frames.tres" id="2_frames"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hablar"]
+radius = 90.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pies"]
+size = Vector2(40, 18)
+
+[node name="DonChucho" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_script")
+texto_aviso = "E  Hablar"
+dialogos = Array[PackedStringArray]([PackedStringArray("visto:don_chucho_granja", "don_chucho_granja_repetir"), PackedStringArray("zona:lago", "don_chucho_granja"), PackedStringArray("zona:rio", "don_chucho_rio_limpio"), PackedStringArray("visto:don_chucho_filtro", "don_chucho_filtro_repetir"), PackedStringArray("marca:rio_nivel", "don_chucho_filtro"), PackedStringArray("visto:don_chucho_inicio", "don_chucho_repetir"), PackedStringArray("siempre", "don_chucho_inicio")])
+
+[node name="Sombra" type="Polygon2D" parent="."]
+color = Color(0, 0, 0, 0.28)
+polygon = PackedVector2Array(-30, 0, -25, -7, -14, -10, 0, -11, 14, -10, 25, -7, 30, 0, 25, 7, 14, 10, 0, 11, -14, 10, -25, 7)
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.14, 0.14)
+sprite_frames = ExtResource("2_frames")
+animation = &"idle"
+autoplay = "idle"
+offset = Vector2(0, -480)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_hablar")
+
+[node name="Cuerpo" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Cuerpo"]
+position = Vector2(0, -4)
+shape = SubResource("RectangleShape2D_pies")
+
+[node name="Aviso" type="Label" parent="."]
+offset_left = -150.0
+offset_top = -190.0
+offset_right = 150.0
+offset_bottom = -152.0
+theme_override_font_sizes/font_size = 26
+text = "E"
+horizontal_alignment = 1

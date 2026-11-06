@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.2
+  GODOT_RELEASE: stable
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    name: Pruebas (GUT)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restaurar Godot desde caché
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_RELEASE }}-linux
+
+      - name: Descargar Godot
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_RELEASE}/Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v*_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+
+      - name: Importar recursos del proyecto
+        run: ~/godot/godot --headless --path . --import
+
+      - name: Ejecutar pruebas
+        run: |
+          mkdir -p test-results
+          ~/godot/godot --headless --path . -s addons/gut/gut_cmdln.gd
+
+      - name: Publicar resultados de pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-pruebas
+          path: test-results/junit.xml
+          if-no-files-found: ignore
+
+  exportar:
+    name: Exportar (${{ matrix.preset }})
+    needs: pruebas
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: Windows Desktop
+            carpeta: windows
+            salida: builds/windows/GuardianesDelUltimoEcosistema.exe
+          - preset: Web
+            carpeta: web
+            salida: builds/web/index.html
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restaurar Godot y plantillas desde caché
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_RELEASE }}-linux-templates
+
+      - name: Descargar Godot y plantillas de exportación
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          BASE="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-${GODOT_RELEASE}"
+          mkdir -p ~/godot
+          curl -fsSL -o /tmp/godot.zip "${BASE}/Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v*_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+
+          DESTINO=~/.local/share/godot/export_templates/${GODOT_VERSION}.${GODOT_RELEASE}
+          mkdir -p "$DESTINO"
+          curl -fsSL -o /tmp/templates.tpz "${BASE}/Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_export_templates.tpz"
+          unzip -q /tmp/templates.tpz -d /tmp/templates
+          mv /tmp/templates/templates/* "$DESTINO"/
+
+      - name: Importar recursos del proyecto
+        run: ~/godot/godot --headless --path . --import
+
+      - name: Exportar
+        run: |
+          mkdir -p "$(dirname '${{ matrix.salida }}')"
+          ~/godot/godot --headless --path . --export-release "${{ matrix.preset }}" "${{ matrix.salida }}"
+          test -s "${{ matrix.salida }}"
+
+      - name: Subir build
+        uses: actions/upload-artifact@v4
+        with:
+          name: guardianes-${{ matrix.carpeta }}-${{ github.sha }}
+          path: builds/${{ matrix.carpeta }}/

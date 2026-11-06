@@ -1,0 +1,68 @@
+[gd_resource type="SpriteFrames" load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/mari/mari_atlas.png" id="1_atlas"]
+
+[sub_resource type="AtlasTexture" id="c0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 0, 560, 600)
+
+[sub_resource type="AtlasTexture" id="c1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(560, 0, 560, 600)
+
+[sub_resource type="AtlasTexture" id="c2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1120, 0, 560, 600)
+
+[sub_resource type="AtlasTexture" id="c3"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1680, 0, 560, 600)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c0")
+}, {
+"duration": 1.0,
+"texture": SubResource("c1")
+}, {
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c1")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c0")
+}, {
+"duration": 1.0,
+"texture": SubResource("c1")
+}, {
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c1")
+}],
+"loop": true,
+"name": &"hablar",
+"speed": 14.0
+}]

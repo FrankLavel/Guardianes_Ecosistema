@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/punto_control.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/objects/zona1/brote_control.png" id="2_brote"]
+
+[sub_resource type="Gradient" id="Gradient_brillo"]
+colors = PackedColorArray(1, 0.95, 0.55, 0.75, 1, 0.9, 0.4, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_brillo"]
+gradient = SubResource("Gradient_brillo")
+width = 128
+height = 128
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_zona"]
+size = Vector2(32, 160)
+
+[node name="PuntoControl" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -80)
+shape = SubResource("RectangleShape2D_zona")
+
+[node name="Brillo" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(0, -20)
+scale = Vector2(0.7, 0.7)
+texture = SubResource("GradientTexture2D_brillo")
+
+[node name="Brote" type="Sprite2D" parent="."]
+z_index = -1
+texture_filter = 2
+position = Vector2(0, 6)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_brote")
+offset = Vector2(0, -100)

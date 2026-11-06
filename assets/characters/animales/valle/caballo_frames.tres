@@ -1,0 +1,58 @@
+[gd_resource type="SpriteFrames" load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/animales/valle/caballo_atlas.png" id="1_atlas"]
+
+[sub_resource type="AtlasTexture" id="c0"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 0, 339, 252)
+
+[sub_resource type="AtlasTexture" id="c1"]
+atlas = ExtResource("1_atlas")
+region = Rect2(339, 0, 339, 252)
+
+[sub_resource type="AtlasTexture" id="c2"]
+atlas = ExtResource("1_atlas")
+region = Rect2(678, 0, 339, 252)
+
+[sub_resource type="AtlasTexture" id="c3"]
+atlas = ExtResource("1_atlas")
+region = Rect2(1017, 0, 339, 252)
+
+[sub_resource type="AtlasTexture" id="c4"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 252, 339, 252)
+
+[sub_resource type="AtlasTexture" id="c5"]
+atlas = ExtResource("1_atlas")
+region = Rect2(339, 252, 339, 252)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c5")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c0")
+}, {
+"duration": 1.0,
+"texture": SubResource("c1")
+}, {
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
+"duration": 1.0,
+"texture": SubResource("c3")
+}, {
+"duration": 1.0,
+"texture": SubResource("c4")
+}],
+"loop": true,
+"name": &"caminar",
+"speed": 7.0
+}]

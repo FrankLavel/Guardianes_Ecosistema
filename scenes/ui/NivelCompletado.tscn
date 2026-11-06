@@ -1,0 +1,82 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/nivel_completado.gd" id="1_script"]
+[ext_resource type="Theme" path="res://assets/ui/tema.tres" id="2_tema"]
+
+[node name="NivelCompletado" type="CanvasLayer"]
+process_mode = 3
+layer = 10
+script = ExtResource("1_script")
+
+[node name="Oscurecer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -720.0
+offset_top = -460.0
+offset_right = 720.0
+offset_bottom = 460.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_tema")
+
+[node name="Margen" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 90
+theme_override_constants/margin_top = 70
+theme_override_constants/margin_right = 80
+theme_override_constants/margin_bottom = 56
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margen"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 22
+
+[node name="Titulo" type="Label" parent="Panel/Margen/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.99, 0.86, 0.45, 1)
+theme_override_font_sizes/font_size = 58
+text = "¡Lo lograste, {nombre}!"
+horizontal_alignment = 1
+
+[node name="Subtitulo" type="Label" parent="Panel/Margen/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "El río está limpio y los peces regresaron.
+Don Chucho te espera en el valle: ¡tiene algo que enseñarte!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Separador" type="ColorRect" parent="Panel/Margen/VBox"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+color = Color(0.99, 0.86, 0.45, 0.35)
+
+[node name="Aprendizaje" type="Label" parent="Panel/Margen/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 29
+text = "• Un ecosistema es un lugar donde los seres vivos (peces, plantas, aves) se relacionan con el agua, el suelo y el aire.
+• La basura en el agua daña a los peces, a las plantas y a todos los que la beben.
+• Cuando el agua está limpia, los seres vivos pueden volver a vivir ahí.
+• Tú también eres {guardian}: tira la basura en su lugar y recicla."
+autowrap_mode = 3
+
+[node name="BtnMenu" type="Button" parent="Panel/Margen/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 80)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "VOLVER AL VALLE"

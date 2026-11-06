@@ -1,0 +1,714 @@
+{
+	"objetos": {
+		"semilla_maiz": {
+			"nombre": "Semilla de maíz",
+			"icono": "semilla_maiz"
+		},
+		"semilla_frijol": {
+			"nombre": "Semilla de frijol",
+			"icono": "semilla_frijol"
+		},
+		"semilla_calabaza": {
+			"nombre": "Semilla de calabaza",
+			"icono": "semilla_calabaza"
+		},
+		"maiz": {
+			"nombre": "Maíz",
+			"icono": "maiz",
+			"energia": 8,
+			"valor": 1
+		},
+		"frijol": {
+			"nombre": "Frijol",
+			"icono": "frijol",
+			"valor": 1
+		},
+		"calabaza": {
+			"nombre": "Calabaza",
+			"icono": "calabaza",
+			"valor": 2
+		},
+		"huevo": {
+			"nombre": "Huevo",
+			"icono": "huevo",
+			"valor": 1
+		},
+		"leche": {
+			"nombre": "Leche",
+			"icono": "leche",
+			"energia": 8,
+			"valor": 2
+		},
+		"pescado": {
+			"nombre": "Pescado",
+			"icono": "pescado",
+			"valor": 2
+		},
+		"manzanilla": {
+			"nombre": "Manzanilla",
+			"icono": "manzanilla"
+		},
+		"hierbabuena": {
+			"nombre": "Hierbabuena",
+			"icono": "hierbabuena"
+		},
+		"nopal": {
+			"nombre": "Nopal",
+			"icono": "nopal"
+		},
+		"lena": {
+			"nombre": "Leña",
+			"icono": "lena"
+		},
+		"elote_asado": {
+			"nombre": "Elote asado",
+			"icono": "elote_asado",
+			"energia": 20,
+			"valor": 3
+		},
+		"atole": {
+			"nombre": "Atole de maíz",
+			"icono": "atole",
+			"energia": 30,
+			"valor": 4
+		},
+		"huevos_frijoles": {
+			"nombre": "Huevos con frijoles",
+			"icono": "huevos_frijoles",
+			"energia": 40,
+			"valor": 4
+		},
+		"corundas": {
+			"nombre": "Corundas",
+			"icono": "corundas",
+			"energia": 45,
+			"valor": 6
+		},
+		"sopa_tarasca": {
+			"nombre": "Sopa tarasca",
+			"icono": "sopa_tarasca",
+			"energia": 45,
+			"valor": 6
+		},
+		"calabaza_tacha": {
+			"nombre": "Calabaza en tacha",
+			"icono": "calabaza_tacha",
+			"energia": 25,
+			"valor": 3
+		},
+		"nopales_asados": {
+			"nombre": "Nopales asados",
+			"icono": "nopales_asados",
+			"energia": 20,
+			"valor": 3
+		},
+		"pescado_asado": {
+			"nombre": "Pescado asado con hierbabuena",
+			"icono": "pescado_asado",
+			"energia": 50,
+			"valor": 6
+		},
+		"te_manzanilla": {
+			"nombre": "Té de manzanilla",
+			"icono": "te_manzanilla",
+			"energia": 15,
+			"valor": 2
+		},
+		"masa": {
+			"nombre": "Masa de nixtamal",
+			"icono": "masa",
+			"valor": 2
+		},
+		"queso": {
+			"nombre": "Queso Cotija",
+			"icono": "queso",
+			"valor": 4
+		},
+		"miel": {
+			"nombre": "Miel de melipona",
+			"icono": "miel",
+			"energia": 10,
+			"valor": 4
+		},
+		"tortillas": {
+			"nombre": "Tortillas a mano",
+			"icono": "tortillas",
+			"energia": 25,
+			"valor": 4
+		},
+		"quesadillas": {
+			"nombre": "Quesadillas",
+			"icono": "quesadillas",
+			"energia": 40,
+			"valor": 7
+		},
+		"chongos_zamoranos": {
+			"nombre": "Chongos zamoranos",
+			"icono": "chongos_zamoranos",
+			"energia": 35,
+			"valor": 8
+		},
+		"abono": {
+			"nombre": "Abono",
+			"icono": "abono",
+			"valor": 1
+		},
+		"lana": {
+			"nombre": "Lana",
+			"icono": "lana",
+			"valor": 3
+		},
+		"aguacate": {
+			"nombre": "Aguacate",
+			"icono": "aguacate",
+			"energia": 12,
+			"valor": 3
+		},
+		"guayaba": {
+			"nombre": "Guayaba",
+			"icono": "guayaba",
+			"energia": 8,
+			"valor": 2
+		},
+		"limon": {
+			"nombre": "Limón",
+			"icono": "limon",
+			"energia": 4,
+			"valor": 2
+		},
+		"ate_guayaba": {
+			"nombre": "Ate de guayaba",
+			"icono": "ate_guayaba",
+			"energia": 20,
+			"valor": 6
+		},
+		"guacamole": {
+			"nombre": "Guacamole",
+			"icono": "guacamole",
+			"energia": 25,
+			"valor": 7
+		},
+		"agua_limon": {
+			"nombre": "Agua de limón",
+			"icono": "agua_limon",
+			"energia": 10,
+			"valor": 4
+		}
+	},
+	"zonas_semillas": {
+		"rio": {
+			"semilla_frijol": 4
+		},
+		"bosque": {
+			"semilla_maiz": 4
+		},
+		"lago": {
+			"semilla_calabaza": 4
+		}
+	},
+	"cultivos": {
+		"maiz": {
+			"semilla": "semilla_maiz",
+			"cosecha": {
+				"maiz": 3,
+				"semilla_maiz": 1
+			},
+			"horas": 6
+		},
+		"frijol": {
+			"semilla": "semilla_frijol",
+			"cosecha": {
+				"frijol": 3,
+				"semilla_frijol": 1
+			},
+			"horas": 4
+		},
+		"calabaza": {
+			"semilla": "semilla_calabaza",
+			"cosecha": {
+				"calabaza": 2,
+				"semilla_calabaza": 1
+			},
+			"horas": 8
+		}
+	},
+	"milpa": "En la milpa se siembran juntos maíz, frijol y calabaza: el maíz sostiene al frijol, el frijol alimenta la tierra y las hojas de la calabaza la protegen del sol.",
+	"recetas": [
+		{
+			"id": "elote_asado",
+			"ingredientes": {
+				"maiz": 1
+			},
+			"dato": "El maíz se cultiva en México desde hace más de 7000 años.",
+			"nivel": 1,
+			"juego": {
+				"tipo": "atinar",
+				"escena": "comal",
+				"texto": "Voltea el elote en el comal antes de que se queme."
+			}
+		},
+		{
+			"id": "atole",
+			"ingredientes": {
+				"maiz": 1,
+				"leche": 1
+			},
+			"dato": "El atole calientito se toma desde antes de la llegada de los españoles.",
+			"nivel": 1,
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Revuelve el atole para que no se pegue."
+			}
+		},
+		{
+			"id": "huevos_frijoles",
+			"ingredientes": {
+				"huevo": 1,
+				"frijol": 1
+			},
+			"dato": "El frijol tiene mucha proteína y es parte de la comida diaria en México.",
+			"nivel": 1,
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Revuelve los huevos con los frijoles en la cazuela."
+			}
+		},
+		{
+			"id": "corundas",
+			"ingredientes": {
+				"masa": 1,
+				"leche": 1
+			},
+			"dato": "Las corundas son tamales michoacanos en forma de estrella, envueltos en hoja de milpa.",
+			"nivel": 5,
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Cuece las corundas al vapor y muévelas para que se cuezan parejo."
+			}
+		},
+		{
+			"id": "sopa_tarasca",
+			"ingredientes": {
+				"frijol": 2,
+				"calabaza": 1
+			},
+			"dato": "La sopa tarasca es un platillo de la región purépecha, hecho con frijol.",
+			"nivel": 4,
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Revuelve la sopa tarasca."
+			}
+		},
+		{
+			"id": "calabaza_tacha",
+			"ingredientes": {
+				"calabaza": 1
+			},
+			"dato": "La calabaza en tacha es un dulce tradicional del Día de Muertos.",
+			"nivel": 1,
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Revuelve la calabaza con el piloncillo."
+			}
+		},
+		{
+			"id": "nopales_asados",
+			"ingredientes": {
+				"nopal": 2
+			},
+			"dato": "El nopal tiene mucha fibra y crece aunque llueva poco.",
+			"nivel": 1,
+			"juego": {
+				"tipo": "atinar",
+				"escena": "comal",
+				"texto": "Voltea los nopales en el comal a tiempo."
+			}
+		},
+		{
+			"id": "pescado_asado",
+			"ingredientes": {
+				"pescado": 1,
+				"hierbabuena": 1
+			},
+			"dato": "Pescar solo lo necesario y soltar a las crías ayuda a que el lago siga teniendo peces.",
+			"nivel": 3,
+			"juego": {
+				"tipo": "atinar",
+				"escena": "comal",
+				"texto": "Voltea el pescado para que se ase parejo."
+			}
+		},
+		{
+			"id": "te_manzanilla",
+			"ingredientes": {
+				"manzanilla": 1
+			},
+			"dato": "La manzanilla es una planta medicinal: su té calma el dolor de panza.",
+			"nivel": 1,
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Revuelve el té de manzanilla para que suelte su sabor."
+			}
+		},
+		{
+			"id": "tortillas",
+			"ingredientes": {
+				"masa": 1
+			},
+			"dato": "Para hacer masa, el maíz se cuece con cal (nixtamal): así es más nutritivo y fácil de moler.",
+			"nivel": 2,
+			"juego": {
+				"tipo": "machacar",
+				"escena": "comal",
+				"texto": "Palmea la masa con las manos para hacer las tortillas."
+			}
+		},
+		{
+			"id": "quesadillas",
+			"ingredientes": {
+				"masa": 1,
+				"queso": 1
+			},
+			"dato": "El queso Cotija lleva el nombre de un pueblo de Michoacán, donde se hace desde hace siglos.",
+			"nivel": 3,
+			"juego": {
+				"tipo": "atinar",
+				"escena": "comal",
+				"texto": "Voltea la quesadilla cuando se derrita el queso."
+			}
+		},
+		{
+			"id": "chongos_zamoranos",
+			"ingredientes": {
+				"leche": 1,
+				"miel": 1
+			},
+			"dato": "Los chongos zamoranos son un dulce de leche que nació en Zamora, Michoacán.",
+			"nivel": 6,
+			"juego": {
+				"tipo": "revolver",
+				"escena": "leche",
+				"texto": "Revuelve la leche con la miel, despacito."
+			}
+		},
+		{
+			"id": "ate_guayaba",
+			"ingredientes": {
+				"guayaba": 3
+			},
+			"nivel": 3,
+			"dato": "El ate de Morelia es un dulce de fruta cocida muy espesa; se hace en Michoacán desde hace siglos.",
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Revuelve la guayaba en el cazo hasta que espese."
+			}
+		},
+		{
+			"id": "guacamole",
+			"ingredientes": {
+				"aguacate": 2,
+				"limon": 1
+			},
+			"nivel": 4,
+			"dato": "El guacamole se prepara en molcajete, un mortero de piedra volcánica que se usa en México desde hace miles de años.",
+			"juego": {
+				"tipo": "machacar",
+				"escena": "molcajete",
+				"texto": "Machaca el aguacate con el limón en el molcajete."
+			}
+		},
+		{
+			"id": "agua_limon",
+			"ingredientes": {
+				"limon": 2
+			},
+			"nivel": 4,
+			"dato": "Una agua fresca de limón quita la sed, y el limón tiene vitamina C, que ayuda a tus defensas.",
+			"juego": {
+				"tipo": "revolver",
+				"escena": "olla",
+				"texto": "Exprime los limones y revuelve el agua."
+			}
+		}
+	],
+	"silvestres": [
+		"manzanilla",
+		"hierbabuena",
+		"nopal",
+		"lena",
+		"lena"
+	],
+	"corral": {
+		"gallina": {
+			"nombre": "Gallina",
+			"producto": "huevo",
+			"cantidad": 1,
+			"costo": 3,
+			"nivel": 1,
+			"escala": 0.2,
+			"dato": "Las gallinas comen semillas e insectos; sus huevos se recogen cada mañana.",
+			"corral": 0.6
+		},
+		"cabra": {
+			"nombre": "Cabra",
+			"producto": "leche",
+			"cantidad": 1,
+			"costo": 5,
+			"nivel": 3,
+			"escala": 0.3,
+			"dato": "Las cabras dan leche y comen hierbas que otros animales no comen.",
+			"corral": 0.7
+		},
+		"cerdo": {
+			"nombre": "Cerdo",
+			"producto": "abono",
+			"cantidad": 1,
+			"costo": 6,
+			"nivel": 3,
+			"escala": 0.34,
+			"dato": "El estiércol del cerdo, hecho composta, es abono: alimenta la tierra y la milpa crece más rápido.",
+			"corral": 0.7
+		},
+		"vaca": {
+			"nombre": "Vaca",
+			"producto": "leche",
+			"cantidad": 2,
+			"costo": 9,
+			"nivel": 4,
+			"escala": 0.42,
+			"dato": "Una vaca da mucha leche, pero necesita bastante agua y pasto: hay que cuidarla bien.",
+			"corral": 0.85
+		},
+		"guajolote": {
+			"nombre": "Guajolote",
+			"producto": "huevo",
+			"cantidad": 1,
+			"costo": 5,
+			"nivel": 5,
+			"escala": 0.24,
+			"dato": "El guajolote es un ave de México: los pueblos antiguos ya lo criaban hace miles de años.",
+			"corral": 0.62
+		},
+		"borrego": {
+			"nombre": "Borrego",
+			"producto": "lana",
+			"cantidad": 1,
+			"costo": 7,
+			"nivel": 5,
+			"escala": 0.3,
+			"dato": "La lana se trasquila sin lastimar al borrego y le vuelve a crecer; con ella se tejen sarapes.",
+			"corral": 0.72
+		},
+		"caballo": {
+			"nombre": "Caballo",
+			"producto": "",
+			"cantidad": 0,
+			"costo": 12,
+			"nivel": 6,
+			"escala": 0.45,
+			"dato": "El caballo ayudaba a cargar y a viajar por el campo. Con él caminas más rápido por el valle.",
+			"corral": 0.85
+		}
+	},
+	"semillas_tianguis": {
+		"semilla_frijol": 2,
+		"semilla_maiz": 3,
+		"semilla_calabaza": 4
+	},
+	"niveles": {
+		"xp": [
+			0,
+			15,
+			40,
+			80,
+			140,
+			220,
+			320,
+			450,
+			600,
+			800
+		],
+		"desbloqueos": {
+			"2": {
+				"surcos": 9,
+				"texto": "3 surcos más en tu milpa, el molino de nixtamal y las tortillas"
+			},
+			"3": {
+				"cabra": true,
+				"texto": "La cabra, la quesería, las quesadillas, el pescado asado y el ate de guayaba"
+			},
+			"4": {
+				"surcos": 12,
+				"texto": "3 surcos más en tu milpa y las recetas de sopa tarasca, guacamole y agua de limón"
+			},
+			"5": {
+				"pedidos": 4,
+				"guajolote": true,
+				"texto": "El guajolote (un ave de México) en tu corral, un pedido más en el tianguis y la receta de corundas"
+			},
+			"6": {
+				"texto": "La colmena de abejas meliponas y los chongos zamoranos"
+			},
+			"7": {
+				"pedidos": 5,
+				"texto": "Un pedido más en el tianguis"
+			}
+		}
+	},
+	"xp": {
+		"cosechar": 3,
+		"cocinar": 5,
+		"corral": 1,
+		"pescar": 2,
+		"recolectar": 1,
+		"ayudar_animal": 10,
+		"taller": 2,
+		"decorar": 2,
+		"comprar_animal": 3,
+		"frutal": 3
+	},
+	"talleres": {
+		"molino": {
+			"nombre": "Molino de nixtamal",
+			"accion": "MOLER",
+			"entrada": {
+				"maiz": 2
+			},
+			"salida": {
+				"masa": 2
+			},
+			"nivel": 2,
+			"dato": "El maíz se cuece con cal y agua (nixtamal) y luego se muele para hacer masa.",
+			"juego": {
+				"tipo": "machacar",
+				"escena": "molino",
+				"texto": "Gira la manivela del molino para moler el nixtamal."
+			}
+		},
+		"queseria": {
+			"nombre": "Quesería",
+			"accion": "HACER QUESO",
+			"entrada": {
+				"leche": 2
+			},
+			"salida": {
+				"queso": 1
+			},
+			"nivel": 3,
+			"dato": "Con la leche de cabra se hace queso; así la leche dura muchos días sin echarse a perder.",
+			"juego": {
+				"tipo": "revolver",
+				"escena": "leche",
+				"texto": "Revuelve la leche con el cuajo hasta que se haga queso."
+			}
+		},
+		"colmena": {
+			"nombre": "Colmena de meliponas",
+			"accion": "SACAR MIEL",
+			"entrada": {},
+			"salida": {
+				"miel": 1
+			},
+			"horas": 8,
+			"nivel": 6,
+			"dato": "Las abejas meliponas no tienen aguijón. Al buscar néctar polinizan las flores y la milpa.",
+			"juego": {
+				"tipo": "atinar",
+				"escena": "panal",
+				"texto": "Saca los panales con calma, cuando las abejas se aparten."
+			}
+		}
+	},
+	"decoraciones": {
+		"cempasuchil": {
+			"nombre": "Cempasúchil",
+			"costo": 3,
+			"nivel": 1,
+			"ancho": 84,
+			"dato": "Sus flores naranjas atraen abejas y mariposas que polinizan la milpa."
+		},
+		"banca": {
+			"nombre": "Banca de madera",
+			"costo": 4,
+			"nivel": 1,
+			"ancho": 82,
+			"dato": "Hecha con un tronco que ya estaba caído: no hubo que cortar un árbol vivo."
+		},
+		"espantapajaros": {
+			"nombre": "Espantapájaros",
+			"costo": 5,
+			"nivel": 2,
+			"ancho": 66,
+			"dato": "Asusta a los pájaros sin lastimarlos para que no se coman las semillas."
+		},
+		"olla_barro": {
+			"nombre": "Olla de barro",
+			"costo": 5,
+			"nivel": 3,
+			"ancho": 69,
+			"dato": "En Michoacán se hacen ollas de barro a mano, como en Capula y Tzintzuntzan."
+		},
+		"farol": {
+			"nombre": "Farol",
+			"costo": 6,
+			"nivel": 4,
+			"ancho": 78,
+			"dato": "De noche basta una luz suave: la luz muy fuerte confunde a las luciérnagas."
+		},
+		"bebedero": {
+			"nombre": "Bebedero para aves",
+			"costo": 7,
+			"nivel": 5,
+			"ancho": 76,
+			"dato": "En tiempo de secas, un poco de agua limpia ayuda a las aves del valle."
+		}
+	},
+	"frutales": {
+		"aguacate": {
+			"nombre": "Aguacate",
+			"costo": 8,
+			"nivel": 2,
+			"fruto": "aguacate",
+			"cantidad": 2,
+			"horas": [
+				6,
+				10
+			],
+			"horas_fruto": 10,
+			"dato": "Michoacán es el lugar del mundo donde más aguacate se cultiva, sobre todo cerca de Uruapan."
+		},
+		"guayaba": {
+			"nombre": "Guayaba",
+			"costo": 6,
+			"nivel": 3,
+			"fruto": "guayaba",
+			"cantidad": 3,
+			"horas": [
+				5,
+				8
+			],
+			"horas_fruto": 8,
+			"dato": "La guayaba tiene más vitamina C que la naranja. En Zitácuaro y Jungapeo se cultiva mucha."
+		},
+		"limon": {
+			"nombre": "Limón",
+			"costo": 5,
+			"nivel": 4,
+			"fruto": "limon",
+			"cantidad": 3,
+			"horas": [
+				4,
+				7
+			],
+			"horas_fruto": 6,
+			"dato": "En la Tierra Caliente de Michoacán, como en Apatzingán, se cultiva mucho limón."
+		}
+	}
+}

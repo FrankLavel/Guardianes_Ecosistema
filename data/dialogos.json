@@ -1,0 +1,298 @@
+{
+	"personajes": {
+		"don_chucho": {
+			"nombre": "Don Chucho",
+			"retrato": "res://assets/characters/don_chucho/don_chucho_retrato.png"
+		},
+		"jugador": {
+			"nombre": "{nombre}",
+			"retrato": ""
+		},
+		"mari": {
+			"nombre": "Mari",
+			"retrato": "res://assets/characters/mari/mari_retrato.png"
+		},
+		"venado": {
+			"nombre": "Venado",
+			"retrato": "res://assets/ui/bitacora/venado.png"
+		},
+		"garza": {
+			"nombre": "Garza",
+			"retrato": "res://assets/ui/bitacora/garza.png"
+		},
+		"pato_mexicano": {
+			"nombre": "Pato mexicano",
+			"retrato": "res://assets/ui/bitacora/pato_mexicano.png"
+		},
+		"monarca": {
+			"nombre": "Mariposa monarca",
+			"retrato": "res://assets/ui/bitacora/monarca.png"
+		},
+		"achi": {
+			"nombre": "Achi",
+			"retrato": "res://assets/characters/achi/achi_retrato.png"
+		}
+	},
+	"dialogos": {
+		"don_chucho_inicio": [
+			{
+				"quien": "don_chucho",
+				"texto": "¡Hola, {muchacho}! Soy Don Chucho. Toda mi vida he pescado en el río Cupatitzio."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Pero ya casi no hay peces... El agua está turbia y huele feo."
+			},
+			{
+				"quien": "jugador",
+				"texto": "¿Qué le pasó al río, Don Chucho?"
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "La gente tira basura en la orilla, y una tubería vieja suelta agua sucia."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Tú eres {el} {nuevo} {guardian}, ¿verdad? Entra por el arco de piedra y ayuda al río."
+			}
+		],
+		"don_chucho_repetir": [
+			{
+				"quien": "don_chucho",
+				"texto": "El arco de piedra te lleva al río. ¡Recoge la basura y el agua se aclarará!"
+			}
+		],
+		"don_chucho_rio_limpio": [
+			{
+				"quien": "don_chucho",
+				"texto": "¡Mira nada más! Volvieron los peces y el agua brilla otra vez."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "El agua limpia es vida: para los peces, las plantas, las aves... y para nosotros."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Dicen que en el bosque de oyamel también necesitan ayuda. ¡Ve, {guardian}!"
+			}
+		],
+		"entrada_bloqueada_bosque": [
+			{
+				"quien": "jugador",
+				"texto": "El camino al bosque está lleno de humo. Primero debo ayudar al río."
+			}
+		],
+		"entrada_bloqueada_lago": [
+			{
+				"quien": "jugador",
+				"texto": "El lago está muy lejos todavía. Primero debo ayudar al bosque."
+			}
+		],
+		"don_chucho_filtro": [
+			{
+				"quien": "don_chucho",
+				"texto": "¡{nombre}, limpiaste el río! Ya regresaron los peces."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Pero el agua del río todavía no se puede tomar así nada más. Primero hay que filtrarla."
+			},
+			{
+				"quien": "jugador",
+				"texto": "¿Y cómo se filtra el agua?"
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Con una botella y capas de cosas que detienen la suciedad. ¿Me ayudas a ponerlas en orden?"
+			}
+		],
+		"don_chucho_filtro_repetir": [
+			{
+				"quien": "don_chucho",
+				"texto": "¿Lo intentamos otra vez? Recuerda: las capas se ponen empezando por abajo."
+			}
+		],
+		"don_chucho_filtro_listo": [
+			{
+				"quien": "don_chucho",
+				"texto": "¡Eso es! Así se limpia el agua: capa por capa."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Ahora que el río está limpio, ya puedes nadar en él. ¡Pero nunca en agua sucia!"
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Mira el valle, {guardian}: empieza a recuperar sus colores."
+			}
+		],
+		"mari_espera": [
+			{
+				"quien": "mari",
+				"texto": "Hola... soy Mari. Vine volando desde muy lejos, pero el bosque está lleno de humo."
+			},
+			{
+				"quien": "mari",
+				"texto": "Don Chucho necesita ayuda con el río. ¡Ve con él primero!"
+			}
+		],
+		"mari_inicio": [
+			{
+				"quien": "mari",
+				"texto": "¡{nombre}! Soy Mari, una mariposa monarca. Cada invierno viajo miles de kilómetros hasta este bosque."
+			},
+			{
+				"quien": "mari",
+				"texto": "Pero cortaron muchos oyameles y alguien dejó una fogata encendida... ya casi no tengo dónde descansar."
+			},
+			{
+				"quien": "jugador",
+				"texto": "¡Yo te ayudo, Mari! ¿Qué hago?"
+			},
+			{
+				"quien": "mari",
+				"texto": "Entra al bosque por el arco de troncos. Las enredaderas te ayudarán a subir la montaña."
+			}
+		],
+		"mari_habitat": [
+			{
+				"quien": "mari",
+				"texto": "¡Volvieron a crecer árboles en el claro! Gracias, {guardian}."
+			},
+			{
+				"quien": "mari",
+				"texto": "Un solo árbol es la casa de muchos animales. ¿Sabes dónde vive cada uno?"
+			}
+		],
+		"mari_habitat_repetir": [
+			{
+				"quien": "mari",
+				"texto": "¿Lo intentamos otra vez? Piensa en dónde come y duerme cada animal."
+			}
+		],
+		"mari_listo": [
+			{
+				"quien": "mari",
+				"texto": "¡Exacto! Por eso cuidar el bosque es cuidar a todos los que viven en él."
+			},
+			{
+				"quien": "mari",
+				"texto": "Te regalo semillas de enredadera: ahora puedes plantarlas donde haya tierra fértil."
+			},
+			{
+				"quien": "mari",
+				"texto": "Dicen que en el lago de Pátzcuaro vive el último achoque... ¡necesita tu ayuda!"
+			}
+		],
+		"mari_bosque_vivo": [
+			{
+				"quien": "mari",
+				"texto": "Mira cuántas mariposas llegaron este invierno. ¡El bosque está vivo otra vez!"
+			}
+		],
+		"achi_espera": [
+			{
+				"quien": "achi",
+				"texto": "Glub... hola. Soy Achi, un achoque. Vivo en el lago, pero ahora estoy muy cansado..."
+			},
+			{
+				"quien": "achi",
+				"texto": "Primero ayuda al río y al bosque. Luego ven conmigo, ¿sí?"
+			}
+		],
+		"achi_inicio": [
+			{
+				"quien": "achi",
+				"texto": "¡{nombre}! Soy Achi, el último achoque del lago de Pátzcuaro."
+			},
+			{
+				"quien": "achi",
+				"texto": "Los achoques solo vivimos aquí, en ningún otro lugar del mundo."
+			},
+			{
+				"quien": "achi",
+				"texto": "Pero el lirio cubre el lago, hay basura flotando... y mis huevos están en el fondo, en peligro."
+			},
+			{
+				"quien": "jugador",
+				"texto": "¡Yo los rescato, Achi! Ya sé nadar."
+			},
+			{
+				"quien": "achi",
+				"texto": "Entra por el arco de tule. ¡Gracias, {guardian}!"
+			}
+		],
+		"achi_residuos": [
+			{
+				"quien": "achi",
+				"texto": "¡Mis huevos están a salvo y el agua se ve más clara!"
+			},
+			{
+				"quien": "achi",
+				"texto": "Sacaste mucha basura del lago. Pero si la tiramos toda junta, vuelve a terminar en el agua."
+			},
+			{
+				"quien": "achi",
+				"texto": "¿Me ayudas a separarla? Así se puede reciclar."
+			}
+		],
+		"achi_residuos_repetir": [
+			{
+				"quien": "achi",
+				"texto": "¿Lo intentamos otra vez? Piensa de qué está hecha cada cosa."
+			}
+		],
+		"achi_listo": [
+			{
+				"quien": "achi",
+				"texto": "¡Lo lograste, {nombre}! El río, el bosque y el lago están vivos otra vez."
+			},
+			{
+				"quien": "achi",
+				"texto": "Ven, acompáñame al corazón del valle. Hay algo que quiero que veas."
+			}
+		],
+		"achi_final": [
+			{
+				"quien": "achi",
+				"texto": "Mis crías ya nadan en el lago. Gracias por cuidarnos, {guardian}."
+			}
+		],
+		"don_chucho_granja": [
+			{
+				"quien": "don_chucho",
+				"texto": "¡{nombre}! Gracias a ti el valle volvió a vivir. Ahora te toca cuidarlo con tu propia granja."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "En la milpa siembras maíz, frijol y calabaza. Riégala una vez y, si tienes abono, crece el doble de rápido."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Tus animales viven en sus corrales. Usa el comedero para darles de comer a todos: al otro día te dan huevo, leche y más."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "En el tianguis la gente te pide cosas. Entrégalas y ganas hojas para comprar animales, árboles y semillas."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Con el botón DECORAR acomodas todo a tu gusto: corrales, talleres, árboles, caminos y más tierra para la milpa."
+			},
+			{
+				"quien": "jugador",
+				"texto": "¡Voy a cuidar el valle, Don Chucho!"
+			}
+		],
+		"don_chucho_granja_repetir": [
+			{
+				"quien": "don_chucho",
+				"texto": "Riega tu milpa, alimenta a tus animales en el comedero y entrega pedidos en el tianguis para ganar hojas."
+			},
+			{
+				"quien": "don_chucho",
+				"texto": "Si quieres acomodar algo, presiona DECORAR. ¡Tu granja, a tu manera!"
+			}
+		]
+	}
+}
