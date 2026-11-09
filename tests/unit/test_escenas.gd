@@ -43,3 +43,15 @@ func test_rutas_de_navegacion_se_pueden_instanciar() -> void:
 			var nodo := escena.instantiate()
 			assert_not_null(nodo, "No se pudo instanciar: %s" % ruta)
 			nodo.free()
+
+
+## (No se toca ninguna partida guardada: se abre el aviso directamente.)
+func test_el_aviso_de_nueva_partida_deja_regresar() -> void:
+	var menu = add_child_autofree(preload("res://scenes/menu/menu_principal.tscn").instantiate())
+	await wait_process_frames(2)
+	menu._confirmar_nueva()
+	assert_not_null(menu._confirmacion, "Avisa que se va a borrar el progreso")
+	assert_true(menu._confirmacion.find_child("BtnNo", true, false).has_focus(), "Lo seguro queda seleccionado")
+	menu._confirmacion.find_child("BtnNo", true, false).pressed.emit()
+	await wait_process_frames(2)
+	assert_null(menu._confirmacion, "NO regresa al menú")

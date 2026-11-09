@@ -7,7 +7,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | ID | Caso | Resultado esperado | Prioridad | Resultado | Fecha | Evidencia |
 |---|---|---|---|---|---|---|
 | CP-01 | Iniciar videojuego | Se muestra correctamente el menú principal | Crítica | ✅ Aprobado | 9 nov 2026 | [CP-01](CP-01/) |
-| CP-02 | Crear nueva partida | Se carga el escenario inicial | Crítica | Pendiente | | |
+| CP-02 | Crear nueva partida | Se carga el escenario inicial | Crítica | ✅ Aprobado | 9 nov 2026 | [CP-02](CP-02/) |
 | CP-03 | Movimiento | El personaje responde correctamente | Alta | Pendiente | | |
 | CP-04 | Colisiones | El jugador no atraviesa objetos sólidos | Alta | Pendiente | | |
 | CP-05 | Recolección | El objeto aparece en el inventario | Alta | Pendiente | | |
@@ -40,5 +40,28 @@ Pixel con la versión firmada).
 como en Windows ese nombre es también la carpeta de las partidas, el juego ahora copia al iniciar las
 partidas y opciones de la carpeta anterior para que nadie pierda su progreso ("CONTINUAR" sigue
 apareciendo en las capturas).
+
+**Resultado: ✅ Aprobado.**
+
+## CP-02 · Crear nueva partida
+
+**Cómo se probó:** en la versión de Windows (1280 × 720), con clics reales del mouse y partiendo de una
+computadora que ya tenía una partida guardada (se respaldó antes y se restauró al terminar).
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. Menú principal | Aparecen CONTINUAR, NUEVA PARTIDA, OPCIONES y SALIR | `1_menu.png` |
+| 2. Clic en NUEVA PARTIDA | Aparece el aviso "¿Empezar una partida nueva?"; "NO, REGRESAR" queda seleccionado | `2_aviso.png` |
+| 3. SÍ, EMPEZAR DE NUEVO | Se abre "¿Quién protegerá el valle?" | `3_personaje.png` |
+| 4. Elegir NIÑA y escribir "Prueba" | La niña queda marcada y el nombre se escribe | `4_nina_nombre.png` |
+| 5. COMENZAR | Se carga el valle de Tzintzun: día 1, 8 de la mañana, 0 de 3 zonas, objetivo "Habla con Don Chucho" | `5_valle.png` |
+
+La partida guardada quedó con `genero: nina`, `nombre: Prueba`, sin zonas completadas, día 1 a las 8:00.
+El personaje niño y el nombre sugerido se cubren con las pruebas automáticas de `test_seleccion.gd`, y
+el inicio en Android se probó en el emulador.
+
+**Defecto encontrado y corregido durante la prueba:** si ya había una partida, NUEVA PARTIDA →
+COMENZAR la borraba sin preguntar. Ahora aparece el aviso con "NO, REGRESAR" seleccionado primero
+(prueba automática `test_el_aviso_de_nueva_partida_deja_regresar`).
 
 **Resultado: ✅ Aprobado.**
