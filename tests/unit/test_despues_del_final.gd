@@ -129,6 +129,24 @@ func test_el_animal_que_llega_de_abajo_queda_al_alcance_para_hablar() -> void:
 	assert_has(valle.gara._interactuables, venado, "Se puede hablar con él sin dar un paso")
 
 
+func test_la_cria_cuenta_aunque_llegue_detras_del_guardian() -> void:
+	_terminar_juego()
+	Juego.dialogos_vistos.append("don_chucho_granja")
+	var valle = await _valle()
+	var pedidos: PedidosAyuda = valle.pedidos
+	var venado: AnimalValle = valle.get_node("Objetos/Venado1")
+	pedidos.iniciar_pedido("cria", venado)
+	pedidos._activar()
+	pedidos._al_llamar_cria(pedidos.cria)
+	# El guardián llega por la derecha y se para junto a la mamá, al alcance para hablarle; la cría viene detrás.
+	valle.gara.global_position = venado.global_position + Vector2(90, 0)
+	pedidos.cria.global_position = venado.global_position + Vector2(300, 0)
+	await wait_physics_frames(3)
+	assert_eq(int(Juego.pedido["progreso"]), 0, "Todavía no: la cría viene lejos")
+	await wait_until(func(): return int(Juego.pedido["progreso"]) == 1, 5.0)
+	assert_eq(int(Juego.pedido["progreso"]), 1, "La cría llega con su mamá sin que el guardián tenga que rodearla")
+
+
 func test_un_pedido_a_medias_reaparece_al_volver() -> void:
 	_terminar_juego()
 	Juego.pedido = {"tipo": "flores", "animal": "Monarca1", "especie": "monarca", "estado": "activo", "progreso": 2}

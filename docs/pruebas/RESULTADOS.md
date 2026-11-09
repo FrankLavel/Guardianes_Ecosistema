@@ -12,7 +12,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-04 | Colisiones | El jugador no atraviesa objetos sólidos | Alta | ✅ Aprobado | 9 nov 2026 | [CP-04](CP-04/) |
 | CP-05 | Recolección | El objeto aparece en el inventario | Alta | ✅ Aprobado | 9 nov 2026 | [CP-05](CP-05/) |
 | CP-06 | Activar misión | La misión aparece como activa | Alta | ✅ Aprobado | 9 nov 2026 | [CP-06](CP-06/) |
-| CP-07 | Completar misión | Se entrega la recompensa correspondiente | Alta | Pendiente | | |
+| CP-07 | Completar misión | Se entrega la recompensa correspondiente | Alta | ✅ Aprobado | 9 nov 2026 | [CP-07](CP-07/) |
 | CP-08 | Información educativa | Se muestra la información de la especie | Media | Pendiente | | |
 | CP-09 | Guardar partida | El progreso queda almacenado | Crítica | Pendiente | | |
 | CP-10 | Cargar partida | Se recupera el progreso anterior | Crítica | Pendiente | | |
@@ -189,5 +189,44 @@ aparecía "E  Hablar" y la E no hacía nada hasta que el jugador diera un paso (
 juego se trabó). Ahora se detiene a 70 px y se agregó la prueba
 `test_el_animal_que_llega_de_abajo_queda_al_alcance_para_hablar`, que falla con el código anterior y
 pasa con el nuevo. Pasan 191 de 191.
+
+**Resultado: ✅ Aprobado.**
+
+## CP-07 · Completar misión
+
+**Cómo se probó:** igual que CP-05 y CP-06 (el juego corriendo en Windows a 1280 × 720, tecla E como
+evento dentro del juego, partida de prueba borrada al final). Se completaron los dos tipos de misión.
+
+**Misión del río** (con el nivel del río ya limpio; el nivel completo se prueba en CP-12)
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. Antes | 0 / 3 zonas, sin habilidades, sin semillas; "Habla con Don Chucho: quiere enseñarte algo" | `1_rio_antes.png` |
+| 2. Hablar con Don Chucho | Se abre el reto "El filtro de agua" | `2_filtro_de_don_chucho.png` |
+| 3. Poner las capas en orden | "¡El agua sale limpia!" y aviso "¡Nueva especie en tu bitácora! Martín pescador" | `3_filtro_resuelto.png` |
+| 4. Continuar | Don Chucho: "¡Eso es! Así se limpia el agua: capa por capa" | `4_don_chucho_felicita.png` |
+| 5. Recompensa | 1 / 3 zonas restauradas y "¡Nueva habilidad: NADAR!"; en la mochila, 4 semillas de frijol; el objetivo pasa al bosque | `5_recompensa_nadar.png` |
+
+**Pedido de ayuda: la cría perdida**
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. Encontrar la cría | "E  Llamar a la cría" | `6_encuentra_la_cria.png` |
+| 2. Llamarla | "La cría te sigue. Llévala con su mamá." | `7_la_cria_te_sigue.png` |
+| 3. Llegar con la mamá | La cría se junta con ella, la mamá muestra "!": "¡Listo! Regresa a hablar con el animal" | `8_llega_con_su_mama.png` |
+| 4. Hablar con la mamá | "¡Mi cría! ¡Gracias, guardiana!" | `9_gracias.png` |
+| 5. Recompensa | "+8 hojas · Gástalas en muebles para tu casa": hojas 0 → 8 y experiencia 0 → 10 | `10_recompensa_hojas.png` |
+
+La partida guardada quedó con 8 hojas, una ayuda contada (`"ayudas": {"cria": 1}`) y sin pedido pendiente.
+Para no rodear cercas, el script llevó a la niña junto a la mamá y la cría caminó sola detrás de ella.
+Lo cubren también las pruebas `test_la_cria_cuenta_al_llegar_con_su_mama`,
+`test_hojas_ayudas_y_muebles_se_guardan` y `test_recoger_todo_y_arreglar_las_compuertas_limpia_el_rio`.
+
+**Defecto encontrado y corregido durante la prueba:** la cría solo contaba si quedaba a menos de
+110 px de su mamá, pero camina 70 px detrás de la niña. Si la niña llegaba por el mismo lado por donde
+venía la cría y se paraba junto a la mamá (lo natural para hablarle), la cría se quedaba a unos 160 px y
+la misión no avanzaba nunca, sin ninguna pista de qué hacer. Ahora también cuenta cuando la niña llega
+junto a la mamá con la cría siguiéndola de cerca, y la cría camina hasta su mamá. Se agregó
+`test_la_cria_cuenta_aunque_llegue_detras_del_guardian`, que falla con el código anterior. Pasan 192 de 192.
 
 **Resultado: ✅ Aprobado.**

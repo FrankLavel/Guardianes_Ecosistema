@@ -18,8 +18,10 @@ const HORAS_ENTRE_PEDIDOS := Vector2(20.0, 28.0)
 const HORAS_PRIMER_PEDIDO := 6.0
 ## Parte del valle donde pueden aparecer cosas (lejos del río y de los bordes).
 const AREA := Rect2(880, 220, 1760, 1420)
-## Qué tan cerca de su mamá hay que llevar a la cría.
+## Qué tan cerca de su mamá hay que llevar a la cría, o al guardián que la trae (la cría camina detrás de
+## él, así que si llega por el mismo lado se quedaría lejos de su mamá).
 const DISTANCIA_CRIA := 110.0
+const DISTANCIA_GUARDIAN := 150.0
 
 var datos: Dictionary = {}
 var animales: Array[AnimalValle] = []
@@ -62,7 +64,9 @@ func _process(_delta: float) -> void:
 			iniciar_pedido()
 	elif cria and cria.estado == AnimalValle.Estado.SIGUE and cria.objetivo == jugador:
 		var mama := animal_del_pedido()
-		if mama and cria.global_position.distance_to(mama.global_position) < DISTANCIA_CRIA:
+		if mama and (cria.global_position.distance_to(mama.global_position) < DISTANCIA_CRIA
+				or (jugador.global_position.distance_to(mama.global_position) < DISTANCIA_GUARDIAN
+					and cria.global_position.distance_to(jugador.global_position) < DISTANCIA_GUARDIAN)):
 			cria.seguir(mama)
 			avanzar()
 
