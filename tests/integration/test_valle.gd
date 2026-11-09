@@ -119,6 +119,67 @@ func test_gara_no_cruza_el_rio() -> void:
 	assert_gt(gara.global_position.x, 760.0, "El río la detiene")
 
 
+## CP-04: empuja a Gara contra algo sólido y revisa que se quede de su lado.
+func _empujar(desde: Vector2, direccion: Vector2) -> Vector2:
+	var gara: GaraAerea = valle.gara
+	gara.global_position = desde
+	gara.reset_physics_interpolation()
+	gara.entrada_direccion = direccion
+	await wait_physics_frames(120)
+	gara.entrada_direccion = Vector2.ZERO
+	return gara.global_position
+
+
+func test_no_atraviesa_la_casa() -> void:
+	var casa: Node2D = valle.get_node("Objetos/CasaAdobe1")
+	var al_final := await _empujar(casa.position + Vector2(260, -20), Vector2.LEFT)
+	assert_gt(al_final.x, casa.position.x + 60.0, "La pared de la casa la detiene")
+
+
+func test_no_atraviesa_un_arbol() -> void:
+	var arbol: Node2D = valle.get_node("Objetos/Encino18")
+	var al_final := await _empujar(arbol.position + Vector2(-160, -4), Vector2.RIGHT)
+	assert_lt(al_final.x, arbol.position.x - 10.0, "El tronco la detiene")
+
+
+## Empuja de frente contra un tramo de cerca (es una línea en diagonal) y revisa que siga del mismo lado.
+func _empujar_contra_la_cerca(choque: CollisionShape2D) -> float:
+	var forma: SegmentShape2D = choque.shape
+	var a: Vector2 = choque.global_transform * forma.a
+	var b: Vector2 = choque.global_transform * forma.b
+	var centro := (a + b) / 2.0
+	var normal := (b - a).orthogonal().normalized()
+	if normal.y < 0.0:
+		normal = -normal
+	var al_final := await _empujar(centro + normal * 90.0, -normal)
+	return (al_final - centro).dot(normal)
+
+
+func test_no_atraviesa_la_cerca() -> void:
+	await wait_physics_frames(2)
+	var choque := valle.get_node("Objetos/Cerca2").find_children("*", "CollisionShape2D", true, false)[0] as CollisionShape2D
+	assert_gt(await _empujar_contra_la_cerca(choque), 0.0, "La cerca la detiene")
+
+
+func test_no_atraviesa_la_cerca_de_un_corral() -> void:
+	for zona in ["rio", "bosque", "lago"]:
+		Juego.completar_zona(zona)
+	Juego.dialogos_vistos.append("don_chucho_granja")
+	valle.free()
+	valle = add_child_autofree(ESCENA_VALLE.instantiate())
+	valle.gara.leer_entrada_del_jugador = false
+	await wait_physics_frames(3)
+	var corral: Corral = valle.corrales["gallina"]
+	var choques := corral.find_children("*", "CollisionShape2D", true, false).filter(func(c): return c.shape is SegmentShape2D)
+	assert_eq(choques.size(), 4, "Los 4 tramos de la cerca son sólidos")
+	assert_gt(await _empujar_contra_la_cerca(choques[2]), 0.0, "La cerca del corral la detiene")
+
+
+func test_no_sale_del_mapa() -> void:
+	var al_final := await _empujar(Vector2(2700, 900), Vector2.RIGHT)
+	assert_lt(al_final.x, valle.TAMANO.x, "La orilla del valle la detiene")
+
+
 func test_menu_de_pausa_pausa_y_reanuda() -> void:
 	var pausa: MenuPausa = valle.get_node("MenuPausa")
 	pausa.abrir()

@@ -95,6 +95,9 @@ func _ready() -> void:
 	puzzle_residuos.resuelto.connect(_al_resolver_residuos)
 	puzzle_residuos.cerrado.connect(_al_cerrar_residuos)
 	_especies_de_zonas_terminadas()
+	# La cerca suelta del valle no tenía forma de choque y se podía atravesar.
+	var cerca: StaticBody2D = $Objetos/Cerca2
+	cerca.add_child(Corral.choque_de_cerca(cerca.get_node("Sprite2D")))
 	_noche = CanvasModulate.new()
 	add_child(_noche)
 	# De noche las ventanas de la casa dan una luz cálida.

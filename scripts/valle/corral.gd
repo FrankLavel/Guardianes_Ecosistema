@@ -20,6 +20,7 @@ var animales: Array[AnimalValle] = []
 var base := 1.0
 var tamano := 1.0
 var con_gallinero := false
+var _cuerpo: StaticBody2D
 ## El comedero va en la orilla de enfrente (lo pone el valle; ver Comedero).
 var comedero: Comedero:
 	set(valor):
@@ -40,11 +41,26 @@ func _ready() -> void:
 	_poner_cerca()
 
 
+## Forma de choque de un tramo de cerca (el dibujo es una cerca en diagonal): una línea por la base de
+## los postes, para que el guardián no la atraviese. Sirve para los corrales y la cerca suelta del valle.
+static func choque_de_cerca(tramo: Sprite2D) -> CollisionShape2D:
+	var forma := SegmentShape2D.new()
+	var lado := -1.0 if tramo.flip_h else 1.0
+	forma.a = Vector2(-200.0 * lado, -25.0) * tramo.scale
+	forma.b = Vector2(200.0 * lado, -210.0) * tramo.scale
+	var choque := CollisionShape2D.new()
+	choque.shape = forma
+	choque.position = tramo.position
+	return choque
+
+
 func _poner_cerca() -> void:
 	for hijo in get_children():
 		if hijo != comedero:
 			hijo.queue_free()
 	_acomodar_comedero()
+	_cuerpo = StaticBody2D.new()
+	add_child(_cuerpo)
 	for tramo in [[Vector2(-140, -22), false], [Vector2(140, -22), true], [Vector2(-140, 150), true], [Vector2(140, 150), false]]:
 		var cerca := Sprite2D.new()
 		cerca.texture = CERCA
@@ -53,6 +69,7 @@ func _poner_cerca() -> void:
 		cerca.flip_h = tramo[1]
 		cerca.position = tramo[0] * tamano
 		add_child(cerca)
+		_cuerpo.add_child(choque_de_cerca(cerca))
 	if con_gallinero and ResourceLoader.exists(GALLINERO):
 		var gallinero := Sprite2D.new()
 		gallinero.name = "Gallinero"

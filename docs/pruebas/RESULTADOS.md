@@ -9,7 +9,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-01 | Iniciar videojuego | Se muestra correctamente el menú principal | Crítica | ✅ Aprobado | 9 nov 2026 | [CP-01](CP-01/) |
 | CP-02 | Crear nueva partida | Se carga el escenario inicial | Crítica | ✅ Aprobado | 9 nov 2026 | [CP-02](CP-02/) |
 | CP-03 | Movimiento | El personaje responde correctamente | Alta | ✅ Aprobado | 9 nov 2026 | [CP-03](CP-03/) |
-| CP-04 | Colisiones | El jugador no atraviesa objetos sólidos | Alta | Pendiente | | |
+| CP-04 | Colisiones | El jugador no atraviesa objetos sólidos | Alta | ✅ Aprobado | 9 nov 2026 | [CP-04](CP-04/) |
 | CP-05 | Recolección | El objeto aparece en el inventario | Alta | Pendiente | | |
 | CP-06 | Activar misión | La misión aparece como activa | Alta | Pendiente | | |
 | CP-07 | Completar misión | Se entrega la recompensa correspondiente | Alta | Pendiente | | |
@@ -99,3 +99,26 @@ solo con la habilidad y agua limpia) y `test_valle.gd` (4 direcciones y no cruza
 personaje).
 
 **Resultado: ✅ Aprobado.** Sin defectos encontrados.
+
+## CP-04 · Colisiones
+
+**Cómo se probó:** con pruebas automáticas que empujan al personaje 2 segundos contra cada tipo de
+objeto sólido usando la física real del juego, y con evidencia visual en la versión de Windows.
+
+| Objeto sólido | Cómo se probó | Resultado | Evidencia |
+|---|---|---|---|
+| Casa | Teclas reales (W) en Windows | Se detiene contra la pared | `1_contra_la_casa.png` |
+| Casa, árbol (encino) | Prueba automática | No los atraviesa | `test_no_atraviesa_la_casa`, `test_no_atraviesa_un_arbol` |
+| Río | Teclas reales (CP-03) y prueba automática | No lo cruza | `test_gara_no_cruza_el_rio` |
+| Orilla del mapa | Prueba automática | No sale del valle | `test_no_sale_del_mapa` |
+| Cerca del valle | Prueba automática y empuje de frente con las acciones del teclado | Se detiene contra la cerca | `test_no_atraviesa_la_cerca`, `5_cerca_del_valle_*.png` |
+| Cerca de los corrales | Prueba automática y empuje de frente | Se detiene contra la cerca | `test_no_atraviesa_la_cerca_de_un_corral`, `6_cerca_del_corral_*.png` |
+| Suelo de los niveles | Teclas reales (CP-03) y pruebas de `test_guardian.gd` | Camina y aterriza sobre el suelo, no lo atraviesa | CP-03 `nivel_*.png` |
+
+**Defecto encontrado y corregido durante la prueba:** la cerca suelta del valle y las cercas de los
+corrales no tenían forma de choque y el personaje las atravesaba. Ahora cada tramo de cerca choca por la
+línea de sus postes (al empujar de lado el personaje resbala por la cerca y la rodea por la punta, como
+en cualquier juego). Los arbustos, las piedritas y el muelle se dejan pisables a propósito (el muelle es
+donde se pesca).
+
+**Resultado: ✅ Aprobado.**
