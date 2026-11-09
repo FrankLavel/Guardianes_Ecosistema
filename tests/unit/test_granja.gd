@@ -70,6 +70,17 @@ func test_pesca_responsable() -> void:
 	assert_true(Granja.puede_pescar())
 
 
+func test_recolectar_una_planta_la_pone_en_la_mochila_y_se_guarda() -> void:
+	var dato: Dictionary = Granja.silvestres_de_hoy(Rect2(0, 0, 500, 500))[0]
+	var tipo: String = dato["tipo"]
+	var cuantas := Juego.silvestres.size()
+	Granja.recolectar(dato)
+	assert_eq(Granja.cantidad(tipo), 1, "Aparece en la mochila")
+	assert_eq(Juego.silvestres.size(), cuantas - 1, "Ya no está en el valle")
+	Juego.desde_diccionario(JSON.parse_string(JSON.stringify(Juego.a_diccionario())))
+	assert_eq(Granja.cantidad(tipo), 1, "Sigue en la mochila al guardar y cargar")
+
+
 func test_cocinar_y_comer() -> void:
 	Granja.dar("maiz")
 	Granja.dar("leche")

@@ -10,7 +10,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-02 | Crear nueva partida | Se carga el escenario inicial | Crítica | ✅ Aprobado | 9 nov 2026 | [CP-02](CP-02/) |
 | CP-03 | Movimiento | El personaje responde correctamente | Alta | ✅ Aprobado | 9 nov 2026 | [CP-03](CP-03/) |
 | CP-04 | Colisiones | El jugador no atraviesa objetos sólidos | Alta | ✅ Aprobado | 9 nov 2026 | [CP-04](CP-04/) |
-| CP-05 | Recolección | El objeto aparece en el inventario | Alta | Pendiente | | |
+| CP-05 | Recolección | El objeto aparece en el inventario | Alta | ✅ Aprobado | 9 nov 2026 | [CP-05](CP-05/) |
 | CP-06 | Activar misión | La misión aparece como activa | Alta | Pendiente | | |
 | CP-07 | Completar misión | Se entrega la recompensa correspondiente | Alta | Pendiente | | |
 | CP-08 | Información educativa | Se muestra la información de la especie | Media | Pendiente | | |
@@ -122,3 +122,35 @@ en cualquier juego). Los arbustos, las piedritas y el muelle se dejan pisables a
 donde se pesca).
 
 **Resultado: ✅ Aprobado.**
+
+## CP-05 · Recolección
+
+**Cómo se probó:** en la versión de Windows (1280 × 720) con una partida de prueba que se borró al
+terminar. Se acercó a la niña al objeto y se mandó la tecla E como evento de teclado dentro del juego,
+igual que si se presionara en el teclado (así la prueba no depende de qué ventana tiene el foco). Se
+probaron los dos tipos de recolección del juego.
+
+**Valle: plantas silvestres → mochila**
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. Junto al nopal | Aparece "E  Recoger nopal" | `1_junto_a_la_planta.png` |
+| 2. Mochila antes (I) | "Tu mochila está vacía" | `2_mochila_antes.png` |
+| 3. Presionar E | El nopal desaparece, sale "+1 Nopal" y la experiencia sube a 1 / 15 | `3_recoge_con_E.png` |
+| 4. Mochila después | Aparece la tarjeta "Nopal ×1" | `4_mochila_despues.png` |
+
+Al guardar, la partida quedó con `"inventario": {"nopal": 1}`.
+
+**Nivel del río: basura → contador**
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. Junto a la botella | "Basura recogida: 0 / 8" y la barra de salud del río vacía | `5_rio_antes.png` |
+| 2. Presionar E | "Basura recogida: 1 / 8", la barra sube y aparece el dato "Botella de plástico" | `6_rio_despues.png` |
+
+**Pruebas automáticas:** se agregó `test_recolectar_una_planta_la_pone_en_la_mochila_y_se_guarda` (la
+planta pasa a la mochila, deja de estar en el valle y sigue en la mochila después de guardar y cargar). La
+basura ya la cubrían `test_basura.gd` (se recoge al interactuar y no se puede recoger dos veces) y
+`test_nivel1.gd` (la salud sube y se muestra el dato). Pasan 190 de 190.
+
+**Resultado: ✅ Aprobado.** Sin defectos encontrados.
