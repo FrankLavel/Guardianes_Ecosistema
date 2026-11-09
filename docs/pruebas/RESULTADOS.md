@@ -8,7 +8,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 |---|---|---|---|---|---|---|
 | CP-01 | Iniciar videojuego | Se muestra correctamente el menú principal | Crítica | ✅ Aprobado | 9 nov 2026 | [CP-01](CP-01/) |
 | CP-02 | Crear nueva partida | Se carga el escenario inicial | Crítica | ✅ Aprobado | 9 nov 2026 | [CP-02](CP-02/) |
-| CP-03 | Movimiento | El personaje responde correctamente | Alta | Pendiente | | |
+| CP-03 | Movimiento | El personaje responde correctamente | Alta | ✅ Aprobado | 9 nov 2026 | [CP-03](CP-03/) |
 | CP-04 | Colisiones | El jugador no atraviesa objetos sólidos | Alta | Pendiente | | |
 | CP-05 | Recolección | El objeto aparece en el inventario | Alta | Pendiente | | |
 | CP-06 | Activar misión | La misión aparece como activa | Alta | Pendiente | | |
@@ -65,3 +65,37 @@ COMENZAR la borraba sin preguntar. Ahora aparece el aviso con "NO, REGRESAR" sel
 (prueba automática `test_el_aviso_de_nueva_partida_deja_regresar`).
 
 **Resultado: ✅ Aprobado.**
+
+## CP-03 · Movimiento
+
+**Cómo se probó:** en la versión de Windows (1280 × 720) con teclas reales del teclado, en las dos vistas
+del juego: el valle (vista aérea, 4 direcciones) y el nivel del río (plataformas).
+
+**Valle de Tzintzun**
+
+| Tecla | Qué pasó | Evidencia |
+|---|---|---|
+| D | Camina a la derecha y la cámara lo sigue | `valle_1_derecha_D.png` |
+| W | Camina hacia arriba (pasa junto a la casa) | `valle_2_arriba_W.png` |
+| A | Camina a la izquierda (se ve a Don Chucho) | `valle_3_izquierda_A.png` |
+| S | Camina hacia abajo y regresa al cruce de caminos | `valle_4_abajo_S.png` |
+| → / ← | Las flechas hacen lo mismo que D y A | `valle_5…`, `valle_6…` |
+| W + A hasta el arco | Llega al arco del río y aparece "E Río Cupatitzio"; el río no se puede cruzar | `valle_7_hacia_el_rio.png` |
+
+**Nivel del río (plataformas)**
+
+| Tecla | Qué pasó | Evidencia |
+|---|---|---|
+| E en el arco | Entra al nivel del río | `nivel_0_entrada.png` |
+| → | Camina a la derecha y la cámara lo sigue | `nivel_2_derecha.png` |
+| Espacio | Salta (foto en el aire) y vuelve a caer al suelo | `nivel_3_salto.png`, `nivel_4_aterriza.png` |
+| ← | Se voltea y camina a la izquierda; junto a la basura aparece "E" | `nivel_5_izquierda.png` |
+
+Lo que no se probó a mano (trepar enredaderas en el bosque y nadar en agua limpia, que se desbloquean
+más adelante) lo cubren las pruebas automáticas: `test_guardian.gd` (caminar, detenerse, saltar, no
+saltar en el aire, gravedad, animaciones), `test_bosque.gd` (trepar y soltarse), `test_nadar.gd` (nadar
+solo con la habilidad y agua limpia) y `test_valle.gd` (4 direcciones y no cruzar el río). Todas pasan
+(184 de 184). Los controles táctiles de Android se probaron en el emulador (el joystick mueve al
+personaje).
+
+**Resultado: ✅ Aprobado.** Sin defectos encontrados.
