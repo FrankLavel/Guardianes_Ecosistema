@@ -100,7 +100,8 @@ func _physics_process(delta: float) -> void:
 		Estado.PASEO:
 			paso = _pasear(delta)
 		Estado.VA_AL_JUGADOR:
-			if objetivo and global_position.distance_to(objetivo.global_position) > 90.0:
+			# Se detiene dentro de su zona para hablar (radio 80 + medio cuerpo del guardián), llegue por donde llegue.
+			if objetivo and global_position.distance_to(objetivo.global_position) > 70.0:
 				paso = _mover_hacia(objetivo.global_position, velocidad * 2.0, delta)
 			else:
 				estado = Estado.ESPERA

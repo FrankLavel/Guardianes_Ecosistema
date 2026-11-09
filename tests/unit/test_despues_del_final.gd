@@ -115,6 +115,20 @@ func test_la_cria_cuenta_al_llegar_con_su_mama() -> void:
 	assert_eq(int(Juego.pedido["progreso"]), 1)
 
 
+func test_el_animal_que_llega_de_abajo_queda_al_alcance_para_hablar() -> void:
+	_terminar_juego()
+	Juego.dialogos_vistos.append("don_chucho_granja")
+	var valle = await _valle()
+	var venado: AnimalValle = valle.get_node("Objetos/Venado1")
+	valle.gara.global_position = Vector2(2050, 1000)
+	venado.global_position = valle.gara.global_position + Vector2(0, 250)
+	await wait_physics_frames(2)
+	valle.pedidos.iniciar_pedido("cria", venado)
+	await wait_until(func(): return venado.estado == AnimalValle.Estado.ESPERA, 10.0)
+	await wait_physics_frames(3)
+	assert_has(valle.gara._interactuables, venado, "Se puede hablar con él sin dar un paso")
+
+
 func test_un_pedido_a_medias_reaparece_al_volver() -> void:
 	_terminar_juego()
 	Juego.pedido = {"tipo": "flores", "animal": "Monarca1", "especie": "monarca", "estado": "activo", "progreso": 2}

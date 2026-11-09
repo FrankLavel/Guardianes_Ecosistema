@@ -11,7 +11,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-03 | Movimiento | El personaje responde correctamente | Alta | ✅ Aprobado | 9 nov 2026 | [CP-03](CP-03/) |
 | CP-04 | Colisiones | El jugador no atraviesa objetos sólidos | Alta | ✅ Aprobado | 9 nov 2026 | [CP-04](CP-04/) |
 | CP-05 | Recolección | El objeto aparece en el inventario | Alta | ✅ Aprobado | 9 nov 2026 | [CP-05](CP-05/) |
-| CP-06 | Activar misión | La misión aparece como activa | Alta | Pendiente | | |
+| CP-06 | Activar misión | La misión aparece como activa | Alta | ✅ Aprobado | 9 nov 2026 | [CP-06](CP-06/) |
 | CP-07 | Completar misión | Se entrega la recompensa correspondiente | Alta | Pendiente | | |
 | CP-08 | Información educativa | Se muestra la información de la especie | Media | Pendiente | | |
 | CP-09 | Guardar partida | El progreso queda almacenado | Crítica | Pendiente | | |
@@ -125,10 +125,10 @@ donde se pesca).
 
 ## CP-05 · Recolección
 
-**Cómo se probó:** en la versión de Windows (1280 × 720) con una partida de prueba que se borró al
-terminar. Se acercó a la niña al objeto y se mandó la tecla E como evento de teclado dentro del juego,
-igual que si se presionara en el teclado (así la prueba no depende de qué ventana tiene el foco). Se
-probaron los dos tipos de recolección del juego.
+**Cómo se probó:** se corrió el juego en Windows (1280 × 720, Godot 4.7.2, el mismo código del armado
+1.0.0-rc1) con un script que acerca a la niña al objeto y manda la tecla E como evento de teclado dentro
+del juego, igual que si se presionara (así la prueba no depende de qué ventana tiene el foco). Se usó una
+partida de prueba que se borró al terminar. Se probaron los dos tipos de recolección del juego.
 
 **Valle: plantas silvestres → mochila**
 
@@ -154,3 +154,40 @@ basura ya la cubrían `test_basura.gd` (se recoge al interactuar y no se puede r
 `test_nivel1.gd` (la salud sube y se muestra el dato). Pasan 190 de 190.
 
 **Resultado: ✅ Aprobado.** Sin defectos encontrados.
+
+## CP-06 · Activar misión
+
+**Cómo se probó:** igual que CP-05 (el juego corriendo en Windows a 1280 × 720 con la tecla E mandada
+como evento dentro del juego y una partida de prueba que se borró al terminar). El juego tiene dos tipos
+de misión y se probaron las dos.
+
+**Misión principal: restaurar el río**
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. Partida nueva, junto a Don Chucho | El objetivo dice "Habla con Don Chucho, junto al río" y aparece "E  Hablar" | `1_antes_habla_con_don_chucho.png` |
+| 2. Presionar E | Don Chucho se presenta y explica el problema del río | `2_don_chucho_explica.png` |
+| 3. Terminar el diálogo | La misión queda activa: "Entra al río por el arco de piedra" | `3_mision_activa_entra_al_rio.png` |
+
+**Pedido de ayuda de un animal (después de restaurar las 3 zonas)**
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. Llega la hora del pedido | Un pato camina hacia la niña: "¡Un animal necesita tu ayuda! Habla con él (E)" | `4_un_animal_viene.png` |
+| 2. El pato llega | Se detiene junto a ella con "E  Hablar" | `5_necesita_tu_ayuda.png` |
+| 3. Presionar E | "¡Guardiana, ayúdame! ¡No encuentro a mi cría!" | `6_pide_ayuda.png` |
+| 4. Terminar el diálogo | La misión queda activa: "Busca a la cría del pato y tráela", y la cría aparece en el valle | `7_pedido_activo.png` |
+
+La partida guardada quedó con `"pedido": {"tipo": "cria", "animal": "Pato1", "estado": "activo"}`, así que
+la misión sigue activa si se sale y se vuelve a entrar (`test_un_pedido_a_medias_reaparece_al_volver`).
+Para no esperar el día de juego que tarda el pedido, el script adelantó el reloj al momento del pedido
+(que tarde un día lo cubre `test_el_siguiente_pedido_tarda_un_dia`).
+
+**Defecto encontrado y corregido durante la prueba:** el animal se detenía a 90 px de la niña, pero su
+zona para hablar alcanza 80 px más medio cuerpo de ella. Si llegaba desde abajo se quedaba a 81 px: no
+aparecía "E  Hablar" y la E no hacía nada hasta que el jugador diera un paso (un niño podía pensar que el
+juego se trabó). Ahora se detiene a 70 px y se agregó la prueba
+`test_el_animal_que_llega_de_abajo_queda_al_alcance_para_hablar`, que falla con el código anterior y
+pasa con el nuevo. Pasan 191 de 191.
+
+**Resultado: ✅ Aprobado.**
