@@ -359,6 +359,25 @@ static func existe_partida(numero := 1) -> bool:
 	return FileAccess.file_exists(ruta_ranura(numero)) or FileAccess.file_exists(ruta_ranura(numero) + ".bak")
 
 
+## El juego se llamaba "guardianes del ultimo ecosistema" (sin acento): en la computadora sus partidas y
+## opciones quedaron en la carpeta con ese nombre. Al iniciar se copian a la carpeta nueva si ahí no hay.
+const CARPETA_ANTERIOR := "guardianes del ultimo ecosistema"
+
+
+func _ready() -> void:
+	_traer_partidas_anteriores()
+
+
+func _traer_partidas_anteriores() -> void:
+	var nueva := OS.get_user_data_dir()
+	var anterior := nueva.get_base_dir().path_join(CARPETA_ANTERIOR)
+	if nueva.get_file() == CARPETA_ANTERIOR or not DirAccess.dir_exists_absolute(anterior):
+		return
+	for archivo in DirAccess.get_files_at(anterior):
+		if (archivo.begins_with("partida_") or archivo == "opciones.cfg") 				and not FileAccess.file_exists(nueva.path_join(archivo)):
+			DirAccess.copy_absolute(anterior.path_join(archivo), nueva.path_join(archivo))
+
+
 ## En el celular la app se puede cerrar en cualquier momento: se guarda al mandarla a segundo plano,
 ## al cerrarla y con el botón "atrás" (que abre la pausa en lugar de salir del juego).
 func _notification(que: int) -> void:
