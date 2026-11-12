@@ -1,0 +1,9 @@
+Resolución (1280, 720), vsync 1, GPU: NVIDIA GeForce RTX 2050
+valle_noche    484.5 FPS promedio | 1% más lento:   3.0 ms (338.8 FPS) | peor cuadro   6.9 ms | cuadros > 33 ms: 0 de 4847
+valle_dia      532.1 FPS promedio | 1% más lento:   3.1 ms (318.7 FPS) | peor cuadro   6.6 ms | cuadros > 33 ms: 0 de 5323
+casa           1078.8 FPS promedio | 1% más lento:   1.6 ms (641.8 FPS) | peor cuadro   6.1 ms | cuadros > 33 ms: 0 de 10790
+nivel1_rio     1070.7 FPS promedio | 1% más lento:   1.6 ms (627.7 FPS) | peor cuadro   5.2 ms | cuadros > 33 ms: 0 de 10708
+nivel2_bosque  1040.6 FPS promedio | 1% más lento:   1.6 ms (612.7 FPS) | peor cuadro   6.3 ms | cuadros > 33 ms: 0 de 10407
+nivel3_lago    1059.9 FPS promedio | 1% más lento:   1.6 ms (627.4 FPS) | peor cuadro   6.5 ms | cuadros > 33 ms: 0 de 10601
+menu           1521.1 FPS promedio | 1% más lento:   1.2 ms (814.3 FPS) | peor cuadro   5.7 ms | cuadros > 33 ms: 0 de 15212
+Partida real sin cambios: true

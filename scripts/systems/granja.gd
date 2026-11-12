@@ -694,7 +694,9 @@ func avanzar_talleres(horas: float) -> void:
 		if not t["trabajando"]:
 			continue
 		t["horas"] = float(t["horas"]) + horas
-		if t["horas"] < float(datos["talleres"][id]["horas"]):
+		# El molino y la quesería ya no tienen horas (se hacen con su minijuego): la tanda que dejó una partida
+		# vieja a medias queda lista de una vez.
+		if t["horas"] < float(datos["talleres"][id].get("horas", 0.0)):
 			continue
 		t["horas"] = 0.0
 		t["listo"] = mini(int(t["listo"]) + 1, TANDAS_MAX)
@@ -707,7 +709,7 @@ func minutos_taller(id: String) -> int:
 	var t := taller(id)
 	if not t["trabajando"]:
 		return 0
-	var falta := float(datos["talleres"][id]["horas"]) - float(t["horas"])
+	var falta := float(datos["talleres"][id].get("horas", 0.0)) - float(t["horas"])
 	return maxi(ceili(falta * Juego.SEGUNDOS_POR_HORA / 60.0), 1)
 
 

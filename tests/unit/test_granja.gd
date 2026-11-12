@@ -271,6 +271,17 @@ func test_la_colmena_trabaja_sola_y_se_llena() -> void:
 	assert_true(Granja.taller("colmena")["trabajando"], "Al recoger vuelve a trabajar")
 
 
+func test_la_tanda_del_molino_de_una_partida_vieja_queda_lista() -> void:
+	# Antes del minijuego el molino trabajaba con el reloj; una partida guardada así no debe trabarse.
+	Juego.talleres["molino"] = {"horas": 47.7, "listo": 0, "trabajando": true}
+	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][1]) * 3)
+	Granja.avanzar_talleres(0.01)
+	assert_eq(int(Granja.taller("molino")["listo"]), 1, "La tanda que quedó a medias está lista")
+	assert_false(Granja.taller("molino")["trabajando"], "Y ya no sigue trabajando sola")
+	assert_eq(Granja.minutos_taller("molino"), 0)
+	assert_eq(Granja.recoger_taller("molino"), {"masa": 2})
+
+
 func test_los_talleres_se_guardan() -> void:
 	Granja.dar_xp(int(Granja.datos["niveles"]["xp"][5]))
 	Granja.avanzar_talleres(float(Granja.datos["talleres"]["colmena"]["horas"]))

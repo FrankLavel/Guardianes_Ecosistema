@@ -18,7 +18,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-10 | Cargar partida | Se recupera el progreso anterior | Crítica | ✅ Aprobado | 12 nov 2026 | [CP-10](CP-10/) |
 | CP-11 | Pausar juego | El videojuego se detiene correctamente | Media | ✅ Aprobado | 12 nov 2026 | [CP-11](CP-11/) |
 | CP-12 | Cambio de escenario | El nuevo escenario carga correctamente | Alta | ✅ Aprobado | 12 nov 2026 | [CP-12](CP-12/) |
-| CP-13 | Rendimiento | Se mantienen al menos 30 FPS | Alta | Pendiente | | |
+| CP-13 | Rendimiento | Se mantienen al menos 30 FPS | Alta | ✅ Aprobado | 12 nov 2026 | [CP-13](CP-13/) |
 | CP-14 | Cerrar videojuego | El videojuego termina correctamente | Media | Pendiente | | |
 
 ## CP-01 · Iniciar videojuego
@@ -397,3 +397,40 @@ aprendido (`rio_nivel_completado.png`), y al continuar el valle pidió hablar co
 193 de 193.
 
 **Resultado: ✅ Aprobado.** Sin defectos encontrados.
+
+## CP-13 · Rendimiento
+
+**Cómo se midió:** el juego corriendo en Windows (laptop con NVIDIA GeForce RTX 2050) en las tres
+resoluciones del plan. En cada escena se dejó 2 s para que cargara y luego se midió cada cuadro durante
+10 s, con el personaje caminando en varias direcciones. El valle se midió con una copia de la partida
+real del equipo, que es la granja más llena que existe (nivel 7, corrales, talleres, decoraciones y
+caminos), de día y de noche con los faroles prendidos. La partida real solo se leyó.
+
+Resultados a 1280 × 720 (los de 1366 × 768 y 1920 × 1080 son parecidos: `fps_*.txt`):
+
+| Escena | FPS promedio | 1 % de cuadros más lentos | Peor cuadro | Cuadros de más de 33 ms (menos de 30 FPS) |
+|---|---|---|---|---|
+| Valle de noche (granja llena) | 484 | 3.0 ms (338 FPS) | 6.9 ms | 0 de 4,847 |
+| Valle de día (granja llena) | 532 | 3.1 ms (318 FPS) | 6.6 ms | 0 de 5,323 |
+| Casa | 1,045 | 1.6 ms | 5.0 ms | 0 |
+| Nivel del río | 1,033 | 1.6 ms | 5.7 ms | 0 |
+| Nivel del bosque | 980 | 1.7 ms | 5.4 ms | 0 |
+| Nivel del lago | 1,012 | 1.6 ms | 6.2 ms | 0 |
+| Menú principal | 1,369 | 1.3 ms | 6.0 ms | 0 |
+
+En las 21 mediciones (7 escenas × 3 resoluciones) el 99 % de los cuadros queda por encima de 149 FPS. Solo
+hubo un cuadro de más de 33 ms (52 ms al entrar a la casa a 1920 × 1080), un tirón aislado que no se
+repitió. En la versión Web (itch.io) y en Android el equipo reportó que va fluido a 60 FPS.
+
+**Defecto encontrado y corregido durante la prueba:** con la partida real, el valle mostraba un error en
+cada cuadro y tenía tirones de 38 a 49 ms. Esa partida era de antes de que el molino se manejara con su
+minijuego y había quedado con una tanda "trabajando" según el reloj. Como el molino ya no tiene horas, el
+juego no podía terminar esa tanda: el molino se quedaba trabado y el error se repetía sin parar. Ahora
+esa tanda queda lista para recoger (2 de masa) y el molino sigue normal. Se agregó
+`test_la_tanda_del_molino_de_una_partida_vieja_queda_lista`, que falla con el código anterior. Sin el
+error, los tirones desaparecieron. Pasan 194 de 194.
+
+**Resultado: ✅ Aprobado** (mínimo pedido: 30 FPS; meta: 60 FPS).
+
+*Observación:* el juego no tiene tope de FPS y en esta laptop el vsync no lo limita, así que dibuja cientos
+de cuadros por segundo. No afecta la prueba, pero calienta la computadora y gasta batería sin necesidad.
