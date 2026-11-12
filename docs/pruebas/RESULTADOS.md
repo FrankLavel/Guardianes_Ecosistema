@@ -16,7 +16,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-08 | Información educativa | Se muestra la información de la especie | Media | ✅ Aprobado | 12 nov 2026 | [CP-08](CP-08/) |
 | CP-09 | Guardar partida | El progreso queda almacenado | Crítica | ✅ Aprobado | 12 nov 2026 | [CP-09](CP-09/) |
 | CP-10 | Cargar partida | Se recupera el progreso anterior | Crítica | ✅ Aprobado | 12 nov 2026 | [CP-10](CP-10/) |
-| CP-11 | Pausar juego | El videojuego se detiene correctamente | Media | Pendiente | | |
+| CP-11 | Pausar juego | El videojuego se detiene correctamente | Media | ✅ Aprobado | 12 nov 2026 | [CP-11](CP-11/) |
 | CP-12 | Cambio de escenario | El nuevo escenario carga correctamente | Alta | Pendiente | | |
 | CP-13 | Rendimiento | Se mantienen al menos 30 FPS | Alta | Pendiente | | |
 | CP-14 | Cerrar videojuego | El videojuego termina correctamente | Media | Pendiente | | |
@@ -325,3 +325,35 @@ datos de prueba, así que la partida real no se tocó:
 profunda. La ruta superó el largo que permite Windows, el caché de gráficos no se pudo leer y el valle se
 vio en blanco. Con la carpeta real del juego no pasa (0 errores), y con una carpeta de prueba de ruta
 corta tampoco; las capturas son de esa repetición.
+
+## CP-11 · Pausar juego
+
+**Cómo se probó:** el juego corriendo en Windows (1280 × 720), con Esc, D, → y Espacio mandados como
+eventos de teclado dentro del juego y una partida de prueba borrada al final. Durante la pausa se
+mantuvieron presionadas las teclas de moverse por 3 segundos reales y se comparó el estado antes y
+después (`registro.txt`).
+
+**Valle** (con animales paseando y un surco de maíz sembrado y regado)
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| Esc | Aparece PAUSA con CONTINUAR y MENÚ PRINCIPAL; el juego queda pausado | `1_valle_en_pausa.png` |
+| 3 s en pausa con D presionada | No cambia nada: la hora, la niña, los animales y el maíz siguen igual | `2_valle_sigue_en_pausa.png` |
+| CONTINUAR | Se cierra la pausa; con D la niña camina, los animales pasean, el reloj y el maíz avanzan | `3_valle_reanudado.png` |
+| Esc y Esc otra vez | Abre la pausa y la vuelve a cerrar | — |
+
+**Nivel del río**
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| Saltar y pausar en el aire | PAUSA con CONTINUAR, VOLVER AL VALLE y MENÚ PRINCIPAL; la niña queda congelada en el aire | `4_rio_pausa_en_el_aire.png` |
+| 3 s en pausa con → presionada | No se mueve ni cae: la misma posición exacta | `5_rio_sigue_en_el_aire.png` |
+| CONTINUAR | Termina de caer y aterriza | `6_rio_reanudado_aterriza.png` |
+
+La pausa también detiene el guardado automático, la energía, los talleres y los árboles frutales, porque
+todos dependen del mismo reloj (`Juego.reloj_corre()`). La bitácora, los retos y los minijuegos también
+pausan el juego. En Android, el botón PAUSA y el botón "atrás" abren la misma pausa
+(`test_atras_cierra_el_panel_abierto_sin_abrir_la_pausa`). Otras pruebas automáticas:
+`test_menu_de_pausa_pausa_y_reanuda` y `test_abrir_un_puzzle_pausa_y_bloquea_el_movimiento`. Pasan 193 de 193.
+
+**Resultado: ✅ Aprobado.** Sin defectos encontrados.

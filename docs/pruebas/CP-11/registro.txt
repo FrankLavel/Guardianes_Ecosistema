@@ -1,0 +1,8 @@
+  sembrar=true regar=true
+VALLE: pausa abierta=true, árbol pausado=true
+  3 s en pausa con D presionada: hora=igual  gara=igual  animales=igual  milpa_creciendo=igual  
+  CONTINUAR: pausa abierta=false, árbol pausado=false
+  2 s jugando con D: hora=CAMBIÓ  gara=CAMBIÓ  animales=CAMBIÓ  milpa_creciendo=CAMBIÓ  
+  Esc abre=true, Esc otra vez cierra=true
+RÍO: pausa abierta=true | en el aire=true | 3 s en pausa con → presionada: posición (112.0, 473.2586) → (112.0, 473.2586) (igual)
+  CONTINUAR: cae y aterriza=true, posición (112.0, 575.9252)
