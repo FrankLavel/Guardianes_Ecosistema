@@ -17,7 +17,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-09 | Guardar partida | El progreso queda almacenado | Crítica | ✅ Aprobado | 12 nov 2026 | [CP-09](CP-09/) |
 | CP-10 | Cargar partida | Se recupera el progreso anterior | Crítica | ✅ Aprobado | 12 nov 2026 | [CP-10](CP-10/) |
 | CP-11 | Pausar juego | El videojuego se detiene correctamente | Media | ✅ Aprobado | 12 nov 2026 | [CP-11](CP-11/) |
-| CP-12 | Cambio de escenario | El nuevo escenario carga correctamente | Alta | Pendiente | | |
+| CP-12 | Cambio de escenario | El nuevo escenario carga correctamente | Alta | ✅ Aprobado | 12 nov 2026 | [CP-12](CP-12/) |
 | CP-13 | Rendimiento | Se mantienen al menos 30 FPS | Alta | Pendiente | | |
 | CP-14 | Cerrar videojuego | El videojuego termina correctamente | Media | Pendiente | | |
 
@@ -355,5 +355,45 @@ todos dependen del mismo reloj (`Juego.reloj_corre()`). La bitácora, los retos 
 pausan el juego. En Android, el botón PAUSA y el botón "atrás" abren la misma pausa
 (`test_atras_cierra_el_panel_abierto_sin_abrir_la_pausa`). Otras pruebas automáticas:
 `test_menu_de_pausa_pausa_y_reanuda` y `test_abrir_un_puzzle_pausa_y_bloquea_el_movimiento`. Pasan 193 de 193.
+
+**Resultado: ✅ Aprobado.** Sin defectos encontrados.
+
+## CP-12 · Cambio de escenario
+
+**Cómo se probó:** el juego corriendo en Windows (1280 × 720) con un recorrido por los 18 cambios de
+escenario del juego, cada uno con su disparador real: el botón de cada pantalla o la tecla E (como
+evento de teclado) en el arco, la puerta o la meta. Se midió cuánto tarda cada cambio, desde que se toca
+hasta que termina el fundido. Se usó una partida de prueba borrada al final; las pantallas del menú solo
+leyeron la partida real, que quedó igual (`registro.txt`).
+
+| # | Cambio | Llega a | Tiempo |
+|---|---|---|---|
+| 1 | Menú → OPCIONES | Opciones | 0.71 s |
+| 2 | Opciones → VOLVER | Menú | 0.58 s |
+| 3 | Menú → NUEVA PARTIDA → SÍ | Elegir personaje | 0.59 s |
+| 4 | Elegir personaje → VOLVER | Menú | 0.58 s |
+| 5 | Empezar la partida | Valle | 1.15 s |
+| 6 | Valle: E en el arco del río | Nivel del río | 0.93 s |
+| 7 | Río terminado: botón de la pantalla final | Valle (junto al arco, objetivo "Habla con Don Chucho") | 0.69 s |
+| 8–9 | Arco del río → pausa → VOLVER AL VALLE | Río → Valle | 0.85 s / 0.69 s |
+| 10–11 | Arco del bosque → pausa → VOLVER AL VALLE | Bosque → Valle | 0.90 s / 0.70 s |
+| 12–13 | Arco del lago → pausa → VOLVER AL VALLE | Lago → Valle | 0.84 s / 0.71 s |
+| 14 | Lago restaurado: Achi se despide | Pantalla final "¡Gracias, Guardiana!" | 1.50 s (incluye el diálogo) |
+| 15 | Final → VOLVER AL VALLE | Valle | 0.83 s |
+| 16 | Valle: E en la puerta de la casa | Casa | 0.82 s |
+| 17 | Casa: E en la puerta | Valle | 0.99 s |
+| 18 | Valle → pausa → MENÚ PRINCIPAL | Menú | 0.63 s |
+
+Los 18 llegan a la escena correcta, todos en 1.5 s o menos (el fundido a negro dura 0.7 s de esos). Cada
+foto `NN_<escena>.png` es la pantalla al terminar ese cambio.
+
+**Nivel del río de punta a punta** (pendiente de CP-07): se recogieron las 8 basuras con E, se resolvió el
+reto de las compuertas con sus botones (cerrar A, abrir B y C, abrir el agua →
+`rio_compuertas_resueltas.png`) y se llegó al árbol del final: apareció "¡Lo lograste, Guardiana!" con lo
+aprendido (`rio_nivel_completado.png`), y al continuar el valle pidió hablar con Don Chucho.
+
+**Pruebas automáticas:** `test_escenas.gd` (cada escena carga sin errores) y las de cada nivel
+(`test_nivel1/2/3.gd`, por ejemplo `test_recoger_todo_y_arreglar_las_compuertas_limpia_el_rio`). Pasan
+193 de 193.
 
 **Resultado: ✅ Aprobado.** Sin defectos encontrados.

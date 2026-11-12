@@ -1,0 +1,22 @@
+ 1. Menú: OPCIONES → Opciones.tscn  [OK, 711 ms]
+ 2. Opciones: VOLVER → menu_principal.tscn  [OK, 577 ms]
+ 3. Menú: NUEVA PARTIDA → SÍ → SeleccionPersonaje.tscn  [OK, 587 ms]
+ 4. Elegir personaje: VOLVER → menu_principal.tscn  [OK, 582 ms]
+ 5. Partida de prueba: al valle → Valle.tscn  [OK, 1151 ms]
+ 6. Valle: E en el arco del río → Nivel1.tscn  [OK, 931 ms]
+    Río: basura 8/8, compuertas=true, río limpio=true
+    Pantalla de nivel completado visible=true
+ 7. Río terminado: botón de la pantalla final → Valle.tscn  [OK, 686 ms]
+    De vuelta en el valle: objetivo = Habla con Don Chucho: quiere enseñarte algo. | posición junto al arco = (880.0, 420.0)
+ 8. Valle: E en el arco del río (otra vez) → Nivel1.tscn  [OK, 852 ms]
+ 9. Río: pausa → VOLVER AL VALLE → Valle.tscn  [OK, 688 ms]
+10. Valle: E en el arco del bosque → Nivel2.tscn  [OK, 904 ms]
+11. Bosque: pausa → VOLVER AL VALLE → Valle.tscn  [OK, 703 ms]
+12. Valle: E en el arco del lago → Nivel3.tscn  [OK, 843 ms]
+13. Lago: pausa → VOLVER AL VALLE → Valle.tscn  [OK, 708 ms]
+14. Lago restaurado: Achi se despide → final → Final.tscn  [OK, 1504 ms]
+15. Final: VOLVER AL VALLE → Valle.tscn  [OK, 825 ms]
+16. Valle: E en la puerta de la casa → Casa.tscn  [OK, 816 ms]
+17. Casa: E en la puerta → Valle.tscn  [OK, 991 ms]
+18. Valle: pausa → MENÚ PRINCIPAL → menu_principal.tscn  [OK, 634 ms]
+Partida real sin cambios: true
