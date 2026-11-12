@@ -13,7 +13,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-05 | Recolección | El objeto aparece en el inventario | Alta | ✅ Aprobado | 9 nov 2026 | [CP-05](CP-05/) |
 | CP-06 | Activar misión | La misión aparece como activa | Alta | ✅ Aprobado | 9 nov 2026 | [CP-06](CP-06/) |
 | CP-07 | Completar misión | Se entrega la recompensa correspondiente | Alta | ✅ Aprobado | 9 nov 2026 | [CP-07](CP-07/) |
-| CP-08 | Información educativa | Se muestra la información de la especie | Media | Pendiente | | |
+| CP-08 | Información educativa | Se muestra la información de la especie | Media | ✅ Aprobado | 12 nov 2026 | [CP-08](CP-08/) |
 | CP-09 | Guardar partida | El progreso queda almacenado | Crítica | Pendiente | | |
 | CP-10 | Cargar partida | Se recupera el progreso anterior | Crítica | Pendiente | | |
 | CP-11 | Pausar juego | El videojuego se detiene correctamente | Media | Pendiente | | |
@@ -228,5 +228,36 @@ venía la cría y se paraba junto a la mamá (lo natural para hablarle), la crí
 la misión no avanzaba nunca, sin ninguna pista de qué hacer. Ahora también cuenta cuando la niña llega
 junto a la mamá con la cría siguiéndola de cerca, y la cría camina hasta su mamá. Se agregó
 `test_la_cria_cuenta_aunque_llegue_detras_del_guardian`, que falla con el código anterior. Pasan 192 de 192.
+
+**Resultado: ✅ Aprobado.**
+
+## CP-08 · Información educativa
+
+**Cómo se probó:** el juego corriendo en Windows (1280 × 720) con la tecla Tab mandada como evento de
+teclado dentro del juego y una partida de prueba borrada al final. Además se revisaron las 14 fichas de
+`data/especies.json`.
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. Se descubre una especie | Aviso "¡Nueva especie en tu bitácora! Garza blanca · Tab: abrir la bitácora" | `1_aviso_nueva_especie.png` |
+| 2. Tab | Se abre la bitácora en la pestaña Río: dibujo, "Garza blanca", *Ardea alba*, "Sin peligro" y su dato; "Especies descubiertas: 1 / 14" | `2_ficha_garza.png` |
+| 3. Tocar una especie sin descubrir | Se ve como silueta, "???" y "Sigue explorando y ayudando al ecosistema para descubrir esta especie" (no se revela antes de tiempo) | `3_sin_descubrir.png` |
+| 4. Tab otra vez | La bitácora se cierra | — |
+| 5. Con las 14 descubiertas | Una ficha de cada zona: Acocil (Necesita cuidado), Mariposa monarca (En peligro), Achoque (En peligro); "14 / 14" | `4_rio_acocil.png`, `5_bosque_monarca.png`, `6_lago_achoque.png` |
+
+Las 14 especies (4 del río, 6 del bosque, 4 del lago) tienen nombre común, nombre científico, estado de
+conservación, dibujo y un dato de entre 94 y 144 caracteres (`test_cada_especie_tiene_sus_datos`). En los
+niveles también se muestra información educativa al recoger cada basura (CP-05, "Botella de plástico").
+
+**Revisión del contenido:** los datos son correctos y van con el tema de Michoacán (achoque y pescado
+blanco de Pátzcuaro, monarca y oyamel, peces endémicos de la familia Goodeidae). Queda un punto para
+confirmar con el equipo o la maestra: la monarca dice "En peligro"; la UICN la pasó a *vulnerable* en
+2023 y en México está "sujeta a protección especial", así que "Necesita cuidado" sería más exacto.
+
+**Defecto encontrado y corregido durante la prueba:** al abrir la bitácora, la primera tarjeta toma el
+foco y Tab (la tecla que indica el juego: "Tab: bitácora") solo pasaba a la siguiente tarjeta en vez de
+cerrar el libro; había que usar B, Esc o el botón CERRAR. Ahora Tab la cierra. Se agregó
+`test_tab_cierra_la_bitacora_aunque_una_tarjeta_tenga_el_foco`, que falla con el código anterior. Pasan
+193 de 193.
 
 **Resultado: ✅ Aprobado.**

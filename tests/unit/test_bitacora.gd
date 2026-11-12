@@ -56,5 +56,18 @@ func test_abrir_muestra_las_especies_de_la_zona() -> void:
 	assert_eq(Bitacora.get_node("%NombreEspecie").text, "???", "No descubierta: no se revela")
 
 
+func test_tab_cierra_la_bitacora_aunque_una_tarjeta_tenga_el_foco() -> void:
+	Bitacora.abrir("rio")
+	await wait_process_frames(3)
+	assert_not_null(get_viewport().gui_get_focus_owner(), "La primera tarjeta tiene el foco")
+	var tab := InputEventKey.new()
+	tab.physical_keycode = KEY_TAB
+	tab.keycode = KEY_TAB
+	tab.pressed = true
+	Input.parse_input_event(tab)
+	await wait_process_frames(3)
+	assert_false(Bitacora.abierta, "Tab cierra el libro en lugar de pasar a la siguiente tarjeta")
+
+
 func test_solo_se_abre_mientras_se_juega() -> void:
 	assert_false(Bitacora.se_puede_abrir(), "En las pruebas no hay escena jugable")

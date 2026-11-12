@@ -84,17 +84,16 @@ func se_puede_abrir() -> bool:
 		and not Dialogo.activo and not Transicion.en_curso and not get_tree().paused
 
 
-func _unhandled_input(evento: InputEvent) -> void:
-	if evento.is_action_pressed("bitacora"):
-		if abierta:
-			cerrar()
-		elif se_puede_abrir():
-			abrir()
-		else:
-			return
-		get_viewport().set_input_as_handled()
-	elif abierta and evento.is_action_pressed("pausa"):
+## Con el libro abierto, Tab lo cierra antes de que las tarjetas la usen para cambiar el foco.
+func _input(evento: InputEvent) -> void:
+	if abierta and (evento.is_action_pressed("bitacora") or evento.is_action_pressed("pausa")):
 		cerrar()
+		get_viewport().set_input_as_handled()
+
+
+func _unhandled_input(evento: InputEvent) -> void:
+	if evento.is_action_pressed("bitacora") and not abierta and se_puede_abrir():
+		abrir()
 		get_viewport().set_input_as_handled()
 
 
