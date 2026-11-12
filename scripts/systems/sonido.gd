@@ -22,6 +22,8 @@ var _voces: Array[AudioStreamPlayer] = []
 var _siguiente_voz := 0
 var _reproductor_musica: AudioStreamPlayer
 var _cache: Dictionary = {}
+## Ya se apagó para salir: no suena nada más (el clic del botón SALIR sonaría después de apagar).
+var _apagado := false
 
 
 func _ready() -> void:
@@ -41,6 +43,23 @@ func _ready() -> void:
 			nodo.pressed.connect(efecto.bind("boton", 0.0)))
 
 
+## Al salir del juego se detiene todo y se sueltan los sonidos antes de cerrar: si la música sigue sonando,
+## el audio se queda con ella y Godot avisa al salir que no se liberó. Lo llama Juego.salir().
+func apagar() -> void:
+	_apagado = true
+	for fundido in get_tree().get_processed_tweens():
+		fundido.kill()
+	for voz in _voces + [_reproductor_musica]:
+		voz.stop()
+		voz.stream = null
+	musica_actual = ""
+	_cache.clear()
+
+
+func _exit_tree() -> void:
+	apagar()
+
+
 func _cargar(ruta: String) -> AudioStream:
 	if not _cache.has(ruta):
 		_cache[ruta] = load(ruta) if ResourceLoader.exists(ruta) else null
@@ -50,6 +69,8 @@ func _cargar(ruta: String) -> AudioStream:
 
 
 func efecto(nombre: String, variacion_tono := 0.0) -> void:
+	if _apagado:
+		return
 	var stream := _cargar(CARPETA_SFX % nombre)
 	if stream == null:
 		return
@@ -61,7 +82,7 @@ func efecto(nombre: String, variacion_tono := 0.0) -> void:
 
 
 func musica(nombre: String) -> void:
-	if nombre == musica_actual:
+	if _apagado or nombre == musica_actual:
 		return
 	musica_actual = nombre
 	var stream := _cargar(CARPETA_MUSICA % nombre)

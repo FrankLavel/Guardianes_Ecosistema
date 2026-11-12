@@ -14,6 +14,7 @@ config/name="Guardianes del Último Ecosistema"
 config/version="1.0.0-rc1"
 config/quit_on_go_back=false
 run/main_scene="uid://cwcyfjvlx52aw"
+run/max_fps=60
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

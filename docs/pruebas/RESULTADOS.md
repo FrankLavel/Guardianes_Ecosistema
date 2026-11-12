@@ -19,7 +19,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-11 | Pausar juego | El videojuego se detiene correctamente | Media | ✅ Aprobado | 12 nov 2026 | [CP-11](CP-11/) |
 | CP-12 | Cambio de escenario | El nuevo escenario carga correctamente | Alta | ✅ Aprobado | 12 nov 2026 | [CP-12](CP-12/) |
 | CP-13 | Rendimiento | Se mantienen al menos 30 FPS | Alta | ✅ Aprobado | 12 nov 2026 | [CP-13](CP-13/) |
-| CP-14 | Cerrar videojuego | El videojuego termina correctamente | Media | Pendiente | | |
+| CP-14 | Cerrar videojuego | El videojuego termina correctamente | Media | ✅ Aprobado | 12 nov 2026 | [CP-14](CP-14/) |
 
 ## CP-01 · Iniciar videojuego
 
@@ -432,5 +432,49 @@ error, los tirones desaparecieron. Pasan 194 de 194.
 
 **Resultado: ✅ Aprobado** (mínimo pedido: 30 FPS; meta: 60 FPS).
 
-*Observación:* el juego no tiene tope de FPS y en esta laptop el vsync no lo limita, así que dibuja cientos
-de cuadros por segundo. No afecta la prueba, pero calienta la computadora y gasta batería sin necesidad.
+**Mejora aplicada después de la prueba:** el juego no tenía tope de FPS y en esta laptop el vsync no lo
+limitaba, así que dibujaba cientos de cuadros por segundo, calentando la computadora y gastando batería sin
+necesidad. Ahora tiene un tope de 60 FPS (`application/run/max_fps=60`). Medido otra vez a 1280 × 720:
+todas las escenas a 60.0 FPS promedio, el 1 % más lento a 58.5 FPS o más y ningún cuadro de más de 20.4 ms.
+
+## CP-14 · Cerrar videojuego
+
+**Cómo se probó:** con una carpeta de datos de prueba (la partida real no se usó), cerrando el juego de
+las tres formas posibles y revisando el código de salida del proceso, los avisos de Godot al salir
+(`--verbose`) y la partida guardada (`registro.txt`).
+
+| Forma de cerrar | Veces | Resultado |
+|---|---|---|
+| Botón SALIR del menú (`1_menu_salir.png`) | 8 | El proceso termina con código 0 en menos de medio segundo, sin avisos |
+| Botón "atrás" de Android en el menú | 4 | Código 0, sin avisos |
+| X de la ventana jugando en el valle, sin haber guardado (`3_jugando_antes_de_cerrar.png`) | 1 | Se cierra en 0.6 s con código 0, sin avisos, y la partida quedó guardada con las 7 hojas y el día 2 que había antes de cerrar |
+| X de la ventana en la versión de Windows armada (exe), después de un clic | 4 | Código 0, sin avisos |
+
+**Defecto encontrado y corregido durante la prueba:** al cerrar la versión armada, Godot avisaba que la
+pista de ambiente (`valle.wav`) o el sonido del botón SALIR seguían en uso, con 2 objetos sin liberar.
+El jugador no lo veía y el juego se cerraba bien, pero eran memoria y audio sin soltar. Pasaba porque el
+sonido seguía activo al salir: el fundido de entrada del ambiente aún guardaba la pista, y el clic de
+SALIR sonaba justo después. Ahora todas las salidas (SALIR, la X y "atrás" en el menú) pasan por
+`Juego.salir()`, que guarda la partida si hay una, apaga el sonido (detiene el ambiente, los efectos y
+sus fundidos, y ya no deja sonar nada más) y espera un momento antes de cerrar. Se agregó
+`test_al_cerrar_se_apaga_la_musica_y_se_sueltan_los_sonidos`. Pasan 195 de 195.
+
+**Resultado: ✅ Aprobado.**
+
+## Resumen
+
+| Criterio de salida (documento DevOps) | Resultado |
+|---|---|
+| Todas las pruebas críticas aprobadas (CP-01, CP-02, CP-09, CP-10) | ✅ 4 de 4 |
+| Al menos 90 % de las pruebas generales satisfactorias | ✅ 14 de 14 (100 %) |
+| Ningún error bloqueante ni crítico conocido | ✅ Los 8 defectos encontrados se corrigieron; 7 tienen su prueba automática (el título de la ventana se revisó a la vista) |
+| Mínimo 30 FPS | ✅ 60 FPS estables (más de 480 FPS sin el tope) |
+| El guardado funciona | ✅ CP-09 y CP-10, también en Android y con archivo dañado |
+
+**Defectos encontrados y corregidos** (8): título de la ventana (CP-01); borrar la partida sin avisar
+(CP-02); cercas que se atravesaban (CP-04); animal fuera de alcance para hablar (CP-06); la cría que no
+contaba (CP-07); Tab que no cerraba la bitácora (CP-08); molino trabado en partidas viejas (CP-13); sonido
+sin liberar al salir (CP-14). Mejora aplicada: tope de 60 FPS (CP-13).
+
+**Pendiente fuera de las pruebas:** confirmar con el equipo o la maestra el estado de la mariposa
+monarca (CP-08) y subir a itch.io los armados nuevos con estos arreglos.

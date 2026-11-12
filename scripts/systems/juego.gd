@@ -366,6 +366,8 @@ const CARPETA_ANTERIOR := "guardianes del ultimo ecosistema"
 
 func _ready() -> void:
 	_traer_partidas_anteriores()
+	# La X de la ventana pasa por salir(): guarda y apaga el sonido antes de cerrar.
+	get_tree().auto_accept_quit = false
 
 
 func _traer_partidas_anteriores() -> void:
@@ -382,9 +384,11 @@ func _traer_partidas_anteriores() -> void:
 ## al cerrarla y con el botón "atrás" (que abre la pausa en lugar de salir del juego).
 func _notification(que: int) -> void:
 	match que:
-		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST:
+		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT:
 			if partida_activa:
 				guardar()
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			salir()
 		NOTIFICATION_WM_GO_BACK_REQUEST:
 			_atras()
 
@@ -395,12 +399,29 @@ func _notification(que: int) -> void:
 const ESCENA_MENU := "res://scenes/menu/menu_principal.tscn"
 
 
+## Todas las salidas del juego (SALIR, la X de la ventana, "atrás" en el menú): guarda, apaga el sonido y
+## espera un momento a que el audio suelte la música antes de cerrar (si no, Godot avisa al salir que no se
+## liberó).
+func salir() -> void:
+	if _saliendo:
+		return
+	_saliendo = true
+	if partida_activa:
+		guardar()
+	Sonido.apagar()
+	await get_tree().create_timer(0.4, true, false, true).timeout
+	get_tree().quit()
+
+
+var _saliendo := false
+
+
 func _atras() -> void:
 	if partida_activa:
 		guardar()
 	var escena := get_tree().current_scene
 	if escena == null or escena.scene_file_path == ESCENA_MENU:
-		get_tree().quit()
+		salir()
 		return
 	if not escena.is_in_group(&"jugable"):
 		if not Transicion.en_curso:

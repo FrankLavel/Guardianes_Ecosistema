@@ -1,0 +1,9 @@
+CP-14 · Cerrar videojuego — 12 nov 2026 (carpeta de datos de prueba builds/cp14; la partida real no se usó)
+
+SALIR (menú), 8 veces: código de salida 0 las 8; avisos de memoria al salir: 0 0 0 0 0 0 0 0
+Botón atrás de Android en el menú, 4 veces: código 0 las 4; avisos: 0 0 0 0
+X de la ventana jugando en el valle, sin haber guardado:
+  antes de cerrar -> LISTO: hojas en el juego=7 | en el archivo=sin archivo
+  la ventana se cerró en 645 ms, código de salida 0, avisos 0
+  en el archivo después de cerrar -> hojas 7 y día 2
+Versión de Windows armada (exe), X de la ventana tras un clic, 4 veces: código 0 las 4; avisos: 0 0 0 0

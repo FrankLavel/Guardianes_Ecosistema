@@ -109,4 +109,4 @@ func _on_btn_opciones_pressed() -> void:
 
 
 func _on_btn_salir_pressed() -> void:
-	get_tree().quit()
+	Juego.salir()
