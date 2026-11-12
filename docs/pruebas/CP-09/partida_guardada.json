@@ -1,0 +1,254 @@
+{
+	"ayudas": {},
+	"caminos": {
+		"16,19": "arena",
+		"17,15": "arena",
+		"17,16": "arena",
+		"17,17": "arena",
+		"17,18": "arena",
+		"17,19": "arena",
+		"18,19": "arena",
+		"19,19": "arena",
+		"20,19": "arena",
+		"21,19": "arena",
+		"22,19": "arena",
+		"23,19": "arena",
+		"24,19": "arena",
+		"25,19": "arena",
+		"26,19": "arena",
+		"27,19": "arena",
+		"28,19": "arena",
+		"29,11": "arena",
+		"29,12": "arena",
+		"29,13": "arena",
+		"29,14": "arena",
+		"29,15": "arena",
+		"29,16": "arena",
+		"29,17": "arena",
+		"29,18": "arena",
+		"29,19": "arena",
+		"30,19": "arena",
+		"31,19": "arena",
+		"32,18": "arena",
+		"32,19": "arena",
+		"33,19": "arena",
+		"34,19": "arena",
+		"35,19": "arena",
+		"36,19": "arena",
+		"37,19": "arena",
+		"38,19": "arena",
+		"39,19": "arena",
+		"40,19": "arena",
+		"41,19": "arena",
+		"42,19": "arena",
+		"43,19": "arena",
+		"44,19": "arena"
+	},
+	"caminos_listos": true,
+	"comprados": [],
+	"corral": {},
+	"decoraciones": {
+		"guardadas": {},
+		"puestas": []
+	},
+	"dia": 1,
+	"dialogos_vistos": [
+		"don_chucho_inicio",
+		"don_chucho_granja"
+	],
+	"energia": 94.0908944444428,
+	"especies_descubiertas": [
+		"acocil",
+		"garza",
+		"martin_pescador",
+		"pez_rio",
+		"monarca",
+		"oyamel",
+		"pino",
+		"encino",
+		"venado",
+		"carpintero",
+		"achoque",
+		"pato_mexicano",
+		"pescado_blanco",
+		"tule"
+	],
+	"fogon": {
+		"horas": 0.0,
+		"prendido": false
+	},
+	"frutales": [],
+	"genero": "nina",
+	"habilidades": [
+		"nadar",
+		"enredaderas"
+	],
+	"hojas": 5,
+	"hora": 11.1272780000002,
+	"inventario": {
+		"lena": 2,
+		"semilla_calabaza": 4,
+		"semilla_frijol": 4,
+		"semilla_maiz": 4
+	},
+	"logros": {},
+	"marcas": [
+		"semillas_rio",
+		"semillas_bosque",
+		"semillas_lago"
+	],
+	"milpa": [
+		"0,0",
+		"1,0",
+		"2,0",
+		"3,0",
+		"0,1",
+		"1,1"
+	],
+	"milpa_lista": true,
+	"muebles": [],
+	"nombre": "Prueba",
+	"parcelas": [
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		},
+		{
+			"cultivo": "",
+			"etapa": 0.0,
+			"horas": 0.0,
+			"regada": false
+		}
+	],
+	"pedido": {},
+	"pesca": {
+		"dia": 0.0,
+		"veces": 0.0
+	},
+	"posicion_valle": [
+		1239.78100585938,
+		736.100708007813
+	],
+	"posiciones": {},
+	"recetario": [],
+	"siguiente_pedido": 15.0000328,
+	"silvestres": [
+		{
+			"pos": [
+				1795.72619628906,
+				1583.25415039063
+			],
+			"tipo": "nopal"
+		},
+		{
+			"pos": [
+				2509.71899414063,
+				437.593353271484
+			],
+			"tipo": "hierbabuena"
+		},
+		{
+			"pos": [
+				1957.94519042969,
+				1349.90808105469
+			],
+			"tipo": "hierbabuena"
+		},
+		{
+			"pos": [
+				2072.693359375,
+				728.673400878906
+			],
+			"tipo": "nopal"
+		}
+	],
+	"silvestres_dia": 1,
+	"talleres": {
+		"colmena": {
+			"horas": 0.0,
+			"listo": 0.0,
+			"trabajando": true
+		},
+		"molino": {
+			"horas": 0.0,
+			"listo": 0.0,
+			"trabajando": false
+		},
+		"queseria": {
+			"horas": 0.0,
+			"listo": 0.0,
+			"trabajando": false
+		}
+	},
+	"terrenos": [],
+	"tianguis": [],
+	"version": 7,
+	"xp": 2,
+	"zonas_completadas": [
+		"rio",
+		"bosque",
+		"lago"
+	]
+}

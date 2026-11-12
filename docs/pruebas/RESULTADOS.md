@@ -14,7 +14,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-06 | Activar misión | La misión aparece como activa | Alta | ✅ Aprobado | 9 nov 2026 | [CP-06](CP-06/) |
 | CP-07 | Completar misión | Se entrega la recompensa correspondiente | Alta | ✅ Aprobado | 9 nov 2026 | [CP-07](CP-07/) |
 | CP-08 | Información educativa | Se muestra la información de la especie | Media | ✅ Aprobado | 12 nov 2026 | [CP-08](CP-08/) |
-| CP-09 | Guardar partida | El progreso queda almacenado | Crítica | Pendiente | | |
+| CP-09 | Guardar partida | El progreso queda almacenado | Crítica | ✅ Aprobado | 12 nov 2026 | [CP-09](CP-09/) |
 | CP-10 | Cargar partida | Se recupera el progreso anterior | Crítica | Pendiente | | |
 | CP-11 | Pausar juego | El videojuego se detiene correctamente | Media | Pendiente | | |
 | CP-12 | Cambio de escenario | El nuevo escenario carga correctamente | Alta | Pendiente | | |
@@ -261,3 +261,32 @@ cerrar el libro; había que usar B, Esc o el botón CERRAR. Ahora Tab la cierra.
 193 de 193.
 
 **Resultado: ✅ Aprobado.**
+
+## CP-09 · Guardar partida
+
+**Cómo funciona:** el juego guarda solo, sin botón: cada minuto, al salir por la pausa, al cerrar la
+ventana o mandar la app a segundo plano, y en momentos clave (terminar una zona, un pedido o un taller).
+Cada guardado escribe primero un archivo temporal y luego lo cambia por el bueno, dejando la partida
+anterior como respaldo (`partida_N.json.bak`); si el archivo se daña, al cargar se usa el respaldo.
+
+**Cómo se probó:** el juego corriendo en Windows (1280 × 720) con una partida de prueba en la carpeta
+real de partidas (`%APPDATA%/Godot/app_userdata/Guardianes del Último Ecosistema/`), borrada al final. Se
+revisó el archivo después de cada forma de guardar (`registro.txt`).
+
+| Forma de guardar | Qué se hizo | Qué quedó en el archivo | Evidencia |
+|---|---|---|---|
+| Salir por la pausa | Jugar (recoger leña, caminar), Esc → MENÚ PRINCIPAL | Nombre "Prueba", niña, 3 zonas, leña 1, la posición exacta del personaje, día 1 a las 9:06 | `1_jugando.png`, `2_pausa.png`, `3_menu_principal.png` |
+| Automático | Volver a entrar, recoger otro leño y no tocar nada | El archivo tenía leña 1; a los 59 s se guardó solo con leña 2 | `4_despues_del_guardado_automatico.png` |
+| Cerrar la ventana (X) | Ganar 5 hojas y cerrar | Hojas 0 → 5 antes de salir | `registro.txt` |
+
+Al terminar quedaron `partida_97.json` y su respaldo `.bak`, sin archivo `.tmp` a medias. Copia del
+archivo guardado: `partida_guardada.json`.
+
+**Pruebas automáticas:** `test_juego.gd` (guardar y cargar recupera el progreso, deja respaldo y lo usa si
+la partida se daña, se guarda al mandar la app a segundo plano y el personaje elegido) y las de cada parte
+que se guarda (`test_la_granja_se_guarda`, `test_los_talleres_se_guardan`,
+`test_hojas_ayudas_y_muebles_se_guardan`, etc.). En Android se probó en el emulador que la partida sigue
+al cerrar la app. Pasan 193 de 193.
+
+**Resultado: ✅ Aprobado.** Sin defectos encontrados. Mejora opcional: el juego no avisa cuando guarda; un
+ícono pequeño de "Guardando…" daría tranquilidad a los niños.

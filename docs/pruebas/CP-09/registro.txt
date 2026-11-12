@@ -1,0 +1,4 @@
+1 PAUSA -> MENU: archivo nuevo=true | nombre=Prueba genero=nina | zonas=["rio", "bosque", "lago"] | lena=1.0 | posicion=[1808.07592773438, 884.243225097656] (en el juego (1808.076, 884.2432)) | dia 1.0 hora 9.10
+2 AUTOMATICO: lena en memoria=2, en el archivo antes=1, despues=2, a los 59 s
+3 CERRAR: hojas en memoria=5, en el archivo antes=0, despues=5
+archivos: user://partida_97.json | .bak=true .tmp=false | carpeta=C:/Users/franc/AppData/Roaming/Godot/app_userdata/Guardianes del Último Ecosistema/
