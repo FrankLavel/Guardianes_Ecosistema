@@ -412,15 +412,15 @@ Resultados a 1280 × 720 (los de 1366 × 768 y 1920 × 1080 son parecidos: `fps_
 |---|---|---|---|---|
 | Valle de noche (granja llena) | 484 | 3.0 ms (338 FPS) | 6.9 ms | 0 de 4,847 |
 | Valle de día (granja llena) | 532 | 3.1 ms (318 FPS) | 6.6 ms | 0 de 5,323 |
-| Casa | 1,045 | 1.6 ms | 5.0 ms | 0 |
-| Nivel del río | 1,033 | 1.6 ms | 5.7 ms | 0 |
-| Nivel del bosque | 980 | 1.7 ms | 5.4 ms | 0 |
-| Nivel del lago | 1,012 | 1.6 ms | 6.2 ms | 0 |
-| Menú principal | 1,369 | 1.3 ms | 6.0 ms | 0 |
+| Casa | 1,079 | 1.6 ms | 6.1 ms | 0 |
+| Nivel del río | 1,071 | 1.6 ms | 5.2 ms | 0 |
+| Nivel del bosque | 1,041 | 1.6 ms | 6.3 ms | 0 |
+| Nivel del lago | 1,060 | 1.6 ms | 6.5 ms | 0 |
+| Menú principal | 1,521 | 1.2 ms | 5.7 ms | 0 |
 
-En las 21 mediciones (7 escenas × 3 resoluciones) el 99 % de los cuadros queda por encima de 149 FPS. Solo
-hubo un cuadro de más de 33 ms (52 ms al entrar a la casa a 1920 × 1080), un tirón aislado que no se
-repitió. En la versión Web (itch.io) y en Android el equipo reportó que va fluido a 60 FPS.
+En las 21 mediciones (7 escenas × 3 resoluciones) ningún cuadro tardó más de 33 ms; el peor fue de 7.1 ms
+(140 FPS). En una medición anterior hubo un tirón aislado de 52 ms al entrar a la casa a 1920 × 1080 que
+no se repitió. En la versión Web (itch.io) y en Android el equipo reportó que va fluido a 60 FPS.
 
 **Defecto encontrado y corregido durante la prueba:** con la partida real, el valle mostraba un error en
 cada cuadro y tenía tirones de 38 a 49 ms. Esa partida era de antes de que el molino se manejara con su
