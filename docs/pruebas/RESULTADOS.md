@@ -15,7 +15,7 @@ bloqueante ni crítico conocido, al menos 90 % de las pruebas generales satisfac
 | CP-07 | Completar misión | Se entrega la recompensa correspondiente | Alta | ✅ Aprobado | 9 nov 2026 | [CP-07](CP-07/) |
 | CP-08 | Información educativa | Se muestra la información de la especie | Media | ✅ Aprobado | 12 nov 2026 | [CP-08](CP-08/) |
 | CP-09 | Guardar partida | El progreso queda almacenado | Crítica | ✅ Aprobado | 12 nov 2026 | [CP-09](CP-09/) |
-| CP-10 | Cargar partida | Se recupera el progreso anterior | Crítica | Pendiente | | |
+| CP-10 | Cargar partida | Se recupera el progreso anterior | Crítica | ✅ Aprobado | 12 nov 2026 | [CP-10](CP-10/) |
 | CP-11 | Pausar juego | El videojuego se detiene correctamente | Media | Pendiente | | |
 | CP-12 | Cambio de escenario | El nuevo escenario carga correctamente | Alta | Pendiente | | |
 | CP-13 | Rendimiento | Se mantienen al menos 30 FPS | Alta | Pendiente | | |
@@ -286,8 +286,42 @@ archivo guardado: `partida_guardada.json`.
 la partida se daña, se guarda al mandar la app a segundo plano y el personaje elegido) y las de cada parte
 que se guarda (`test_la_granja_se_guarda`, `test_los_talleres_se_guardan`,
 `test_hojas_ayudas_y_muebles_se_guardan`, etc.). El guardado de Android al mandar la app a segundo plano
-lo cubre `test_se_guarda_al_mandar_la_app_a_segundo_plano` (en CP-10 se revisa en el emulador). Pasan 193
-de 193.
+lo cubre `test_se_guarda_al_mandar_la_app_a_segundo_plano`, y en CP-10 se comprobó en el emulador. Pasan
+193 de 193.
 
 **Resultado: ✅ Aprobado.** Sin defectos encontrados. Mejora opcional: el juego no avisa cuando guarda; un
 ícono pequeño de "Guardando…" daría tranquilidad a los niños.
+
+## CP-10 · Cargar partida
+
+**Windows.** Se usaron dos arranques separados del juego (en Windows a 1280 × 720) con una carpeta de
+datos de prueba, así que la partida real no se tocó:
+
+1. **Jugar y salir:** partida nueva (niña, "Prueba") con avance: 3 zonas, 14 especies, día 3 a las
+   15:30, 12 hojas, 9 de experiencia, 4 leños, 7 maíces y la niña en (1900, 900). Se salió por
+   pausa → MENÚ PRINCIPAL (`1_antes_de_salir.png`).
+2. **Arranque nuevo → CONTINUAR:** el menú muestra CONTINUAR (`2_menu_con_continuar.png`). Al presionarlo
+   se carga el valle y los 11 datos son iguales a los guardados (`3_cargada.png`, `4_mochila_cargada.png`).
+   Solo el reloj avanzó unos segundos, porque sigue corriendo.
+3. **Archivo dañado:** se cortó a la mitad `partida_1.json` (como si la luz se fuera mientras guarda). Al
+   presionar CONTINUAR se cargó el respaldo `.bak` con los mismos 11 datos (`5_cargada_del_respaldo.png`).
+
+**Android** (emulador Pixel, APK firmado 1.0.0-rc1, con toques mandados por adb):
+
+| Paso | Qué pasó | Evidencia |
+|---|---|---|
+| 1. CONTINUAR, ir con el joystick hasta Don Chucho y hablar con E | El objetivo cambia a "Entra al río por el arco de piedra" | `android_1_antes_de_salir.png` |
+| 2. Botón de inicio (la app pasa a segundo plano) y luego forzar el cierre | La app se cierra por completo | — |
+| 3. Abrir otra vez | Menú con CONTINUAR | `android_2_menu_al_reabrir.png` |
+| 4. CONTINUAR | Mismo objetivo, la misma posición junto a Don Chucho y el reloj donde se quedó | `android_3_cargada.png` |
+
+**Pruebas automáticas:** `test_guardar_y_cargar_recupera_el_progreso`,
+`test_el_guardado_deja_respaldo_y_lo_usa_si_la_partida_se_dana`, `test_partida_vieja_sin_datos_nuevos_carga`
+(partidas de versiones anteriores) y `test_un_pedido_a_medias_reaparece_al_volver`. Pasan 193 de 193.
+
+**Resultado: ✅ Aprobado.** Sin defectos encontrados.
+
+*Nota del método:* la primera vez, la carpeta de prueba estaba dentro de una carpeta temporal muy
+profunda. La ruta superó el largo que permite Windows, el caché de gráficos no se pudo leer y el valle se
+vio en blanco. Con la carpeta real del juego no pasa (0 errores), y con una carpeta de prueba de ruta
+corta tampoco; las capturas son de esa repetición.
