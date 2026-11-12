@@ -285,8 +285,9 @@ archivo guardado: `partida_guardada.json`.
 **Pruebas automáticas:** `test_juego.gd` (guardar y cargar recupera el progreso, deja respaldo y lo usa si
 la partida se daña, se guarda al mandar la app a segundo plano y el personaje elegido) y las de cada parte
 que se guarda (`test_la_granja_se_guarda`, `test_los_talleres_se_guardan`,
-`test_hojas_ayudas_y_muebles_se_guardan`, etc.). En Android se probó en el emulador que la partida sigue
-al cerrar la app. Pasan 193 de 193.
+`test_hojas_ayudas_y_muebles_se_guardan`, etc.). El guardado de Android al mandar la app a segundo plano
+lo cubre `test_se_guarda_al_mandar_la_app_a_segundo_plano` (en CP-10 se revisa en el emulador). Pasan 193
+de 193.
 
 **Resultado: ✅ Aprobado.** Sin defectos encontrados. Mejora opcional: el juego no avisa cuando guarda; un
 ícono pequeño de "Guardando…" daría tranquilidad a los niños.
