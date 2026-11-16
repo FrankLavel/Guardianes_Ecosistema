@@ -11,12 +11,15 @@ config_version=5
 [application]
 
 config/name="Guardianes del Último Ecosistema"
-config/version="1.0.0-rc2"
+config/version="1.0.0-rc3"
 config/quit_on_go_back=false
 run/main_scene="uid://cwcyfjvlx52aw"
 run/max_fps=60
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://assets/ui/app/icono_app.png"
+config/windows_native_icon="res://assets/ui/app/icono_app.ico"
+boot_splash/bg_color=Color(0.0588, 0.1804, 0.1059, 1)
+boot_splash/image="res://assets/ui/app/pantalla_carga.png"
 
 [autoload]
 
