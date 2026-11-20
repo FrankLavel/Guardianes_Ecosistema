@@ -16,6 +16,9 @@ const ZONA_MUERTA := 0.22
 const COLOR_BASE := Color(0.1, 0.07, 0.04, 0.45)
 const COLOR_BORDE := Color(1, 0.95, 0.8, 0.55)
 
+## Ícono de cada botón (pixel art del juego). Si falta alguno, el botón muestra su texto.
+const CARPETA_ICONOS := "res://assets/ui/tactil/%s.png"
+
 var _joystick: Control
 var _palanca := Vector2.ZERO
 var _dedo := -1
@@ -48,14 +51,33 @@ func _ready() -> void:
 	_acomodar()
 
 
-## Botón redondo que presiona una acción mientras el dedo está encima.
+## Botón redondo que presiona una acción mientras el dedo está encima. Lleva el ícono de lo que hace.
 func _boton(accion: String, texto: String, radio: float) -> TouchScreenButton:
 	var boton := TouchScreenButton.new()
 	boton.name = "Boton_" + accion
 	boton.action = accion
-	boton.texture_normal = _circulo(radio, Color(0.16, 0.38, 0.14, 0.7), Color(0.75, 1, 0.6, 0.85))
-	boton.texture_pressed = _circulo(radio, Color(0.3, 0.6, 0.22, 0.85), Color(1, 1, 0.8, 1))
+	boton.texture_normal = _circulo(radio, Color(0.1, 0.27, 0.12, 0.72), Color(0.96, 0.9, 0.72, 0.9))
+	boton.texture_pressed = _circulo(radio, Color(0.25, 0.55, 0.22, 0.88), Color(1, 1, 0.85, 1))
 	boton.passby_press = true
+	var ruta := CARPETA_ICONOS % accion
+	if ResourceLoader.exists(ruta):
+		var icono := TextureRect.new()
+		icono.name = "Icono"
+		icono.texture = load(ruta)
+		icono.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icono.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icono.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		icono.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var lado := radio * 1.2
+		icono.size = Vector2(lado, lado)
+		icono.position = Vector2(radio, radio) - icono.size / 2.0
+		icono.pivot_offset = icono.size / 2.0
+		boton.add_child(icono)
+		# Al presionar, el ícono se hunde un poco.
+		boton.pressed.connect(func(): icono.scale = Vector2(0.88, 0.88))
+		boton.released.connect(func(): icono.scale = Vector2.ONE)
+		add_child(boton)
+		return boton
 	var etiqueta := Label.new()
 	etiqueta.text = texto
 	etiqueta.add_theme_font_size_override("font_size", 34 if radio > 70.0 else 19)
@@ -71,15 +93,27 @@ func _boton(accion: String, texto: String, radio: float) -> TouchScreenButton:
 	return boton
 
 
+## Círculo con borde crema y una orilla oscura delgada, con las orillas suavizadas.
 func _circulo(radio: float, relleno: Color, borde: Color) -> ImageTexture:
 	var lado := int(radio * 2)
 	var imagen := Image.create(lado, lado, false, Image.FORMAT_RGBA8)
 	var centro := Vector2(radio, radio)
+	var orilla := Color(0.08, 0.05, 0.03, 0.7)
 	for y in lado:
 		for x in lado:
 			var d := Vector2(x + 0.5, y + 0.5).distance_to(centro)
-			if d <= radio:
-				imagen.set_pixel(x, y, borde if d > radio - 5.0 else relleno)
+			if d > radio:
+				continue
+			var color := relleno
+			if d > radio - 2.5:
+				color = orilla
+			elif d > radio - 7.5:
+				color = borde
+			elif d > radio - 10.0:
+				color = relleno.darkened(0.35)
+			# Suaviza el último píxel de la orilla.
+			color.a *= clampf(radio - d, 0.0, 1.0)
+			imagen.set_pixel(x, y, color)
 	return ImageTexture.create_from_image(imagen)
 
 
