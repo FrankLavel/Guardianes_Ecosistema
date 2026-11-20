@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=17 format=3]
+[gd_resource type="SpriteFrames" load_steps=26 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/characters/nina/aerea/nina_aerea_atlas.png" id="1_atlas"]
 
@@ -62,6 +62,42 @@ region = Rect2(640, 208, 128, 208)
 atlas = ExtResource("1_atlas")
 region = Rect2(768, 208, 128, 208)
 
+[sub_resource type="AtlasTexture" id="c15"]
+atlas = ExtResource("1_atlas")
+region = Rect2(896, 208, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c16"]
+atlas = ExtResource("1_atlas")
+region = Rect2(0, 416, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c17"]
+atlas = ExtResource("1_atlas")
+region = Rect2(128, 416, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c18"]
+atlas = ExtResource("1_atlas")
+region = Rect2(256, 416, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c19"]
+atlas = ExtResource("1_atlas")
+region = Rect2(384, 416, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c20"]
+atlas = ExtResource("1_atlas")
+region = Rect2(512, 416, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c21"]
+atlas = ExtResource("1_atlas")
+region = Rect2(640, 416, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c22"]
+atlas = ExtResource("1_atlas")
+region = Rect2(768, 416, 128, 208)
+
+[sub_resource type="AtlasTexture" id="c23"]
+atlas = ExtResource("1_atlas")
+region = Rect2(896, 416, 128, 208)
+
 [resource]
 animations = [{
 "frames": [{
@@ -74,7 +110,15 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c1")
+"texture": SubResource("c8")
+}],
+"loop": true,
+"name": &"idle_izquierda",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c16")
 }],
 "loop": true,
 "name": &"idle_arriba",
@@ -82,13 +126,14 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("c2")
-}],
-"loop": true,
-"name": &"idle_izquierda",
-"speed": 1.0
+"texture": SubResource("c0")
 }, {
-"frames": [{
+"duration": 1.0,
+"texture": SubResource("c1")
+}, {
+"duration": 1.0,
+"texture": SubResource("c2")
+}, {
 "duration": 1.0,
 "texture": SubResource("c3")
 }, {
@@ -100,15 +145,15 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c6")
+}, {
+"duration": 1.0,
+"texture": SubResource("c7")
 }],
 "loop": true,
 "name": &"caminar_abajo",
-"speed": 8.0
+"speed": 10.0
 }, {
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("c7")
-}, {
 "duration": 1.0,
 "texture": SubResource("c8")
 }, {
@@ -117,12 +162,7 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c10")
-}],
-"loop": true,
-"name": &"caminar_izquierda",
-"speed": 8.0
 }, {
-"frames": [{
 "duration": 1.0,
 "texture": SubResource("c11")
 }, {
@@ -134,8 +174,40 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("c14")
+}, {
+"duration": 1.0,
+"texture": SubResource("c15")
+}],
+"loop": true,
+"name": &"caminar_izquierda",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("c16")
+}, {
+"duration": 1.0,
+"texture": SubResource("c17")
+}, {
+"duration": 1.0,
+"texture": SubResource("c18")
+}, {
+"duration": 1.0,
+"texture": SubResource("c19")
+}, {
+"duration": 1.0,
+"texture": SubResource("c20")
+}, {
+"duration": 1.0,
+"texture": SubResource("c21")
+}, {
+"duration": 1.0,
+"texture": SubResource("c22")
+}, {
+"duration": 1.0,
+"texture": SubResource("c23")
 }],
 "loop": true,
 "name": &"caminar_arriba",
-"speed": 8.0
+"speed": 10.0
 }]

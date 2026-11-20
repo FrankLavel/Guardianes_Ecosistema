@@ -114,6 +114,41 @@ def personaje_aereo(fuente: str, carpeta: str, nombre: str, idle: dict[str, int]
     )
 
 
+def nina_aerea() -> None:
+    """La niña en el valle (vista aérea): nina_aerea.png es una cuadrícula de 4 filas × 8 cuadros.
+
+    Fila 1 camina hacia abajo, fila 2 a la izquierda, fila 3 hacia arriba (8 cuadros cada una); la
+    fila 4 son poses (de pie, saludar, agacharse). Se separa por figuras (no por una cuadrícula exacta:
+    la IA no las alinea perfecto y se cortaban las trenzas). Los cuadros de pie son el primero de cada
+    fila de caminar (en la fila 4 los de perfil miran a la derecha y no hay uno de espaldas).
+    """
+    rgba = quitar_fondo(cargar("nina_aerea.png"))
+    objetos = separar_objetos(rgba)
+    if len(objetos) != 32:
+        raise SystemExit(f"nina_aerea.png: se esperaban 32 cuadros y se encontraron {len(objetos)}")
+    cuadros = [recortar(rgba, o) for o in _por_filas(objetos, alto_fila=rgba.shape[0] // 4)]
+    # A la estatura del niño en el valle (~172 px de alto; sus celdas son de 128 × 208).
+    altos = sorted(c.height for c in cuadros[:24])
+    factor = 172 / altos[len(altos) // 2]
+    cuadros = [c.resize((round(c.width * factor), round(c.height * factor)), Image.Resampling.LANCZOS) for c in cuadros]
+    abajo, izquierda, arriba = list(range(0, 8)), list(range(8, 16)), list(range(16, 24))
+    animaciones = {
+        "idle_abajo": ([0], 1.0, True),
+        "idle_izquierda": ([8], 1.0, True),
+        "idle_arriba": ([16], 1.0, True),
+        "caminar_abajo": (abajo, 10.0, True),
+        "caminar_izquierda": (izquierda, 10.0, True),
+        "caminar_arriba": (arriba, 10.0, True),
+    }
+    base = ASSETS / "characters/nina/aerea"
+    construir_atlas(
+        cuadros[:24], animaciones, (128, 208),
+        base / "nina_aerea_atlas.png", base / "nina_aerea_frames.tres",
+        "res://assets/characters/nina/aerea/nina_aerea_atlas.png",
+        anclar_torso=True,
+    )
+
+
 def nina_plataformas() -> None:
     """Hoja lateral de la niña para los niveles de plataformas (mismo formato que la de Gara)."""
     def cuadros_de(fuente: str, de_pie: int = 0) -> list[Image.Image]:
@@ -225,12 +260,7 @@ def guardianes() -> None:
         caminar={"abajo": [0, 1, 2, 3], "izquierda": [4, 5, 6, 12], "arriba": [16, 17, 18, 19, 20, 21, 22, 23]},
         fps_arriba=12.0,
     )
-    personaje_aereo(
-        "npc_aldeana_aerea.jpg", "nina", "nina",
-        idle={"abajo": 11, "arriba": 15, "izquierda": 0},
-        caminar={"abajo": [1, 3, 5, 7], "izquierda": [8, 12, 16, 20], "arriba": [27, 28, 29, 31]},
-        fps_arriba=8.0,
-    )
+    nina_aerea()
     # Retratos de los diálogos: niño a la izquierda, niña a la derecha; en un cuadrado, pegados abajo.
     rgba = quitar_fondo(cargar("retratos.jpg"))
     for carpeta, obj in zip(["gara", "nina"], separar_objetos(rgba)):
@@ -920,7 +950,7 @@ def frutales():
         objetos("granja_platillos2.png", ["guacamole", "agua_limon", "ate_guayaba"], "ui/granja")
 
 
-GRUPOS = {"frutales": frutales, "caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "tactil": tactil, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+GRUPOS = {"frutales": frutales, "caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "tactil": tactil, "nina_aerea": nina_aerea, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:
