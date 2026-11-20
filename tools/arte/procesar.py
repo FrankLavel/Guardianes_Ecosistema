@@ -628,6 +628,30 @@ def ui() -> None:
     guardar(recortar(rgba, logo), ASSETS / "ui" / "logo.png")
 
 
+def tactil() -> None:
+    """Íconos de los botones táctiles (Android): assets/ui/tactil/<acción>.png.
+
+    iconos_botones.png trae tres íconos en fila (saltar, interactuar, mochila). Se separan por tercios
+    y no por objetos porque el polvo de la flecha son varias piezas sueltas. Bitácora y pausa usan los
+    íconos de ui_iconos (la pausa une las dos barras en un cuadrado).
+    """
+    rgba = quitar_fondo(cargar("iconos_botones.png"))
+    ancho = rgba.shape[1]
+    for i, nombre in enumerate(["saltar", "interactuar", "mochila"]):
+        tercio = Image.fromarray(rgba[:, ancho * i // 3: ancho * (i + 1) // 3])
+        guardar(tercio.crop(tercio.getbbox()), ASSETS / "ui/tactil" / f"{nombre}.png")
+    Image.open(ASSETS / "ui/iconos/icono_bitacora.png").save(ASSETS / "ui/tactil/bitacora.png")
+    izq, der = (Image.open(ASSETS / f"ui/iconos/icono_pausa_{lado}.png").convert("RGBA") for lado in ("izq", "der"))
+    hueco = int(izq.width * 0.75)
+    ancho_par, alto_par = izq.width + hueco + der.width, max(izq.height, der.height)
+    lado = max(ancho_par, alto_par) + 20
+    pausa = Image.new("RGBA", (lado, lado))
+    x0, y0 = (lado - ancho_par) // 2, (lado - alto_par) // 2
+    pausa.alpha_composite(izq, (x0, y0))
+    pausa.alpha_composite(der, (x0 + izq.width + hueco, y0))
+    guardar(pausa, ASSETS / "ui/tactil/pausa.png")
+
+
 # ---------------------------------------------------------------- Después del final
 def _por_filas(objetos: list[dict], alto_fila: int = 384) -> list[dict]:
     """Ordena por fila (arriba/abajo) y luego de izquierda a derecha."""
@@ -896,7 +920,7 @@ def frutales():
         objetos("granja_platillos2.png", ["guacamole", "agua_limon", "ate_guayaba"], "ui/granja")
 
 
-GRUPOS = {"frutales": frutales, "caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+GRUPOS = {"frutales": frutales, "caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "tactil": tactil, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:
