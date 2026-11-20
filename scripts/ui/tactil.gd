@@ -33,6 +33,10 @@ func _ready() -> void:
 	activo = DisplayServer.is_touchscreen_available() or OS.has_feature("mobile") or OS.get_environment("TACTIL") == "1"
 	if not activo:
 		return
+	# Los textos que mencionan teclas hablan de los botones en pantalla.
+	var textos := TextosTactiles.new()
+	textos.locale = TranslationServer.get_locale()
+	TranslationServer.add_translation(textos)
 	_joystick = Control.new()
 	_joystick.name = "Joystick"
 	# Ocupa toda la pantalla solo para dibujar; los toques los lee _input.
