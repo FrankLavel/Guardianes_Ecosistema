@@ -12,14 +12,14 @@ config_version=5
 
 config/name="Guardianes del Último Ecosistema"
 config/version="1.0.0-rc3"
-config/quit_on_go_back=false
 run/main_scene="uid://cwcyfjvlx52aw"
-run/max_fps=60
+config/quit_on_go_back=false
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://assets/ui/app/icono_app.png"
-config/windows_native_icon="res://assets/ui/app/icono_app.ico"
+run/max_fps=60
 boot_splash/bg_color=Color(0.0588, 0.1804, 0.1059, 1)
 boot_splash/image="res://assets/ui/app/pantalla_carga.png"
+config/icon="res://assets/ui/app/icono_app.png"
+config/windows_native_icon="res://assets/ui/app/icono_app.ico"
 
 [autoload]
 
@@ -127,9 +127,9 @@ mochila={
 common/physics_interpolation=true
 
 [rendering]
-textures/vram_compression/import_etc2_astc=true
 
 textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
