@@ -145,7 +145,7 @@ func _al_rescatar_huevo() -> void:
 	var n := huevos_rescatados()
 	if n == huevos().size():
 		Bitacora.descubrir("achoque")
-		hud.mostrar_mensaje("¡Rescataste todos los huevos!",
+		hud.mostrar_mensaje("¡Rescataste todos los huevos de achoque!",
 			"El achoque solo vive en el lago de Pátzcuaro. Con agua limpia, sus crías podrán crecer.", 6.0)
 	else:
 		hud.mostrar_mensaje("Huevo de achoque: %d / %d" % [n, huevos().size()],

@@ -211,7 +211,7 @@
 			},
 			{
 				"quien": "achi",
-				"texto": "Pero el lirio cubre el lago, hay basura flotando... y mis huevos están en el fondo, en peligro."
+				"texto": "Pero el lirio cubre el lago, hay basura flotando... y en el fondo están los huevos de donde nacerán mis bebés. ¡Están en peligro!"
 			},
 			{
 				"quien": "jugador",
@@ -225,7 +225,7 @@
 		"achi_residuos": [
 			{
 				"quien": "achi",
-				"texto": "¡Mis huevos están a salvo y el agua se ve más clara!"
+				"texto": "¡Mis bebés van a nacer a salvo y el agua se ve más clara!"
 			},
 			{
 				"quien": "achi",
