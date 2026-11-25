@@ -261,17 +261,21 @@ def guardianes() -> None:
         fps_arriba=12.0,
     )
     nina_aerea()
-    # Retratos de los diálogos: niño a la izquierda, niña a la derecha; en un cuadrado, pegados abajo.
-    rgba = quitar_fondo(cargar("retratos.jpg"))
+    retratos()
+    nina_plataformas()
+    trepar()
+    nadar()
+
+
+def retratos() -> None:
+    """Retratos de los diálogos: niño a la izquierda, niña a la derecha; en un cuadrado, pegados abajo."""
+    rgba = quitar_fondo(cargar("retratos.png"))
     for carpeta, obj in zip(["gara", "nina"], separar_objetos(rgba)):
         busto = recortar(rgba, obj)
         lado = max(busto.size)
         cuadro = Image.new("RGBA", (lado, lado))
         cuadro.alpha_composite(busto, ((lado - busto.width) // 2, lado - busto.height))
         guardar(cuadro.resize((512, 512), Image.Resampling.LANCZOS), ASSETS / "characters" / carpeta / f"{carpeta}_retrato.png")
-    nina_plataformas()
-    trepar()
-    nadar()
 
 
 # ---------------------------------------------------------------- Valle (mapa aéreo)
@@ -950,7 +954,7 @@ def frutales():
         objetos("granja_platillos2.png", ["guacamole", "agua_limon", "ate_guayaba"], "ui/granja")
 
 
-GRUPOS = {"frutales": frutales, "caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "tactil": tactil, "nina_aerea": nina_aerea, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
+GRUPOS = {"frutales": frutales, "caminos": caminos, "animales_granja": animales_granja, "decoraciones": decoraciones, "granja": granja, "animales_valle": animales_valle, "casa": casa, "guardianes": guardianes, "valle": valle, "zona1": zona1, "personajes": personajes, "ui": ui, "tactil": tactil, "nina_aerea": nina_aerea, "retratos": retratos, "filtro": puzzle_filtro, "zona2": zona2, "bitacora": bitacora, "zona3": zona3}
 
 if __name__ == "__main__":
     for nombre in sys.argv[1:] or GRUPOS:
